@@ -14,6 +14,17 @@
 
 %}
 
+DELIM	 [ \t\n]
+WS	 {delim}+
+LETTER	 [A-Za-z]
+DIGIT    [0-9]
+ID	 {letter}({letter}|{digit})*
+INTEGER	 {digit}+
+FLOAT    {digit}+(\.{digit}+)?
+STRING   \"(\\.|[^"\\])*\"
+CHAR     (L|u8|u|U)?'((\\.)|[^'\\])'
+SINCMNT  \/\/.*
+MULCMNT  /\/\*\_.\{-}\*\/
 
 BOOL              bool
 BREAK             break
