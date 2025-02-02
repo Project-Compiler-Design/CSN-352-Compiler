@@ -1,15 +1,63 @@
 %{
+	#include <algorithm>
+	#include <iostream>
+	#include <utility>
+	#include <iomanip>
     #include <math.h>
 	#include <cstdio> 
-	#include <map>
-	#include <utility>
 	#include <vector>
 	#include <string>
-	#include <iostream>
-	#include <algorithm>
-	#include <iomanip>
+	#include <map>
 
     using namespace std;
     map<string,vector<string>> tokentoLexeme;
 
 %}
+
+
+LBRACE			  \}
+RBRACE			  \{
+LBRACKET		  \]
+RBRACKET		  \[
+LPARENTHESES	  \(
+RPARENTHESES	  \)
+DOT			      \.
+COMMA			  ,
+COLON			  :
+SEMICOLON		  ;
+PLUS			  \+
+MINUS			  -
+STAR 			  \*
+DIVIDE			  \/
+MODULO			  %	
+AMPERSAND		  &
+OR			      \|
+XOR 			  \^
+EXCLAMATION		  !
+TILDE			  ~
+EQUALS			  =
+LESS_THAN		  <
+GREATER_THAN	  >
+QUESTION_MARK	  \?
+DOUBLE_QM		  \?\?
+DOUBLE_COLON      ::
+INCREMENT		  \+\+
+DECREMENT		  --
+REL_AND			  &&
+REL_OR			  \|\|
+REL_EQUALS		  ==
+REL_NOT_EQ		  !=
+LESS_EQUALS		  <=
+GREATER_EQUALS	  >=	
+ASSIGN_PLUS		  \+=
+ASSIGN_MINUS	  -=
+ASSIGN_STAR		  \*=
+ASSIGN_DIV		  \/=
+ASSIGN_MOD		  %=
+ASSIGN_AND		  &=
+ASSIGN_OR		  \|=
+ASSIGN_XOR	  \^=
+LEFT_SHIFT		  <<
+LEFT_SHIFT_EQ	  <<=
+RIGHT_SHIFT		  >>
+RIGHT_SHIFT_EQ	  \>>=
