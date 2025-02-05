@@ -18,7 +18,7 @@ DELIM	 		[ \t\n]
 WS	 			{DELIM}+
 LETTER	 		[A-Za-z]
 DIGIT    		[0-9]
-ID	 			{LETTER}({LETTER}|{DIGIT})*
+ID	 			({LETTER}|_)({LETTER}|_|{DIGIT})*
 INTEGER	 		{DIGIT}+
 FLOAT    		{DIGIT}+(\.{DIGIT}+)?
 STRING   		\"(\\.|[^"\\])*\"
