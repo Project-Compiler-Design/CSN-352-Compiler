@@ -42,17 +42,17 @@ LONG           	"long"
 CHAR            "char"
 STRING_KEYWORD  "string"
 
-DELIM           [ \t\n]
-WS              {delim}+
-LETTER          [A-Za-z]
-DIGIT           [0-9]
-ID              {letter}({letter}|{digit})*
-INTEGER_NO      {digit}+
-FLOAT_NO        {digit}+(\.{digit}+)?
-STRING          \"(\\.|[^"\\])*\"
-CHARACTER       (L|u8|u|U)?'((\\.)|[^'\\])'
-SINCMNT         \/\/.*
-MULCMNT         /\/\*\_.\{-}\*\/
+DELIM	 		[ \t\n]
+WS	 			{DELIM}+
+LETTER	 		[A-Za-z]
+DIGIT    		[0-9]
+ID	 			({LETTER}|_)({LETTER}|_|{DIGIT})*
+INTEGER	 		{DIGIT}+
+FLOAT    		{DIGIT}+(\.{DIGIT}+)?
+STRING   		\"(\\.|[^"\\])*\"
+CHARACTER     	(L|u8|u|U)?'((\\.)|[^'\\])'
+SINCMNT  		\/\/.*
+MULCMNT  		/\/\*\_.\{-}\*\/
 
 LBRACE         	"\}"
 RBRACE          "\{"
@@ -101,7 +101,7 @@ RIGHT_SHIFT    	">>"
 RIGHT_SHIFT_EQ 	"\>>="
 LAMBDA_ARROW   	"->"
 VARIABLE_ARGS  	"..."
-"
+
 %%
 
 {BOOL}          { cout<<("BOOL")<<endl; LexemetoToken[yytext] = "BOOL"}
@@ -133,3 +133,10 @@ VARIABLE_ARGS  	"..."
 {STRING_KEYWORD}{ cout<<("STRING_KEYWORD")<<endl; LexemetoToken[yytext] = "STRING_KEYWORD"}
 
 %%
+
+
+
+
+
+
+
