@@ -15,12 +15,12 @@
 %}
 
 DELIM	 		[ \t\n]
-WS	 			{delim}+
+WS	 			{DELIM}+
 LETTER	 		[A-Za-z]
 DIGIT    		[0-9]
-ID	 			{letter}({letter}|{digit})*
-INTEGER	 		{digit}+
-FLOAT    		{digit}+(\.{digit}+)?
+ID	 			({LETTER}|_)({LETTER}|_|{DIGIT})*
+INTEGER	 		{DIGIT}+
+FLOAT    		{DIGIT}+(\.{DIGIT}+)?
 STRING   		\"(\\.|[^"\\])*\"
 CHAR     		(L|u8|u|U)?'((\\.)|[^'\\])'
 SINCMNT  		\/\/.*
@@ -99,3 +99,5 @@ RIGHT_SHIFT    	>>
 RIGHT_SHIFT_EQ 	\>>=
 LAMBDA_ARROW   	->
 VARIABLE_ARGS  	...
+
+
