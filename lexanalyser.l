@@ -14,7 +14,6 @@
 
 
     using namespace std;
-    // map<string,string> LexemetoToken;
     struct TokenTable
     {
         string lexeme;
@@ -36,6 +35,9 @@
 
 %option yylineno
 
+INCLUDE         ^#include.*\n
+AUTO            "auto"
+STRUCT          "struct"
 BOOL			"bool"
 BREAK         	"break"
 CASE           	"case"
@@ -84,7 +86,8 @@ FLOAT_LITERAL     {DIGIT}*"."{DIGIT}+({EXP})?{FS}
 STRING_LITERAL         L?\"(\\.|[^\\"])*\"
 CHARACTER_LITERAL       (L|u8|u|U)?'((\\.)|[^'\\])'
 SINCMNT         \/\/.*
-MULCMNT         /\/\*\_.\{-}\*\/
+MULCMNT         "/*"([^*]|\*+[^*/])*\*+"/"
+
 
 RBRACE         	"\}"
 LBRACE          "\{"
@@ -136,8 +139,10 @@ VARIABLE_ARGS  	"..."
 
 %%
 
-
-
+{INCLUDE}       {tokens.push_back(TokenTable(yytext, "INCLUDE DIRECTIVE"));}
+{DELIM}         {}
+{AUTO}          { tokens.push_back(TokenTable(yytext, "AUTO")); }
+{STRUCT}          { tokens.push_back(TokenTable(yytext, "STRUCT")); }
 {BOOL}          { tokens.push_back(TokenTable(yytext, "BOOL")); }
 {BREAK}         { tokens.push_back(TokenTable(yytext, "BREAK")); }
 {CASE}          { tokens.push_back(TokenTable(yytext, "CASE")); }
@@ -181,6 +186,7 @@ VARIABLE_ARGS  	"..."
 {STRING_LITERAL} { tokens.push_back(TokenTable(yytext, "STRING_LITERAL")); }
 
 {SINCMNT}       { tokens.push_back(TokenTable(yytext, "SINCMNT")); }
+{MULCMNT}       { tokens.push_back(TokenTable(yytext, "MULCMNT")); }
 
 {VARIABLE_ARGS} { tokens.push_back(TokenTable(yytext, "VARIABLE_ARGS")); }
 {RIGHT_SHIFT_EQ} { tokens.push_back(TokenTable(yytext, "RIGHT_SHIFT_EQ")); }
