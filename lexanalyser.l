@@ -66,11 +66,22 @@ DELIM           [ \t\n]
 WS              {DELIM}+
 LETTER          [A-Za-z]
 DIGIT           [0-9]
+HEXA_DIGIT      [a-fA-F0-9]
+EXP             [Ee][+-]?{DIGIT}+
+FS			    (f|F|l|L)
+IS			    (u|U|l|L)*
+
+
 ID              ({LETTER}|_)({LETTER}|_|{DIGIT})*
-INTEGER         {DIGIT}+
-FLOAT_CONSTANT           {DIGIT}+(\.{DIGIT}+)?
-STRING_LITERAL         \"(\\.|[^"\\])*\"
-CHARACTER       (L|u8|u|U)?'((\\.)|[^'\\])'
+HEXA_LITERAL      0[xX]{HEXA_DIGIT}+{IS}?
+OCTAL_LITERAL    0[0-7]+{IS}?
+DECIMAL_LITERAL   {DIGIT}+{IS}?
+EXP_LITERAL       {DIGIT}+[Ee][+-]?{DIGIT}+{FS}?
+REAL_LITERAL           {DIGIT}*"."{DIGIT}+({EXP})?
+FLOAT_LITERAL     {DIGIT}*"."{DIGIT}+({EXP})?{FS}
+
+STRING_LITERAL         L?\"(\\.|[^\\"])*\"
+CHARACTER_LITERAL       (L|u8|u|U)?'((\\.)|[^'\\])'
 SINCMNT         \/\/.*
 MULCMNT         "/*"([^*]|\*+[^*/])*\*+"/"
 
@@ -93,7 +104,7 @@ MODULO         	"%"
 AMPERSAND      	"&"
 OR             	"\|"
 XOR            	"\^"
-EXCLAMATION    	"!"
+EXCLAMATION    	!
 TILDE          	"~"
 EQUALS        	"="
 LESS_THAN      	"<"
@@ -154,10 +165,21 @@ VARIABLE_ARGS  	"..."
 {LONG}          { tokens.push_back(TokenTable(yytext, "LONG")); }
 {CHAR}          { tokens.push_back(TokenTable(yytext, "CHAR")); }
 
-{ID}            { tokens.push_back(TokenTable(yytext, "ID")); }
-{INTEGER}       { tokens.push_back(TokenTable(yytext, "INTEGER")); }
+{ID}            { tokens.push_back(TokenTable(yytext, "IDENTIFIER")); }
+{HEXA_LITERAL}    { tokens.push_back(TokenTable(yytext, "HEXADECIMAL LITERAL")); }
+{OCTAL_LITERAL}    { tokens.push_back(TokenTable(yytext, "OCTAL LITERAL")); }
+{DECIMAL_LITERAL}    { tokens.push_back(TokenTable(yytext, "DECIMAL LITERAL")); }
+{CHARACTER_LITERAL}     { tokens.push_back(TokenTable(yytext, "CHARACTER LITERAL")); }
+{EXP_LITERAL}    { tokens.push_back(TokenTable(yytext, "LITERAL")); }
+{FLOAT_LITERAL}    { tokens.push_back(TokenTable(yytext, "FLOAT LITERAL")); }
+{REAL_LITERAL}    { tokens.push_back(TokenTable(yytext, "REAL LITERAL")); }
+
+
+
+
+
 {STRING_LITERAL} { tokens.push_back(TokenTable(yytext, "STRING_LITERAL")); }
-{CHARACTER}     { tokens.push_back(TokenTable(yytext, "CHARACTER")); }
+
 {SINCMNT}       { tokens.push_back(TokenTable(yytext, "SINCMNT")); }
 {MULCMNT}       { tokens.push_back(TokenTable(yytext, "MULCMNT")); }
 
