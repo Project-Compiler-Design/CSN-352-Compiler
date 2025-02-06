@@ -35,6 +35,9 @@
 
 %option yylineno
 
+INCLUDE         ^#include.*\n
+AUTO            "auto"
+STRUCT          "struct"
 BOOL			"bool"
 BREAK         	"break"
 CASE           	"case"
@@ -136,8 +139,10 @@ VARIABLE_ARGS  	"..."
 
 %%
 
-
-
+{INCLUDE}       {tokens.push_back(TokenTable(yytext, "INCLUDE DIRECTIVE"));}
+{DELIM}         {}
+{AUTO}          { tokens.push_back(TokenTable(yytext, "AUTO")); }
+{STRUCT}          { tokens.push_back(TokenTable(yytext, "STRUCT")); }
 {BOOL}          { tokens.push_back(TokenTable(yytext, "BOOL")); }
 {BREAK}         { tokens.push_back(TokenTable(yytext, "BREAK")); }
 {CASE}          { tokens.push_back(TokenTable(yytext, "CASE")); }
