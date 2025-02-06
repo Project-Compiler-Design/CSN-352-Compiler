@@ -265,6 +265,30 @@ int main(int argc, char *argv[])
     // Lex the input using yylex()
     yylex();
 
+    std::ofstream file("output.txt");
+    if (!file) {
+        std::cerr << "Error opening file!" << std::endl;
+        return 1;
+    }
+
+
+    // Print table headers with borders
+    file << "+----------------+--------------------------+\n";
+    file << "| Lexeme         | Token Type               |\n";
+    file << "+----------------+--------------------------+\n";
+
+    // Print tokens in table format
+    for (const auto &token : tokens) {
+        file << "| " << std::left << std::setw(15) << token.lexeme
+             << "| " << std::left << std::setw(25) << token.token_type << "|\n";
+        file << "+----------------+--------------------------+\n";
+    }
+
+    // Print bottom border
+    
+
+    file.close();
+    
     // Print out tokens that have been lexically analyzed
     for (const auto &token : tokens)
     {
