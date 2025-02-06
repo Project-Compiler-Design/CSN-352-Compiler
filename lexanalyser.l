@@ -14,7 +14,6 @@
 
 
     using namespace std;
-    // map<string,string> LexemetoToken;
     struct TokenTable
     {
         string lexeme;
@@ -73,7 +72,8 @@ FLOAT_CONSTANT           {DIGIT}+(\.{DIGIT}+)?
 STRING_LITERAL         \"(\\.|[^"\\])*\"
 CHARACTER       (L|u8|u|U)?'((\\.)|[^'\\])'
 SINCMNT         \/\/.*
-MULCMNT         /\/\*\_.\{-}\*\/
+MULCMNT         "/*"([^*]|\*+[^*/])*\*+"/"
+
 
 RBRACE         	"\}"
 LBRACE          "\{"
@@ -159,6 +159,7 @@ VARIABLE_ARGS  	"..."
 {STRING_LITERAL} { tokens.push_back(TokenTable(yytext, "STRING_LITERAL")); }
 {CHARACTER}     { tokens.push_back(TokenTable(yytext, "CHARACTER")); }
 {SINCMNT}       { tokens.push_back(TokenTable(yytext, "SINCMNT")); }
+{MULCMNT}       { tokens.push_back(TokenTable(yytext, "MULCMNT")); }
 
 {VARIABLE_ARGS} { tokens.push_back(TokenTable(yytext, "VARIABLE_ARGS")); }
 {RIGHT_SHIFT_EQ} { tokens.push_back(TokenTable(yytext, "RIGHT_SHIFT_EQ")); }
