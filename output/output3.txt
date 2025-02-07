@@ -1,3 +1,8 @@
+Following errors were found in the source code
+NONE
+------------------------------------------
+Tokens generated are 
+
 +----------------+--------------------------+
 | Lexeme         | Token Type               |
 +----------------+--------------------------+

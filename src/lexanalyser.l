@@ -26,15 +26,18 @@
         }
     };
     vector<TokenTable> tokens;
-
+    vector<string> errors;
     void error_call(string s,int t){
-        if(t==0) cout<<"Invalid identifier: "<<s<<" in line no. "<<yylineno<<endl;
-        else cout<<"Error! Invalid word: "<<s<<" in line no. "<<yylineno<<endl;
+        if(t==0) errors.push_back("Invalid identifier: "+s+" in line no. "+std::to_string(yylineno));
+        else errors.push_back("Invalid token: "+s+" in line no. "+std::to_string(yylineno));
     }
 
 %}
 
 %option yylineno
+
+DELIM           [ \t\n\r]
+WS              {DELIM}+
 
 INCLUDE         ^#include.*\n
 AUTO            "auto"
@@ -66,8 +69,7 @@ SHORT          	"short"
 LONG           	"long"
 CHAR            "char"
 
-DELIM           [ \t\n]
-WS              {DELIM}+
+NOTLETTER       [^A-Za-z_]
 LETTER          [A-Za-z]
 DIGIT           [0-9]
 HEXA_DIGIT      [a-fA-F0-9]
@@ -140,11 +142,10 @@ VARIABLE_ARGS  	"..."
 
 INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
 
-
 %%
-
+{WS}            {}
 {INCLUDE}       {tokens.push_back(TokenTable(yytext, "INCLUDE DIRECTIVE"));}
-{DELIM}         {}
+
 {AUTO}          { tokens.push_back(TokenTable(yytext, "AUTO")); }
 {STRUCT}          { tokens.push_back(TokenTable(yytext, "STRUCT")); }
 {BOOL}          { tokens.push_back(TokenTable(yytext, "BOOL")); }
@@ -242,69 +243,11 @@ INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
 {GREATER_THAN}  { tokens.push_back(TokenTable(yytext, "GREATER_THAN")); }
 {QUESTION_MARK} { tokens.push_back(TokenTable(yytext, "QUESTION_MARK")); }
 
-{INVALID_ID}               { error_call(yytext,0);}
-.                   { error_call(yytext,1);}    
+
+{INVALID_ID}        { error_call(yytext,0); tokens.push_back(TokenTable(yytext, "ERROR! INVALID IDENTIFIER"));}
+.                   { error_call(yytext,1);tokens.push_back(TokenTable(yytext, "ERROR! INVALID TOKEN"));}    
 
 %%
-
-
-// int main(int argc, char *argv[])
-// {
-//     // Check if file argument is passed
-//     if (argc < 2)
-//     {
-//         cerr << "Error: Please provide an input file." << endl;
-//         return 1;
-//     }
-
-//     // Open the input file
-//     ifstream inputFile(argv[1]);
-//     if (!inputFile)
-//     {
-//         cerr << "Error opening file: " << argv[1] << endl;
-//         return 1;
-//     }
-
-//     // Set yyin to read from the provided input file
-//     yyin = fopen(argv[1], "r");// Let Flex handle yyin directly
-
-//     // Lex the input using yylex()
-//     yylex();
-
-//     std::ofstream file("output.txt");
-//     if (!file) {
-//         std::cerr << "Error opening file!" << std::endl;
-//         return 1;
-//     }
-
-
-//     // Print table headers with borders
-//     file << "+----------------+--------------------------+\n";
-//     file << "| Lexeme         | Token Type               |\n";
-//     file << "+----------------+--------------------------+\n";
-
-//     // Print tokens in table format
-//     for (const auto &token : tokens) {
-//         file << "| " << std::left << std::setw(15) << token.lexeme
-//              << "| " << std::left << std::setw(25) << token.token_type << "|\n";
-//         file << "+----------------+--------------------------+\n";
-//     }
-
-//     // Print bottom border
-    
-
-//     file.close();
-    
-//     // Print out tokens that have been lexically analyzed
-//     // for (const auto &token : tokens)
-//     // {
-//     //     cout << token.lexeme << "\t\t" << token.token_type << endl;
-//     // }
-
-//     return 0;
-// }
-
-
 
 
 int main(int argc, char *argv[]) {
@@ -338,6 +281,21 @@ int main(int argc, char *argv[]) {
     yyin = fopen(argv[1], "r");
     yylex(); // Perform lexical analysis
 
+    file<<"Following errors were found in the source code\n";
+    if (errors.empty())  // Use empty() for clarity, or errors.size() == 0
+        {
+    file << "NONE\n";
+    file << "------------------------------------------\n";
+    }
+    else
+    {
+    for (const std::string& error : errors) // Use const reference to avoid unnecessary copies
+    {
+        file << error << std::endl;
+        file << "------------------------------------------\n";
+    }
+    }
+    file<<"Tokens generated are \n\n";
     // Print table headers with borders
     file << "+----------------+--------------------------+\n";
     file << "| Lexeme         | Token Type               |\n";

@@ -47,6 +47,9 @@ ls output/       # Lists all output files
 cat output/output1.txt   # View output for input1.c
 cat output/output2.txt   # View output for input2.c
 ```
+### 4️⃣ Error Handling  
+Errors for each code are written within the generated output file corresponding to that code.
+
 ## 🛠️ Implementation Details
 
     - Lexical Analysis: Uses Flex (Lex) to tokenize C source code.

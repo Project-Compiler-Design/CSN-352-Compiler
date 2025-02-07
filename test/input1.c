@@ -1,8 +1,8 @@
 int main(){
-    int n = -7;
+int n=-7;
 if(n<0)
-    printf("Negative");
+printf("Negative");
 else 
-    printf("Not Negative");
-  return 0;
+printf("Positive");
+return 0;
 }
