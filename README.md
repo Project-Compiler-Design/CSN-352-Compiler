@@ -33,6 +33,11 @@ make clean
 make
 ```
 ### 2️⃣ Run the Test Cases
+You may have to make the run.sh executable the first time:
+```bash
+chmod +x run.sh
+```
+After that run script using:
 ```bash
 ./run.sh
 ```
