@@ -27,9 +27,10 @@
     };
     vector<TokenTable> tokens;
 
-    void error_call(string s){
-    cout<<"Error! Invalid word: "<<s<<" in line no. "<<yylineno<<endl;
-}
+    void error_call(string s,int t){
+        if(t==0) cout<<"Invalid identifier: "<<s<<" in line no. "<<yylineno<<endl;
+        else cout<<"Error! Invalid word: "<<s<<" in line no. "<<yylineno<<endl;
+    }
 
 %}
 
@@ -137,6 +138,9 @@ RIGHT_SHIFT_EQ 	"\>>="
 LAMBDA_ARROW   	"->"
 VARIABLE_ARGS  	"..."
 
+INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
+
+
 %%
 
 {INCLUDE}       {tokens.push_back(TokenTable(yytext, "INCLUDE DIRECTIVE"));}
@@ -237,7 +241,9 @@ VARIABLE_ARGS  	"..."
 {LESS_THAN}     { tokens.push_back(TokenTable(yytext, "LESS_THAN")); }
 {GREATER_THAN}  { tokens.push_back(TokenTable(yytext, "GREATER_THAN")); }
 {QUESTION_MARK} { tokens.push_back(TokenTable(yytext, "QUESTION_MARK")); }
-.               { error_call(yytext);}
+
+{INVALID_ID}               { error_call(yytext,0);}
+.                   { error_call(yytext,1);}    
 
 %%
 
@@ -290,10 +296,10 @@ int main(int argc, char *argv[])
     file.close();
     
     // Print out tokens that have been lexically analyzed
-    for (const auto &token : tokens)
-    {
-        cout << token.lexeme << "\t\t" << token.token_type << endl;
-    }
+    // for (const auto &token : tokens)
+    // {
+    //     cout << token.lexeme << "\t\t" << token.token_type << endl;
+    // }
 
     return 0;
 }
