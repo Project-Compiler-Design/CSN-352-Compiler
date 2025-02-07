@@ -248,35 +248,95 @@ INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
 %%
 
 
-int main(int argc, char *argv[])
-{
-    // Check if file argument is passed
-    if (argc < 2)
-    {
-        cerr << "Error: Please provide an input file." << endl;
+// int main(int argc, char *argv[])
+// {
+//     // Check if file argument is passed
+//     if (argc < 2)
+//     {
+//         cerr << "Error: Please provide an input file." << endl;
+//         return 1;
+//     }
+
+//     // Open the input file
+//     ifstream inputFile(argv[1]);
+//     if (!inputFile)
+//     {
+//         cerr << "Error opening file: " << argv[1] << endl;
+//         return 1;
+//     }
+
+//     // Set yyin to read from the provided input file
+//     yyin = fopen(argv[1], "r");// Let Flex handle yyin directly
+
+//     // Lex the input using yylex()
+//     yylex();
+
+//     std::ofstream file("output.txt");
+//     if (!file) {
+//         std::cerr << "Error opening file!" << std::endl;
+//         return 1;
+//     }
+
+
+//     // Print table headers with borders
+//     file << "+----------------+--------------------------+\n";
+//     file << "| Lexeme         | Token Type               |\n";
+//     file << "+----------------+--------------------------+\n";
+
+//     // Print tokens in table format
+//     for (const auto &token : tokens) {
+//         file << "| " << std::left << std::setw(15) << token.lexeme
+//              << "| " << std::left << std::setw(25) << token.token_type << "|\n";
+//         file << "+----------------+--------------------------+\n";
+//     }
+
+//     // Print bottom border
+    
+
+//     file.close();
+    
+//     // Print out tokens that have been lexically analyzed
+//     // for (const auto &token : tokens)
+//     // {
+//     //     cout << token.lexeme << "\t\t" << token.token_type << endl;
+//     // }
+
+//     return 0;
+// }
+
+
+
+
+int main(int argc, char *argv[]) {
+    // Check if both input and output file arguments are passed
+    if (argc < 3) {
+        cerr << "Error: Please provide an input file and an output file." << endl;
         return 1;
     }
 
-    // Open the input file
-    ifstream inputFile(argv[1]);
-    if (!inputFile)
-    {
-        cerr << "Error opening file: " << argv[1] << endl;
+    string inputFileName = argv[1];
+    string outputFileName = argv[2];
+
+    // Open input file
+    ifstream inputFile(inputFileName);
+    if (!inputFile) {
+        cerr << "Error opening file: " << inputFileName << endl;
+        return 1;
+    }
+
+    // Ensure output directory exists
+    system("mkdir -p output");
+
+    // Open output file
+    ofstream file(outputFileName);
+    if (!file) {
+        cerr << "Error creating output file: " << outputFileName << endl;
         return 1;
     }
 
     // Set yyin to read from the provided input file
-    yyin = fopen(argv[1], "r");// Let Flex handle yyin directly
-
-    // Lex the input using yylex()
-    yylex();
-
-    std::ofstream file("output.txt");
-    if (!file) {
-        std::cerr << "Error opening file!" << std::endl;
-        return 1;
-    }
-
+    yyin = fopen(argv[1], "r");
+    yylex(); // Perform lexical analysis
 
     // Print table headers with borders
     file << "+----------------+--------------------------+\n";
@@ -285,28 +345,12 @@ int main(int argc, char *argv[])
 
     // Print tokens in table format
     for (const auto &token : tokens) {
-        file << "| " << std::left << std::setw(15) << token.lexeme
-             << "| " << std::left << std::setw(25) << token.token_type << "|\n";
+        file << "| " << left << setw(15) << token.lexeme
+             << "| " << left << setw(25) << token.token_type << "|\n";
         file << "+----------------+--------------------------+\n";
     }
 
-    // Print bottom border
-    
-
     file.close();
-    
-    // Print out tokens that have been lexically analyzed
-    // for (const auto &token : tokens)
-    // {
-    //     cout << token.lexeme << "\t\t" << token.token_type << endl;
-    // }
 
     return 0;
 }
-
-
-
-
-
-
-

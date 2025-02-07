@@ -1,2 +1,15 @@
+# Ignore compiled files
 lex.yy.c
-./lexer
+lexer
+
+
+# Ignore backup and temporary files
+*.swp
+*.swo
+*.bak
+*~
+
+# Ignore build artifacts
+*.o
+*.out
+*.exe
