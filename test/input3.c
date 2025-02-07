@@ -16,7 +16,7 @@ float fahrenheit_to_celsius(float f)
 
 float interesting(int a, int b){
     int c,d,e,f,g,h;
-    if(a%2==b&1&&c|1||d^22&~5){
+    if(a%2==b&1&&c|1||d^22.0&~5){
         a=(b/c+d-e)&(~f+g-h);
     }
     return 0;

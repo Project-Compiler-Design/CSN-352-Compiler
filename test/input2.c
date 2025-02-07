@@ -6,4 +6,4 @@ const char c = 'c', d = 'D';
 char c[] = "ghgHGHG b";
 printf("gg", );
 
-int _234gh, __Gg, 2fgg, !dfg, ~dffg;
+int _234gh, __Gg, 2fgg;

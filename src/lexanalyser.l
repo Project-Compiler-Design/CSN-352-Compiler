@@ -68,6 +68,13 @@ EXTERN         	"extern"
 SHORT          	"short"
 LONG           	"long"
 CHAR            "char"
+ENUM            "enum"
+REGISTER        "register"
+SIGNED          "signed"
+TYPEDEF         "typedef"
+UNION           "union"
+UNSIGNED        "unsigned" 
+VOLATILE        "volatile"
 
 NOTLETTER       [^A-Za-z_]
 LETTER          [A-Za-z]
@@ -110,13 +117,12 @@ MODULO         	"%"
 AMPERSAND      	"&"
 OR             	"\|"
 XOR            	"\^"
-EXCLAMATION    	!
+EXCLAMATION    	"!"
 TILDE          	"~"
 EQUALS        	"="
 LESS_THAN      	"<"
 GREATER_THAN   	">"
 QUESTION_MARK  	"\?"
-DOUBLE_COLON   	"::"
 INCREMENT      	"\+\+"
 DECREMENT      	"--"
 REL_AND        	"&&"
@@ -147,7 +153,7 @@ INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
 {INCLUDE}       {tokens.push_back(TokenTable(yytext, "INCLUDE DIRECTIVE"));}
 
 {AUTO}          { tokens.push_back(TokenTable(yytext, "AUTO")); }
-{STRUCT}          { tokens.push_back(TokenTable(yytext, "STRUCT")); }
+{STRUCT}        { tokens.push_back(TokenTable(yytext, "STRUCT")); }
 {BOOL}          { tokens.push_back(TokenTable(yytext, "BOOL")); }
 {BREAK}         { tokens.push_back(TokenTable(yytext, "BREAK")); }
 {CASE}          { tokens.push_back(TokenTable(yytext, "CASE")); }
@@ -174,6 +180,15 @@ INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
 {SHORT}         { tokens.push_back(TokenTable(yytext, "SHORT")); }
 {LONG}          { tokens.push_back(TokenTable(yytext, "LONG")); }
 {CHAR}          { tokens.push_back(TokenTable(yytext, "CHAR")); }
+{ENUM}          { tokens.push_back(TokenTable(yytext, "ENUM")); }
+{REGISTER}      { tokens.push_back(TokenTable(yytext, "REGISTER")); }
+{SIGNED}        { tokens.push_back(TokenTable(yytext, "SIGNED")); }
+{TYPEDEF}       { tokens.push_back(TokenTable(yytext, "TYPEDEF")); }
+{UNION}         { tokens.push_back(TokenTable(yytext, "UNION")); }
+{UNSIGNED}      { tokens.push_back(TokenTable(yytext, "UNSIGNED")); }
+{VOLATILE}      { tokens.push_back(TokenTable(yytext, "VOLATILE")); }
+
+
 
 {ID}            { tokens.push_back(TokenTable(yytext, "IDENTIFIER")); }
 {HEXA_LITERAL}    { tokens.push_back(TokenTable(yytext, "HEXADECIMAL LITERAL")); }
