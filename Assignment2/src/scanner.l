@@ -1,27 +1,35 @@
 %option noyywrap
 %{
     #include "parser.tab.h"
-    #include <algorithm>
-    #include <iostream>
-    #include <utility>
-    #include <iomanip>
-    #include <math.h>
-    #include <cstdio> 
-    #include <vector>
+    #include <stdio.h>
+    #include <stdlib.h>
     #include <string.h>
-    #include <map>
-    #include<fstream>
-    extern "C" int yylex();
 
+    extern int yylineno;
+    extern int yylex();
     extern YYSTYPE yylval;
-    using namespace std;
-    
-    vector<string> errors;
-    void error_call(string s,int t){
-        if(t==0) errors.push_back("Invalid identifier: "+s+" in line no. "+std::to_string(yylineno));
-        else errors.push_back("Invalid token: "+s+" in line no. "+std::to_string(yylineno));
-    }
 
+    #define MAX_ERRORS 100  
+
+    char *errors[MAX_ERRORS];  
+    int error_count = 0;       
+
+    void error_call(const char *s, int t) {
+        if (error_count >= MAX_ERRORS) {
+            fprintf(stderr, "Error buffer full!\n");
+            return;
+        }
+
+        char buffer[256];  
+        if (t == 0) {
+            snprintf(buffer, sizeof(buffer), "Invalid identifier: %s in line no. %d", s, yylineno);
+        } else {
+            snprintf(buffer, sizeof(buffer), "Invalid token: %s in line no. %d", s, yylineno);
+        }
+
+        errors[error_count] = strdup(buffer);  
+        error_count++;
+    }
 %}
 
 %option yylineno
