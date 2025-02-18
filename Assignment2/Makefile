@@ -1,22 +1,42 @@
-# Define compiler and flags
-LEX = flex
-CXX = g++
-CXXFLAGS = -Wall
+# Directories
+SRC_DIR = src
+BUILD_DIR = .
 
-# Output executable name
-EXEC = lexer
+# Tools and flags
+CC      = gcc
+LEX     = flex
+YACC    = bison
+CFLAGS  = -g -Wall
+LIBS    = -lm
 
-# Lex file
-LEX_FILE = src/lexanalyser.l
+# Source files in src folder
+YACC_FILE = $(SRC_DIR)/parser.y
+LEX_FILE  = $(SRC_DIR)/scanner.l
+
+# Output files
+BISON_C = parser.c
+BISON_H = y.tab.h
+LEX_C = scanner.c
+OUTPUT = parser
 
 # Default target
-all: $(EXEC)
+all: $(OUTPUT)
 
-# Rule to compile the lex file using g++
-$(EXEC): $(LEX_FILE)
-	$(LEX) $(LEX_FILE)
-	$(CXX) $(CXXFLAGS) lex.yy.c -o $(EXEC) -lfl
+# Build the parser executable
+$(OUTPUT): $(BISON_C) $(LEX_C)
+	$(CC) -o $(OUTPUT) $(BISON_C) $(LEX_C) $(LIBS)
 
-# Clean build files
+# Generate parser.c and y.tab.h from parser.y
+$(BISON_C) $(BISON_H): $(YACC_FILE)
+	$(YACC) -d -o $(BISON_C) $(YACC_FILE) -y
+	mv parser.h y.tab.h
+
+# Generate scanner.c from scanner.l (depends on y.tab.h)
+$(LEX_C): $(LEX_FILE) $(BISON_H)
+	$(LEX) -o $(LEX_C) $(LEX_FILE)
+
+# Clean up generated files
 clean:
-	rm -f lex.yy.c $(EXEC)
+	rm -f $(OUTPUT) $(BISON_C) $(BISON_H) $(LEX_C)
+
+.PHONY: all clean

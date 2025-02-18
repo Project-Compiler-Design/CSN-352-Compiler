@@ -1,20 +1,16 @@
 #!/bin/bash
+# run.sh: Process all *.c files in the test folder using the parser
 
-# Define paths
-EXEC="./lexer"
-TEST_DIR="./test"
-OUTPUT_DIR="./output"
+# Build the parser
+make
 
-# Create output directory if not exists
-mkdir -p $OUTPUT_DIR
+# Create output directory if it doesn't exist
+mkdir -p output
 
-# Run lexer on each test file and store output separately
-counter=1
-for testfile in $TEST_DIR/*.c; do
-    output_file="$OUTPUT_DIR/output${counter}.txt"
-    echo "Processing $(basename "$testfile") -> $(basename "$output_file")"
-    $EXEC "$testfile" "$output_file"  # Pass input and output files as arguments
-    ((counter++))
+# Loop over each .c file in the test folder
+for file in test/*.c; do
+    base=$(basename "$file")
+    output="output/${base}.out"
+    echo "Processing $file -> $output"
+    ./parser "$file" "$output"
 done
-
-echo "All test cases executed. Outputs stored in $OUTPUT_DIR."
