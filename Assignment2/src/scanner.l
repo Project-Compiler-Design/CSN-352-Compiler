@@ -37,7 +37,7 @@
 DELIM           [ \t\n\r]
 WS              {DELIM}+
 
-INCLUDE         ^#include.*\n
+INCLUDE         "#include"[ \t]*("<"[^">"]+">"|"\""[^\"]+"\"")
 AUTO            "auto"
 STRUCT          "struct"
 BOOL			"bool"
@@ -147,6 +147,7 @@ VARIABLE_ARGS  	"..."
 INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
 
 %%
+{WS}               {}
 {INCLUDE}          {yylval.str = strdup(yytext); return INCLUDE; }
 {AUTO}             { yylval.str = strdup(yytext); return AUTO; }
 {STRUCT}           { yylval.str = strdup(yytext); return STRUCT; }

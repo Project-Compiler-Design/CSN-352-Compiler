@@ -4,8 +4,27 @@
     #include <string.h>
 
     void yyerror(const char *s);
+    
     extern int yylex();
     extern int yylineno;
+
+    // int count=0;
+
+    // struct sym_tab{
+    //     char *identifier_name;
+    //     char *datatype;
+    //     char *type;
+    //     int lineno;
+
+    //     sym_tab(char c, char *yytext, char *datatype){
+    //         identifier_name=strdup(yytext);
+            
+            
+    //     }
+    // } symbol_table[40];
+
+
+
 %}
 
 %union {
@@ -22,52 +41,81 @@
 
 %%
 program:
-    statement
-    | program statement
+    include_statements function_definitions
     ;
 
-statement:
-    declaration SEMICOLON
-    | expression SEMICOLON
-    | RETURN expression SEMICOLON
-    | IF LPARENTHESES expression RPARENTHESES statement ELSE statement
-    | IF LPARENTHESES expression RPARENTHESES statement
-    | WHILE LPARENTHESES expression RPARENTHESES statement
-    | FOR LPARENTHESES declaration SEMICOLON expression SEMICOLON expression RPARENTHESES statement
-    | LBRACE program RBRACE
+include_statements:
+    include_statements include_statement
+    | /* empty */
     ;
 
-declaration:
-    type_specifier ID
-    | type_specifier ID EQUALS expression
+include_statement:
+    INCLUDE { printf("This is an include statement: %s\n", $1); }
+    | INCLUDE ID { printf("This is an include statement: %s\n", $1); }
     ;
 
-expression:
-    ID
-    | DECIMAL_LITERAL
-    | HEXA_LITERAL
-    | OCTAL_LITERAL
-    | EXP_LITERAL
-    | REAL_LITERAL
-    | FLOAT_LITERAL
-    | STRING_LITERAL
-    | CHARACTER_LITERAL
-    | expression PLUS expression
-    | expression MINUS expression
-    | expression STAR expression
-    | expression DIVIDE expression
-    | expression MODULO expression
-    | LPARENTHESES expression RPARENTHESES
+function_definitions:
+    function_definitions function_definition
+    | 
+    ;
+
+function_definition:
+    type_specifier ID LPARENTHESES RPARENTHESES LBRACE statements RBRACE { printf("This is a function: %s\n", $2); }
     ;
 
 type_specifier:
-    INT | FLOAT | DOUBLE | CHAR | VOID
+    INT
+    | FLOAT
+    | DOUBLE
+    | CHAR
+    | LONG
     ;
+
+statements:
+    statements statement
+    | /* empty */
+    ;
+
+statement:
+    RETURN DECIMAL_LITERAL SEMICOLON { printf("Return statement with value %s\n", $2); }
+    | RETURN SEMICOLON { printf("Return statement without value\n"); }
+    | variable_declaration
+    | /* other statements */
+    ;
+
+variable_declaration:
+    type_specifier ID EQUALS constant SEMICOLON { 
+        printf("Variable declaration: %s = %s\n", $1, $2); 
+    }
+    ;
+
+constant: 
+    DECIMAL_LITERAL
+    | FLOAT_LITERAL
+    | EXP_LITERAL
+    | HEXA_LITERAL
+    | REAL_LITERAL
+    | STRING_LITERAL
+    | OCTAL_LITERAL
+    | CHARACTER_LITERAL
+
 %%
 
 void yyerror(const char *s) {
+    
     fprintf(stderr, "Error at line %d: %s\n", yylineno, s);
 }
+
+// int search(char *id_name) {
+	
+// 	for(int i=count-1; i>=0; i--) {
+// 		if(strcmp(symbol_table[i].identifier_name, id_name)==0) {
+// 			return -1;
+// 			break;
+// 		}
+// 	}
+// 	return 0;
+// }
 
 int main() {
     return yyparse();
