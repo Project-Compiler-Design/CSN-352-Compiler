@@ -74,29 +74,90 @@
     #include <string.h>
 
     void yyerror(const char *s);
-    
+    int search_symtab(char *);
+    void assign_type();
+
     extern int yylex();
     extern int yylineno;
+    extern char *yytext;  // Fix for yytext undeclared error
 
-    // int count=0;
+    int count = 0;
+    char d_type[10];
 
-    // struct sym_tab{
-    //     char *identifier_name;
-    //     char *datatype;
-    //     char *type;
-    //     int lineno;
+    struct sym_tab {
+        char identifier_name[50];  // Use a fixed-size array instead of pointer
+        char datatype[50];
+        char type[20];
+        int lineno;
+    };
 
-    //     sym_tab(char c, char *yytext, char *datatype){
-    //         identifier_name=strdup(yytext);
-            
-            
-    //     }
-    // } symbol_table[40];
+    struct sym_tab symbol_table[100]; // Use an array instead of C++ vector
+
+    void insert_symtab(char c, char *yytext) {
+        if (search_symtab(yytext) == 0) {
+            strcpy(symbol_table[count].identifier_name, yytext);
+            symbol_table[count].lineno = yylineno;
+
+            if (c == 'H') {
+                strcpy(symbol_table[count].datatype, d_type);
+                strcpy(symbol_table[count].type, "Header");
+            }
+            else if (c == 'K') {
+                strcpy(symbol_table[count].datatype, yytext);
+                strcpy(symbol_table[count].type, "Keyword");
+            }
+            else if (c == 'V') {
+                strcpy(symbol_table[count].datatype, d_type);
+                strcpy(symbol_table[count].type, "Variable");
+            }
+            else if (c == 'C') {
+                strcpy(symbol_table[count].datatype, "CONST");
+                strcpy(symbol_table[count].type, "Constant");
+            }
+            else if (c == 'F') {
+                strcpy(symbol_table[count].datatype, d_type);
+                strcpy(symbol_table[count].type, "Function");
+            }
+            count++;
+        }
+    }
+
+    
+    void get_type_string(char *type_str, char *type_spec) {
+    if (strcmp(type_spec, "int") == 0) {
+        strcpy(type_str, "INT");
+    } else if (strcmp(type_spec, "float") == 0) {
+        strcpy(type_str, "FLOAT");
+    } else if (strcmp(type_spec, "double") == 0) {
+        strcpy(type_str, "DOUBLE");
+    } else if (strcmp(type_spec, "char") == 0) {
+        strcpy(type_str, "CHAR");
+    } else if (strcmp(type_spec, "long") == 0) {
+        strcpy(type_str, "LONG");
+    } else {
+        strcpy(type_str, "UNKNOWN");
+    }
+}
 
 
 
+    void print_symbol_table() {
+        printf("\nSYMBOL TABLE\n");
+        printf("------------------------------------------------------\n");
+        printf("| %-15s | %-10s | %-10s | Line No |\n", "Identifier", "Type", "Data Type");
+        printf("------------------------------------------------------\n");
+        for (int i = 0; i < count; i++) {
+            printf("| %-15s | %-10s | %-10s | %-7d |\n",
+                   symbol_table[i].identifier_name,
+                   symbol_table[i].type,
+                   symbol_table[i].datatype,
+                   symbol_table[i].lineno);
+        }
+        printf("------------------------------------------------------\n");
+    }
 
-#line 100 "parser.tab.c"
+
+#line 161 "parser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -622,11 +683,11 @@ static const yytype_int8 yytranslate[] =
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_int8 yyrline[] =
+static const yytype_uint8 yyrline[] =
 {
-       0,    44,    44,    48,    49,    53,    54,    58,    59,    63,
-      67,    68,    69,    70,    71,    75,    76,    80,    81,    82,
-      83,    87,    93,    94,    95,    96,    97,    98,    99,   100
+       0,   105,   105,   109,   110,   114,   115,   119,   120,   124,
+     133,   134,   135,   136,   137,   141,   142,   146,   147,   148,
+     149,   153,   163,   164,   165,   166,   167,   168,   169,   170
 };
 #endif
 
@@ -1226,45 +1287,53 @@ yyreduce:
   switch (yyn)
     {
   case 5: /* include_statement: INCLUDE  */
-#line 53 "parser.y"
+#line 114 "parser.y"
             { printf("This is an include statement: %s\n", (yyvsp[0].str)); }
-#line 1232 "parser.tab.c"
+#line 1293 "parser.tab.c"
     break;
 
   case 6: /* include_statement: INCLUDE ID  */
-#line 54 "parser.y"
+#line 115 "parser.y"
                  { printf("This is an include statement: %s\n", (yyvsp[-1].str)); }
-#line 1238 "parser.tab.c"
+#line 1299 "parser.tab.c"
     break;
 
   case 9: /* function_definition: type_specifier ID LPARENTHESES RPARENTHESES LBRACE statements RBRACE  */
-#line 63 "parser.y"
-                                                                         { printf("This is a function: %s\n", (yyvsp[-5].str)); }
-#line 1244 "parser.tab.c"
+#line 125 "parser.y"
+    { printf("This is a function: %s\n", (yyvsp[-5].str));
+      char type_str[10];
+      get_type_string(type_str,(yyvsp[-6].str));
+      assign_type(type_str);
+      insert_symtab('F',(yyvsp[-5].str)); }
+#line 1309 "parser.tab.c"
     break;
 
   case 17: /* statement: RETURN DECIMAL_LITERAL SEMICOLON  */
-#line 80 "parser.y"
+#line 146 "parser.y"
                                      { printf("Return statement with value %s\n", (yyvsp[-1].str)); }
-#line 1250 "parser.tab.c"
+#line 1315 "parser.tab.c"
     break;
 
   case 18: /* statement: RETURN SEMICOLON  */
-#line 81 "parser.y"
+#line 147 "parser.y"
                        { printf("Return statement without value\n"); }
-#line 1256 "parser.tab.c"
+#line 1321 "parser.tab.c"
     break;
 
   case 21: /* variable_declaration: type_specifier ID EQUALS constant SEMICOLON  */
-#line 87 "parser.y"
+#line 153 "parser.y"
                                                 { 
+        char type_str[10];
+        get_type_string(type_str, (yyvsp[-4].str));
         printf("Variable declaration: %s = %s\n", (yyvsp[-4].str), (yyvsp[-3].str)); 
+        assign_type(type_str);
+        insert_symtab('V', (yyvsp[-3].str)); 
     }
-#line 1264 "parser.tab.c"
+#line 1333 "parser.tab.c"
     break;
 
 
-#line 1268 "parser.tab.c"
+#line 1337 "parser.tab.c"
 
       default: break;
     }
@@ -1457,7 +1526,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 102 "parser.y"
+#line 172 "parser.y"
 
 
 void yyerror(const char *s) {
@@ -1465,17 +1534,27 @@ void yyerror(const char *s) {
     fprintf(stderr, "Error at line %d: %s\n", yylineno, s);
 }
 
-// int search(char *id_name) {
+int search_symtab(char *id_name) {
 	
-// 	for(int i=count-1; i>=0; i--) {
-// 		if(strcmp(symbol_table[i].identifier_name, id_name)==0) {
-// 			return -1;
-// 			break;
-// 		}
-// 	}
-// 	return 0;
-// }
+	for(int i=count-1; i>=0; i--) {
+		if(strcmp(symbol_table[i].identifier_name, id_name)==0) {
+			return 1;
+			break;
+		}
+	}
+	return 0;
+}
+
+void assign_type(char *str) {
+	strcpy(d_type, str);
+}
+
 
 int main() {
-    return yyparse();
+    yyparse();
+    print_symbol_table();
+
+
+
+
 }
