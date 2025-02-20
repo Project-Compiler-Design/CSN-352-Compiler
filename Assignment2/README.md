@@ -10,6 +10,7 @@ Currently, the project is in **Phase 1**, which involves building a **Lexical An
 CSN-352-Compiler/
 │── src/                 # Source code directory
 │   ├── lexer.l          # Lex file for lexical analysis
+|   ├── parser.y         # File for syntax analysis
 │── test/                # Test cases for the compiler
 │   ├── input1.c         # Sample test case 1
 │   ├── input2.c         # Sample test case 2
@@ -27,16 +28,12 @@ CSN-352-Compiler/
 ## ⚙️ How to Compile and Run  
 Follow these steps to build and execute the lexical analyzer:
 
-### 1️⃣ Compile the Lexer  
+### 1️⃣ Compile the files 
 ```bash
 make clean
 make
 ```
 ### 2️⃣ Run the Test Cases
-You may have to make the run.sh executable the first time:
-```bash
-chmod +x run.sh
-```
 After that run script using:
 ```bash
 ./run.sh
