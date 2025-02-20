@@ -11,10 +11,6 @@ int main() {
     float d = 5.5;
     static char c = 'x';
     int i=0;
-   
-    char my_array[]={1,2,3};
-    
-    
-      
+    main();
 }
 

@@ -83,7 +83,9 @@
     extern int yylineno;
     extern char *yytext;  // Fix for yytext undeclared error
 
-    int count = 0;
+    int count_sym = 0;
+    int count_const = 0;
+
     char d_type[10];
 
     struct sym_tab {
@@ -95,46 +97,87 @@
 
     struct sym_tab symbol_table[100]; // Use an array instead of C++ vector
 
+    struct const_tab {
+        char constant_value[50];
+        char constant_type[50];
+        int lineno;
+    };
+
+    struct const_tab constant_table[100];
+
 	struct ArgList {
     char *args[MAX_ARGS];
-    int count;
+    int count_arg;
 } argList;
 
     void insert_symtab(char c, char *yytext) {
         if (search_symtab(yytext) == 0) {
-            strcpy(symbol_table[count].identifier_name, yytext);
-            symbol_table[count].lineno = yylineno;
+            strcpy(symbol_table[count_sym].identifier_name, yytext);
+            symbol_table[count_sym].lineno = yylineno;
 
             if (c == 'H') {
-                strcpy(symbol_table[count].datatype, d_type);
-                strcpy(symbol_table[count].type, "Header");
+                strcpy(symbol_table[count_sym].datatype, d_type);
+                strcpy(symbol_table[count_sym].type, "Header");
             }
             else if (c == 'K') {
-                strcpy(symbol_table[count].datatype, yytext);
-                strcpy(symbol_table[count].type, "Keyword");
+                strcpy(symbol_table[count_sym].datatype, yytext);
+                strcpy(symbol_table[count_sym].type, "Keyword");
             }
             else if (c == 'V') {
-                strcpy(symbol_table[count].datatype, d_type);
-                strcpy(symbol_table[count].type, "Variable");
+                strcpy(symbol_table[count_sym].datatype, d_type);
+                strcpy(symbol_table[count_sym].type, "Variable");
             }
             else if (c == 'C') {
-                strcpy(symbol_table[count].datatype, "CONST");
-                strcpy(symbol_table[count].type, "Constant");
+                strcpy(symbol_table[count_sym].datatype, "CONST");
+                strcpy(symbol_table[count_sym].type, "Constant");
             }
             else if (c == 'F') {
-                strcpy(symbol_table[count].datatype, d_type);
-                strcpy(symbol_table[count].type, "Function");
+                strcpy(symbol_table[count_sym].datatype, d_type);
+                strcpy(symbol_table[count_sym].type, "Function");
             }
 			else if(c=='G'){
-				strcpy(symbol_table[count].datatype, "GOTO");
-                strcpy(symbol_table[count].type, "Label");
+				strcpy(symbol_table[count_sym].datatype, "GOTO");
+                strcpy(symbol_table[count_sym].type, "Label");
 			}
 			else if(c=='P'){
-				strcpy(symbol_table[count].datatype, d_type);
-                strcpy(symbol_table[count].type, "Pointer");
+				strcpy(symbol_table[count_sym].datatype, d_type);
+                strcpy(symbol_table[count_sym].type, "Pointer");
 			}
-            count++;
+            count_sym++;
         }
+    }
+
+    void insert_const_tab(char c, char *yytext) {
+        
+        strcpy(constant_table[count_const].constant_value, yytext);
+        constant_table[count_const].lineno = yylineno;
+
+        if (c == 'I') {
+            strcpy(constant_table[count_const].constant_type, "Integer Constant");
+        }
+        else if (c == 'F') {
+            strcpy(constant_table[count_const].constant_type, "Float Constant");
+        }
+        else if (c == 'E') {
+            strcpy(constant_table[count_const].constant_type, "Exponential Constant");
+        }
+        else if (c == 'H') {
+            strcpy(constant_table[count_const].constant_type, "Hexadecimal Constant");
+        }
+        else if (c == 'R') {
+            strcpy(constant_table[count_const].constant_type, "Real Constant");
+        }
+        else if (c == 'S') {
+            strcpy(constant_table[count_const].constant_type, "String Constant");
+        }
+        else if (c == 'O') {
+            strcpy(constant_table[count_const].constant_type, "Octal Constant");
+        }
+        else if (c == 'C') {
+            strcpy(constant_table[count_const].constant_type, "Character Constant");
+        }
+        count_const++;
+        
     }
 
     
@@ -150,7 +193,7 @@
     } else if (strcmp(type_spec, "long") == 0) {
         strcpy(type_str, "LONG");
 	}
-		else if (strcmp(type_spec, "void") == 0) {
+	else if (strcmp(type_spec, "void") == 0) {
         strcpy(type_str, "VOID");	}
 	else if (strcmp(type_spec, "struct") == 0) {
         strcpy(type_str, "STRUCT");
@@ -166,7 +209,7 @@
         printf("------------------------------------------------------\n");
         printf("| %-15s | %-10s | %-10s | Line No |\n", "Identifier", "Type", "Data Type");
         printf("------------------------------------------------------\n");
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count_sym; i++) {
             printf("| %-15s | %-10s | %-10s | %-7d |\n",
                    symbol_table[i].identifier_name,
                    symbol_table[i].type,
@@ -176,8 +219,22 @@
         printf("------------------------------------------------------\n");
     }
 
+    void print_constant_table() {
+        printf("\nConstant Table:\n");
+        printf("-----------------------------------------------------\n");
+        printf("| %-15s | %-20s | Line no. |\n", "Constant Value", "Constant Type");
+        printf("-----------------------------------------------------\n");
+        for (int i = 0; i < count_const; i++) {
+            printf("| %-15s | %-20s | %-8d |\n",
+                   constant_table[i].constant_value,
+                   constant_table[i].constant_type, 
+                   constant_table[i].lineno);
+        }
+        printf("-----------------------------------------------------\n");
+    }
 
-#line 181 "parser.tab.c"
+
+#line 238 "parser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -759,28 +816,28 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   198,   198,   199,   200,   201,   202,   203,   204,   205,
-     209,   210,   211,   214,   218,   219,   220,   221,   229,   230,
-     231,   232,   236,   242,   251,   252,   253,   254,   255,   256,
-     260,   261,   262,   263,   264,   265,   269,   270,   274,   275,
-     276,   277,   281,   282,   283,   287,   288,   289,   293,   294,
-     295,   296,   297,   301,   302,   303,   307,   308,   312,   313,
-     317,   318,   322,   323,   327,   328,   332,   333,   337,   342,
-     346,   347,   348,   349,   350,   351,   352,   353,   354,   355,
-     356,   360,   361,   365,   369,   370,   409,   410,   411,   412,
-     413,   414,   418,   422,   431,   435,   444,   445,   446,   447,
-     448,   452,   453,   454,   455,   456,   457,   458,   459,   460,
-     461,   462,   467,   475,   476,   488,   489,   493,   494,   498,
-     510,   511,   512,   513,   517,   518,   522,   523,   524,   528,
-     529,   530,   534,   535,   539,   540,   544,   545,   549,   554,
-     560,   561,   562,   563,   564,   565,   566,   570,   571,   572,
-     578,   582,   583,   588,   589,   593,   594,   598,   606,   607,
-     611,   612,   616,   617,   621,   622,   623,   627,   628,   629,
-     630,   631,   632,   633,   634,   635,   639,   640,   641,   645,
-     646,   650,   651,   652,   653,   654,   655,   659,   660,   661,
-     665,   666,   667,   668,   672,   673,   677,   678,   682,   683,
-     687,   688,   689,   693,   694,   695,   696,   700,   708,   709,
-     710,   711,   715,   716,   720,   721,   725,   726,   733,   734
+       0,   255,   255,   256,   257,   258,   259,   260,   261,   262,
+     266,   267,   268,   271,   275,   276,   277,   278,   286,   287,
+     288,   289,   293,   299,   308,   309,   310,   311,   312,   313,
+     317,   318,   319,   320,   321,   322,   326,   327,   331,   332,
+     333,   334,   338,   339,   340,   344,   345,   346,   350,   351,
+     352,   353,   354,   358,   359,   360,   364,   365,   369,   370,
+     374,   375,   379,   380,   384,   385,   389,   390,   394,   399,
+     403,   404,   405,   406,   407,   408,   409,   410,   411,   412,
+     413,   417,   418,   422,   426,   427,   466,   467,   468,   469,
+     470,   471,   475,   479,   488,   492,   501,   502,   503,   504,
+     505,   509,   510,   511,   512,   513,   514,   515,   516,   517,
+     518,   519,   524,   532,   533,   545,   546,   550,   551,   555,
+     567,   568,   569,   570,   574,   575,   579,   580,   581,   585,
+     586,   587,   591,   592,   596,   597,   601,   602,   606,   611,
+     617,   618,   619,   620,   621,   622,   623,   627,   628,   629,
+     635,   639,   640,   645,   646,   650,   651,   655,   663,   664,
+     668,   669,   673,   674,   678,   679,   680,   684,   685,   686,
+     687,   688,   689,   690,   691,   692,   696,   697,   698,   702,
+     703,   707,   708,   709,   710,   711,   712,   716,   717,   718,
+     722,   723,   724,   725,   729,   730,   734,   735,   739,   740,
+     744,   745,   746,   750,   751,   752,   753,   757,   765,   766,
+     767,   768,   772,   773,   777,   778,   782,   783,   790,   791
 };
 #endif
 
@@ -1862,75 +1919,123 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
+  case 2: /* constant: DECIMAL_LITERAL  */
+#line 255 "parser.y"
+                         { insert_const_tab('I', (yyvsp[0].str)); }
+#line 1926 "parser.tab.c"
+    break;
+
+  case 3: /* constant: FLOAT_LITERAL  */
+#line 256 "parser.y"
+                         { insert_const_tab('F', (yyvsp[0].str)); }
+#line 1932 "parser.tab.c"
+    break;
+
+  case 4: /* constant: EXP_LITERAL  */
+#line 257 "parser.y"
+                         { insert_const_tab('E', (yyvsp[0].str)); }
+#line 1938 "parser.tab.c"
+    break;
+
+  case 5: /* constant: HEXA_LITERAL  */
+#line 258 "parser.y"
+                         { insert_const_tab('H', (yyvsp[0].str)); }
+#line 1944 "parser.tab.c"
+    break;
+
+  case 6: /* constant: REAL_LITERAL  */
+#line 259 "parser.y"
+                         { insert_const_tab('R', (yyvsp[0].str)); }
+#line 1950 "parser.tab.c"
+    break;
+
+  case 7: /* constant: STRING_LITERAL  */
+#line 260 "parser.y"
+                         { insert_const_tab('S', (yyvsp[0].str)); }
+#line 1956 "parser.tab.c"
+    break;
+
+  case 8: /* constant: OCTAL_LITERAL  */
+#line 261 "parser.y"
+                         { insert_const_tab('O', (yyvsp[0].str)); }
+#line 1962 "parser.tab.c"
+    break;
+
+  case 9: /* constant: CHARACTER_LITERAL  */
+#line 262 "parser.y"
+                         { insert_const_tab('C', (yyvsp[0].str)); }
+#line 1968 "parser.tab.c"
+    break;
+
   case 10: /* primary_expression: ID  */
-#line 209 "parser.y"
+#line 266 "parser.y"
                                 { (yyval.str) = strdup((yyvsp[0].str)); }
-#line 1869 "parser.tab.c"
+#line 1974 "parser.tab.c"
     break;
 
   case 12: /* primary_expression: STRING_LITERAL  */
-#line 211 "parser.y"
+#line 268 "parser.y"
                          {
         printf("This is a string literal: %s",(yyvsp[0].str));
     }
-#line 1877 "parser.tab.c"
+#line 1982 "parser.tab.c"
     break;
 
   case 16: /* postfix_expression: postfix_expression LPARENTHESES RPARENTHESES  */
-#line 220 "parser.y"
+#line 277 "parser.y"
                                                                                         {printf("Brackets found\n");}
-#line 1883 "parser.tab.c"
+#line 1988 "parser.tab.c"
     break;
 
   case 17: /* postfix_expression: postfix_expression LPARENTHESES argument_expression_list RPARENTHESES  */
-#line 222 "parser.y"
+#line 279 "parser.y"
         {printf("Function call\n");
-		for (int i = 0; i < argList.count; i++) {
+		for (int i = 0; i < argList.count_arg; i++) {
             printf("%s", argList.args[i]);
-            if (i < argList.count - 1) printf(", ");
+            if (i < argList.count_arg - 1) printf(", ");
         }
         printf("\n");
 	}
-#line 1895 "parser.tab.c"
+#line 2000 "parser.tab.c"
     break;
 
   case 22: /* argument_expression_list: assignment_expression  */
-#line 237 "parser.y"
+#line 294 "parser.y"
       { 
-          if (argList.count < MAX_ARGS) {
-              argList.args[argList.count++] = strdup((yyvsp[0].str));
+          if (argList.count_arg < MAX_ARGS) {
+              argList.args[argList.count_arg++] = strdup((yyvsp[0].str));
           }
       }
-#line 1905 "parser.tab.c"
+#line 2010 "parser.tab.c"
     break;
 
   case 23: /* argument_expression_list: argument_expression_list COMMA assignment_expression  */
-#line 243 "parser.y"
+#line 300 "parser.y"
       { 
-          if (argList.count < MAX_ARGS) {
-              argList.args[argList.count++] = strdup((yyvsp[0].str));
+          if (argList.count_arg < MAX_ARGS) {
+              argList.args[argList.count_arg++] = strdup((yyvsp[0].str));
           }
       }
-#line 1915 "parser.tab.c"
+#line 2020 "parser.tab.c"
     break;
 
   case 68: /* assignment_expression: conditional_expression  */
-#line 338 "parser.y"
+#line 395 "parser.y"
         { 
 		printf("conditional inside assignment = %s\n",(yyvsp[0].str));
 		(yyval.str) = strdup((yyvsp[0].str));
 	}
-#line 1924 "parser.tab.c"
+#line 2029 "parser.tab.c"
     break;
 
   case 69: /* assignment_expression: unary_expression assignment_operator assignment_expression  */
-#line 342 "parser.y"
+#line 399 "parser.y"
                                                                      {printf("Assignment expression = %s\n",(yyvsp[-2].str));}
-#line 1930 "parser.tab.c"
+#line 2035 "parser.tab.c"
     break;
 
   case 85: /* declaration: declaration_specifiers init_declarator_list SEMICOLON  */
-#line 371 "parser.y"
+#line 428 "parser.y"
     {
         printf("declaration  = %s\n", (yyvsp[-1].str));
         char type_str[10];
@@ -1965,57 +2070,57 @@ yyreduce:
             token = strtok(NULL, ",");
         }
     }
-#line 1969 "parser.tab.c"
+#line 2074 "parser.tab.c"
     break;
 
   case 92: /* init_declarator_list: init_declarator  */
-#line 418 "parser.y"
+#line 475 "parser.y"
                       { 
         (yyval.str) = strdup((yyvsp[0].str));  
         printf("init_declarator = %s\n", (yyval.str));
     }
-#line 1978 "parser.tab.c"
+#line 2083 "parser.tab.c"
     break;
 
   case 93: /* init_declarator_list: init_declarator_list COMMA init_declarator  */
-#line 422 "parser.y"
+#line 479 "parser.y"
                                                  { 
         (yyval.str) = malloc(strlen((yyvsp[-2].str)) + strlen((yyvsp[0].str)) + 2); 
         sprintf((yyval.str), "%s,%s", (yyvsp[-2].str), (yyvsp[0].str));  
         free((yyvsp[-2].str)); free((yyvsp[0].str));
         printf("init_declarator_list = %s\n", (yyval.str));
     }
-#line 1989 "parser.tab.c"
+#line 2094 "parser.tab.c"
     break;
 
   case 94: /* init_declarator: declarator  */
-#line 431 "parser.y"
+#line 488 "parser.y"
                  { 
         (yyval.str) = strdup((yyvsp[0].str)); 
         printf("declarator = %s\n", (yyval.str));
     }
-#line 1998 "parser.tab.c"
+#line 2103 "parser.tab.c"
     break;
 
   case 95: /* init_declarator: declarator EQUALS initializer  */
-#line 435 "parser.y"
+#line 492 "parser.y"
                                     { 
         (yyval.str) = malloc(strlen((yyvsp[-2].str)) + strlen((yyvsp[0].str)) + 2);  
         sprintf((yyval.str), "%s=%s", (yyvsp[-2].str), (yyvsp[0].str));  
         free((yyvsp[-2].str)); free((yyvsp[0].str));
         printf("init_declarator with initializer = %s\n", (yyval.str));
     }
-#line 2009 "parser.tab.c"
+#line 2114 "parser.tab.c"
     break;
 
   case 104: /* type_specifier: INT  */
-#line 455 "parser.y"
+#line 512 "parser.y"
                                         {printf("Integer\n");}
-#line 2015 "parser.tab.c"
+#line 2120 "parser.tab.c"
     break;
 
   case 112: /* struct_or_union_specifier: struct_or_union ID LBRACE struct_declaration_list RBRACE  */
-#line 468 "parser.y"
+#line 525 "parser.y"
         {
 		char type_str[10];
         get_type_string(type_str, (yyvsp[-4].str));
@@ -2023,11 +2128,11 @@ yyreduce:
         assign_type(type_str);
         insert_symtab('V', (yyvsp[-3].str)); 
 	}
-#line 2027 "parser.tab.c"
+#line 2132 "parser.tab.c"
     break;
 
   case 114: /* struct_or_union_specifier: struct_or_union ID  */
-#line 478 "parser.y"
+#line 535 "parser.y"
         {
 		char type_str[10];
         get_type_string(type_str, (yyvsp[-1].str));
@@ -2035,11 +2140,11 @@ yyreduce:
         assign_type(type_str);
         insert_symtab('V', (yyvsp[0].str)); 
 	}
-#line 2039 "parser.tab.c"
+#line 2144 "parser.tab.c"
     break;
 
   case 119: /* struct_declaration: specifier_qualifier_list struct_declarator_list SEMICOLON  */
-#line 499 "parser.y"
+#line 556 "parser.y"
         { 
 		printf("Struct declaration %s = %s\n",(yyvsp[-2].str),(yyvsp[-1].str));
 		char type_str[10];
@@ -2048,81 +2153,81 @@ yyreduce:
         assign_type(type_str);
         insert_symtab('V', (yyvsp[-1].str)); 
 	}
-#line 2052 "parser.tab.c"
+#line 2157 "parser.tab.c"
     break;
 
   case 126: /* struct_declarator: declarator  */
-#line 522 "parser.y"
+#line 579 "parser.y"
                             {printf("Struct declarator = %s\n",(yyvsp[0].str));}
-#line 2058 "parser.tab.c"
+#line 2163 "parser.tab.c"
     break;
 
   case 138: /* declarator: pointer direct_declarator  */
-#line 549 "parser.y"
+#line 606 "parser.y"
                                 { 
         (yyval.str) = malloc(strlen((yyvsp[-1].str)) + strlen((yyvsp[0].str)) + 1); 
         sprintf((yyval.str), "%s%s", (yyvsp[-1].str), (yyvsp[0].str));  
         free((yyvsp[-1].str)); free((yyvsp[0].str));
     }
-#line 2068 "parser.tab.c"
+#line 2173 "parser.tab.c"
     break;
 
   case 139: /* declarator: direct_declarator  */
-#line 554 "parser.y"
+#line 611 "parser.y"
                         { 
         (yyval.str) = strdup((yyvsp[0].str));  
     }
-#line 2076 "parser.tab.c"
+#line 2181 "parser.tab.c"
     break;
 
   case 140: /* direct_declarator: ID  */
-#line 560 "parser.y"
+#line 617 "parser.y"
                             {printf("Identifier in direct declaratorrr = %s\n",(yyvsp[0].str));}
-#line 2082 "parser.tab.c"
+#line 2187 "parser.tab.c"
     break;
 
   case 143: /* direct_declarator: direct_declarator LBRACKET RBRACKET  */
-#line 563 "parser.y"
+#line 620 "parser.y"
                                                                                                         {printf("Array\n");}
-#line 2088 "parser.tab.c"
+#line 2193 "parser.tab.c"
     break;
 
   case 144: /* direct_declarator: direct_declarator LPARENTHESES parameter_type_list RPARENTHESES  */
-#line 564 "parser.y"
+#line 621 "parser.y"
                                                                               {printf("Brackets found with parameter\n");}
-#line 2094 "parser.tab.c"
+#line 2199 "parser.tab.c"
     break;
 
   case 145: /* direct_declarator: direct_declarator LPARENTHESES identifier_list RPARENTHESES  */
-#line 565 "parser.y"
+#line 622 "parser.y"
                                                                                {printf("Brackets found\n");}
-#line 2100 "parser.tab.c"
+#line 2205 "parser.tab.c"
     break;
 
   case 146: /* direct_declarator: direct_declarator LPARENTHESES RPARENTHESES  */
-#line 566 "parser.y"
+#line 623 "parser.y"
                                                                                                 {printf("Brackets found\n");}
-#line 2106 "parser.tab.c"
+#line 2211 "parser.tab.c"
     break;
 
   case 147: /* pointer: STAR  */
-#line 570 "parser.y"
+#line 627 "parser.y"
                { (yyval.str) = strdup("*"); }
-#line 2112 "parser.tab.c"
+#line 2217 "parser.tab.c"
     break;
 
   case 149: /* pointer: STAR pointer  */
-#line 573 "parser.y"
+#line 630 "parser.y"
         { 
         (yyval.str) = malloc(strlen((yyvsp[0].str)) + 2); 
         sprintf((yyval.str), "*%s", (yyvsp[0].str));  
         free((yyvsp[0].str));
     }
-#line 2122 "parser.tab.c"
+#line 2227 "parser.tab.c"
     break;
 
   case 157: /* parameter_declaration: declaration_specifiers declarator  */
-#line 599 "parser.y"
+#line 656 "parser.y"
         {
 		char type_str[10];
         get_type_string(type_str, (yyvsp[-1].str));
@@ -2130,47 +2235,47 @@ yyreduce:
         assign_type(type_str);
         insert_symtab('V', (yyvsp[0].str)); 
 	}
-#line 2134 "parser.tab.c"
+#line 2239 "parser.tab.c"
     break;
 
   case 160: /* identifier_list: ID  */
-#line 611 "parser.y"
+#line 668 "parser.y"
                                         {printf("Identifier in list = %s",(yyvsp[0].str));}
-#line 2140 "parser.tab.c"
+#line 2245 "parser.tab.c"
     break;
 
   case 172: /* direct_abstract_declarator: LPARENTHESES RPARENTHESES  */
-#line 632 "parser.y"
+#line 689 "parser.y"
                                                                                                                         {printf("Brackets found\n");}
-#line 2146 "parser.tab.c"
+#line 2251 "parser.tab.c"
     break;
 
   case 174: /* direct_abstract_declarator: direct_abstract_declarator LPARENTHESES RPARENTHESES  */
-#line 634 "parser.y"
+#line 691 "parser.y"
                                                                        {printf("Brackets found\n");}
-#line 2152 "parser.tab.c"
+#line 2257 "parser.tab.c"
     break;
 
   case 201: /* selection_statement: IF LPARENTHESES expression RPARENTHESES statement ELSE statement  */
-#line 688 "parser.y"
+#line 745 "parser.y"
                                                                                 {printf("It is in if-else block\n");}
-#line 2158 "parser.tab.c"
+#line 2263 "parser.tab.c"
     break;
 
   case 202: /* selection_statement: SWITCH LPARENTHESES expression RPARENTHESES statement  */
-#line 689 "parser.y"
+#line 746 "parser.y"
                                                                                                 {printf("It is in switch block\n");}
-#line 2164 "parser.tab.c"
+#line 2269 "parser.tab.c"
     break;
 
   case 206: /* iteration_statement: FOR LPARENTHESES expression_statement expression_statement expression RPARENTHESES statement  */
-#line 696 "parser.y"
+#line 753 "parser.y"
                                                                                                           {printf("For loop\n");}
-#line 2170 "parser.tab.c"
+#line 2275 "parser.tab.c"
     break;
 
   case 207: /* jump_statement: GOTO ID SEMICOLON  */
-#line 701 "parser.y"
+#line 758 "parser.y"
         { 
 		printf("Goto statement: %s\n",(yyvsp[-1].str));
 		
@@ -2178,34 +2283,34 @@ yyreduce:
 		
 
 	}
-#line 2182 "parser.tab.c"
+#line 2287 "parser.tab.c"
     break;
 
   case 212: /* translation_unit: external_declaration  */
-#line 715 "parser.y"
+#line 772 "parser.y"
                                                         {printf("Reached the root node.\n");}
-#line 2188 "parser.tab.c"
+#line 2293 "parser.tab.c"
     break;
 
   case 213: /* translation_unit: translation_unit external_declaration  */
-#line 716 "parser.y"
+#line 773 "parser.y"
                                                 {printf("Reached the root node.\n");}
-#line 2194 "parser.tab.c"
+#line 2299 "parser.tab.c"
     break;
 
   case 217: /* function_definition: declaration_specifiers declarator compound_statement  */
-#line 727 "parser.y"
+#line 784 "parser.y"
         {printf("Function is there: %s %s\n",(yyvsp[-2].str),(yyvsp[-1].str));
 		char type_str[10];
       	get_type_string(type_str,(yyvsp[-2].str));
       	assign_type(type_str);
       	insert_symtab('F',(yyvsp[-1].str));
 	}
-#line 2205 "parser.tab.c"
+#line 2310 "parser.tab.c"
     break;
 
 
-#line 2209 "parser.tab.c"
+#line 2314 "parser.tab.c"
 
       default: break;
     }
@@ -2398,7 +2503,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 736 "parser.y"
+#line 793 "parser.y"
 
 
 void yyerror(const char *s) {
@@ -2408,7 +2513,7 @@ void yyerror(const char *s) {
 
 int search_symtab(char *id_name) {
 	
-	for(int i=count-1; i>=0; i--) {
+	for(int i=count_sym-1; i>=0; i--) {
 		if(strcmp(symbol_table[i].identifier_name, id_name)==0) {
 			return 1;
 			break;
@@ -2425,7 +2530,7 @@ void assign_type(char *str) {
 int main() {
     yyparse();
     print_symbol_table();
-
+    print_constant_table();
 
 
 

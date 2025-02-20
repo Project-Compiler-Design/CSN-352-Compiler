@@ -1,0 +1,16 @@
+---constant Table---
+
+
+Implement advanced features:
+
+LAMBDA func
+---recursive calls---
+Function call with variable arguments 
+Dynamic memory allocation 
+typedef 
+Reference 
+enum 
+union 
+until loop 
+Multi-dimensional arrays
+dekhenge

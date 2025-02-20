@@ -13,7 +13,9 @@
     extern int yylineno;
     extern char *yytext;  // Fix for yytext undeclared error
 
-    int count = 0;
+    int count_sym = 0;
+    int count_const = 0;
+
     char d_type[10];
 
     struct sym_tab {
@@ -25,46 +27,87 @@
 
     struct sym_tab symbol_table[100]; // Use an array instead of C++ vector
 
+    struct const_tab {
+        char constant_value[50];
+        char constant_type[50];
+        int lineno;
+    };
+
+    struct const_tab constant_table[100];
+
 	struct ArgList {
     char *args[MAX_ARGS];
-    int count;
+    int count_arg;
 } argList;
 
     void insert_symtab(char c, char *yytext) {
         if (search_symtab(yytext) == 0) {
-            strcpy(symbol_table[count].identifier_name, yytext);
-            symbol_table[count].lineno = yylineno;
+            strcpy(symbol_table[count_sym].identifier_name, yytext);
+            symbol_table[count_sym].lineno = yylineno;
 
             if (c == 'H') {
-                strcpy(symbol_table[count].datatype, d_type);
-                strcpy(symbol_table[count].type, "Header");
+                strcpy(symbol_table[count_sym].datatype, d_type);
+                strcpy(symbol_table[count_sym].type, "Header");
             }
             else if (c == 'K') {
-                strcpy(symbol_table[count].datatype, yytext);
-                strcpy(symbol_table[count].type, "Keyword");
+                strcpy(symbol_table[count_sym].datatype, yytext);
+                strcpy(symbol_table[count_sym].type, "Keyword");
             }
             else if (c == 'V') {
-                strcpy(symbol_table[count].datatype, d_type);
-                strcpy(symbol_table[count].type, "Variable");
+                strcpy(symbol_table[count_sym].datatype, d_type);
+                strcpy(symbol_table[count_sym].type, "Variable");
             }
             else if (c == 'C') {
-                strcpy(symbol_table[count].datatype, "CONST");
-                strcpy(symbol_table[count].type, "Constant");
+                strcpy(symbol_table[count_sym].datatype, "CONST");
+                strcpy(symbol_table[count_sym].type, "Constant");
             }
             else if (c == 'F') {
-                strcpy(symbol_table[count].datatype, d_type);
-                strcpy(symbol_table[count].type, "Function");
+                strcpy(symbol_table[count_sym].datatype, d_type);
+                strcpy(symbol_table[count_sym].type, "Function");
             }
 			else if(c=='G'){
-				strcpy(symbol_table[count].datatype, "GOTO");
-                strcpy(symbol_table[count].type, "Label");
+				strcpy(symbol_table[count_sym].datatype, "GOTO");
+                strcpy(symbol_table[count_sym].type, "Label");
 			}
 			else if(c=='P'){
-				strcpy(symbol_table[count].datatype, d_type);
-                strcpy(symbol_table[count].type, "Pointer");
+				strcpy(symbol_table[count_sym].datatype, d_type);
+                strcpy(symbol_table[count_sym].type, "Pointer");
 			}
-            count++;
+            count_sym++;
         }
+    }
+
+    void insert_const_tab(char c, char *yytext) {
+        
+        strcpy(constant_table[count_const].constant_value, yytext);
+        constant_table[count_const].lineno = yylineno;
+
+        if (c == 'I') {
+            strcpy(constant_table[count_const].constant_type, "Integer Constant");
+        }
+        else if (c == 'F') {
+            strcpy(constant_table[count_const].constant_type, "Float Constant");
+        }
+        else if (c == 'E') {
+            strcpy(constant_table[count_const].constant_type, "Exponential Constant");
+        }
+        else if (c == 'H') {
+            strcpy(constant_table[count_const].constant_type, "Hexadecimal Constant");
+        }
+        else if (c == 'R') {
+            strcpy(constant_table[count_const].constant_type, "Real Constant");
+        }
+        else if (c == 'S') {
+            strcpy(constant_table[count_const].constant_type, "String Constant");
+        }
+        else if (c == 'O') {
+            strcpy(constant_table[count_const].constant_type, "Octal Constant");
+        }
+        else if (c == 'C') {
+            strcpy(constant_table[count_const].constant_type, "Character Constant");
+        }
+        count_const++;
+        
     }
 
     
@@ -80,7 +123,7 @@
     } else if (strcmp(type_spec, "long") == 0) {
         strcpy(type_str, "LONG");
 	}
-		else if (strcmp(type_spec, "void") == 0) {
+	else if (strcmp(type_spec, "void") == 0) {
         strcpy(type_str, "VOID");	}
 	else if (strcmp(type_spec, "struct") == 0) {
         strcpy(type_str, "STRUCT");
@@ -96,7 +139,7 @@
         printf("------------------------------------------------------\n");
         printf("| %-15s | %-10s | %-10s | Line No |\n", "Identifier", "Type", "Data Type");
         printf("------------------------------------------------------\n");
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count_sym; i++) {
             printf("| %-15s | %-10s | %-10s | %-7d |\n",
                    symbol_table[i].identifier_name,
                    symbol_table[i].type,
@@ -104,6 +147,20 @@
                    symbol_table[i].lineno);
         }
         printf("------------------------------------------------------\n");
+    }
+
+    void print_constant_table() {
+        printf("\nConstant Table:\n");
+        printf("-----------------------------------------------------\n");
+        printf("| %-15s | %-20s | Line no. |\n", "Constant Value", "Constant Type");
+        printf("-----------------------------------------------------\n");
+        for (int i = 0; i < count_const; i++) {
+            printf("| %-15s | %-20s | %-8d |\n",
+                   constant_table[i].constant_value,
+                   constant_table[i].constant_type, 
+                   constant_table[i].lineno);
+        }
+        printf("-----------------------------------------------------\n");
     }
 
 %}
@@ -195,14 +252,14 @@
 //     ;
 
 constant: 
-    DECIMAL_LITERAL
-    | FLOAT_LITERAL
-    | EXP_LITERAL
-    | HEXA_LITERAL
-    | REAL_LITERAL
-    | STRING_LITERAL
-    | OCTAL_LITERAL
-    | CHARACTER_LITERAL
+    DECIMAL_LITERAL      { insert_const_tab('I', $1); }
+    | FLOAT_LITERAL      { insert_const_tab('F', $1); }
+    | EXP_LITERAL        { insert_const_tab('E', $1); }
+    | HEXA_LITERAL       { insert_const_tab('H', $1); }
+    | REAL_LITERAL       { insert_const_tab('R', $1); }
+    | STRING_LITERAL     { insert_const_tab('S', $1); }
+    | OCTAL_LITERAL      { insert_const_tab('O', $1); }
+    | CHARACTER_LITERAL  { insert_const_tab('C', $1); }
 
 
 primary_expression
@@ -220,9 +277,9 @@ postfix_expression
 	| postfix_expression LPARENTHESES RPARENTHESES					{printf("Brackets found\n");}
 	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES   
 	{printf("Function call\n");
-		for (int i = 0; i < argList.count; i++) {
+		for (int i = 0; i < argList.count_arg; i++) {
             printf("%s", argList.args[i]);
-            if (i < argList.count - 1) printf(", ");
+            if (i < argList.count_arg - 1) printf(", ");
         }
         printf("\n");
 	}
@@ -235,14 +292,14 @@ postfix_expression
 argument_expression_list
     : assignment_expression
       { 
-          if (argList.count < MAX_ARGS) {
-              argList.args[argList.count++] = strdup($1);
+          if (argList.count_arg < MAX_ARGS) {
+              argList.args[argList.count_arg++] = strdup($1);
           }
       }
     | argument_expression_list COMMA assignment_expression
       { 
-          if (argList.count < MAX_ARGS) {
-              argList.args[argList.count++] = strdup($3);
+          if (argList.count_arg < MAX_ARGS) {
+              argList.args[argList.count_arg++] = strdup($3);
           }
       }
     ;
@@ -742,7 +799,7 @@ void yyerror(const char *s) {
 
 int search_symtab(char *id_name) {
 	
-	for(int i=count-1; i>=0; i--) {
+	for(int i=count_sym-1; i>=0; i--) {
 		if(strcmp(symbol_table[i].identifier_name, id_name)==0) {
 			return 1;
 			break;
@@ -759,7 +816,7 @@ void assign_type(char *str) {
 int main() {
     yyparse();
     print_symbol_table();
-
+    print_constant_table();
 
 
 
