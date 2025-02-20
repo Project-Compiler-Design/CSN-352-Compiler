@@ -3,6 +3,8 @@
     #include <stdlib.h>
     #include <string.h>
 
+	#define MAX_ARGS 100
+
     void yyerror(const char *s);
     int search_symtab(char *);
     void assign_type();
@@ -22,6 +24,11 @@
     };
 
     struct sym_tab symbol_table[100]; // Use an array instead of C++ vector
+
+	struct ArgList {
+    char *args[MAX_ARGS];
+    int count;
+} argList;
 
     void insert_symtab(char c, char *yytext) {
         if (search_symtab(yytext) == 0) {
@@ -48,6 +55,14 @@
                 strcpy(symbol_table[count].datatype, d_type);
                 strcpy(symbol_table[count].type, "Function");
             }
+			else if(c=='G'){
+				strcpy(symbol_table[count].datatype, "GOTO");
+                strcpy(symbol_table[count].type, "Label");
+			}
+			else if(c=='P'){
+				strcpy(symbol_table[count].datatype, d_type);
+                strcpy(symbol_table[count].type, "Pointer");
+			}
             count++;
         }
     }
@@ -64,6 +79,11 @@
         strcpy(type_str, "CHAR");
     } else if (strcmp(type_spec, "long") == 0) {
         strcpy(type_str, "LONG");
+	}
+		else if (strcmp(type_spec, "void") == 0) {
+        strcpy(type_str, "VOID");	}
+	else if (strcmp(type_spec, "struct") == 0) {
+        strcpy(type_str, "STRUCT");
     } else {
         strcpy(type_str, "UNKNOWN");
     }
@@ -186,8 +206,8 @@ constant:
 
 
 primary_expression
-	: ID
-	| constant
+	: ID			{ $$ = strdup($1); }
+	| constant		
 	| STRING_LITERAL {
         printf("This is a string literal: %s",$1);
     }
@@ -198,7 +218,14 @@ postfix_expression
 	: primary_expression
 	| postfix_expression LBRACKET expression RBRACKET
 	| postfix_expression LPARENTHESES RPARENTHESES					{printf("Brackets found\n");}
-	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES
+	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES   
+	{printf("Function call\n");
+		for (int i = 0; i < argList.count; i++) {
+            printf("%s", argList.args[i]);
+            if (i < argList.count - 1) printf(", ");
+        }
+        printf("\n");
+	}
 	| postfix_expression DOT ID
 	| postfix_expression LAMBDA_ARROW ID
 	| postfix_expression INCREMENT
@@ -206,9 +233,19 @@ postfix_expression
 	;
 
 argument_expression_list
-	: assignment_expression
-	| argument_expression_list COMMA assignment_expression
-	;
+    : assignment_expression
+      { 
+          if (argList.count < MAX_ARGS) {
+              argList.args[argList.count++] = strdup($1);
+          }
+      }
+    | argument_expression_list COMMA assignment_expression
+      { 
+          if (argList.count < MAX_ARGS) {
+              argList.args[argList.count++] = strdup($3);
+          }
+      }
+    ;
 
 unary_expression
 	: postfix_expression
@@ -297,8 +334,12 @@ conditional_expression
 	;
 
 assignment_expression
-	: conditional_expression
-	| unary_expression assignment_operator assignment_expression
+	: conditional_expression				
+	{ 
+		printf("conditional inside assignment = %s\n",$1);
+		$$ = strdup($1);
+	}
+	| unary_expression assignment_operator assignment_expression {printf("Assignment expression = %s\n",$1);}
 	;
 
 assignment_operator
@@ -325,25 +366,44 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers SEMICOLON
-	| declaration_specifiers init_declarator_list SEMICOLON 
-	{
+    : declaration_specifiers SEMICOLON
+    | declaration_specifiers init_declarator_list SEMICOLON 
+    {
         printf("declaration  = %s\n", $2);
         char type_str[10];
         get_type_string(type_str, $1);
 
         // Tokenize the init_declarator_list to extract variable names
         char *token = strtok($2, ",");
-		
         while (token != NULL) {
-            printf("Variable declaration: %s = %s\n", type_str, token); 
+            char *var_name = token;
+            char *value = strchr(token, '=');
+
+            if (value) {
+                *value = '\0';  // Split variable name from value
+                value++;  // Move to actual value
+            }
+
+            assign_type(type_str);
+
+            // Count '*' characters to determine pointer level
+            int pointer_level = 0;
+            while (*var_name == '*') {
+                pointer_level++;
+                var_name++;  // Move past '*'
+            }
 			assign_type(type_str);
-            insert_symtab('V', token);
+            if (pointer_level > 0) {
+                insert_symtab('P',var_name);
+            } else {
+                insert_symtab('V',var_name);
+            }
+
             token = strtok(NULL, ",");
         }
-		free($2);
-	}
-	;
+    }
+    ;
+
 
 declaration_specifiers
 	: storage_class_specifier
@@ -355,25 +415,30 @@ declaration_specifiers
 	;
 
 init_declarator_list
-	: init_declarator { 
-        $$ = strdup($1);  // Store the first variable
+    : init_declarator { 
+        $$ = strdup($1);  
         printf("init_declarator = %s\n", $$);
     }
-	| init_declarator_list COMMA init_declarator { 
-        $$ = malloc(strlen($1) + strlen($3) + 2); // Allocate space for "a,b"
-        sprintf($$, "%s,%s", $1, $3);  // Concatenate "a,b"
+    | init_declarator_list COMMA init_declarator { 
+        $$ = malloc(strlen($1) + strlen($3) + 2); 
+        sprintf($$, "%s,%s", $1, $3);  
         free($1); free($3);
         printf("init_declarator_list = %s\n", $$);
     }
-	;
+    ;
 
 init_declarator
-	: declarator
-	| declarator EQUALS initializer				
-	// {printf("here\n");
-	// printf("%s\n",$1);
-	// printf("end\n");}
-	;
+    : declarator { 
+        $$ = strdup($1); 
+        printf("declarator = %s\n", $$);
+    }
+    | declarator EQUALS initializer { 
+        $$ = malloc(strlen($1) + strlen($3) + 2);  
+        sprintf($$, "%s=%s", $1, $3);  
+        free($1); free($3);
+        printf("init_declarator with initializer = %s\n", $$);
+    }
+    ;
 
 storage_class_specifier
 	: TYPEDEF
@@ -399,9 +464,25 @@ type_specifier
 	;
 
 struct_or_union_specifier
-	: struct_or_union ID LBRACE struct_declaration_list RBRACE
+	: struct_or_union ID LBRACE struct_declaration_list RBRACE 
+	{
+		char type_str[10];
+        get_type_string(type_str, $1);
+        printf("Variable declaration: %s = %s\n", $1, $2); 
+        assign_type(type_str);
+        insert_symtab('V', $2); 
+	}
 	| struct_or_union LBRACE struct_declaration_list RBRACE
-	| struct_or_union ID
+	| struct_or_union ID 
+	
+	{
+		char type_str[10];
+        get_type_string(type_str, $1);
+        printf("Variable declaration: %s = %s\n", $1, $2); 
+        assign_type(type_str);
+        insert_symtab('V', $2); 
+	}
+	
 
 struct_or_union
 	: STRUCT
@@ -414,7 +495,15 @@ struct_declaration_list
 	;
 
 struct_declaration
-	: specifier_qualifier_list struct_declarator_list SEMICOLON
+	: specifier_qualifier_list struct_declarator_list SEMICOLON      
+	{ 
+		printf("Struct declaration %s = %s\n",$1,$2);
+		char type_str[10];
+        get_type_string(type_str, $1);
+        
+        assign_type(type_str);
+        insert_symtab('V', $2); 
+	}
 	;
 
 specifier_qualifier_list
@@ -430,7 +519,7 @@ struct_declarator_list
 	;
 
 struct_declarator
-	: declarator
+	: declarator        {printf("Struct declarator = %s\n",$1);}
 	| COLON constant_expression
 	| declarator COLON constant_expression
 	;
@@ -457,24 +546,35 @@ type_qualifier
 	;
 
 declarator
-	: pointer direct_declarator
-	| direct_declarator
-	;
+    : pointer direct_declarator { 
+        $$ = malloc(strlen($1) + strlen($2) + 1); 
+        sprintf($$, "%s%s", $1, $2);  
+        free($1); free($2);
+    }
+    | direct_declarator { 
+        $$ = strdup($1);  
+    }
+    ;
 
 direct_declarator
-	: ID                {printf("Identifier in direct declarator = %s\n",$1);}
+	: ID                {printf("Identifier in direct declaratorrr = %s\n",$1);}
 	| LPARENTHESES declarator RPARENTHESES
 	| direct_declarator LBRACKET constant_expression RBRACKET
-	| direct_declarator LBRACKET RBRACKET
-	| direct_declarator LPARENTHESES parameter_type_list RPARENTHESES
+	| direct_declarator LBRACKET RBRACKET								{printf("Array\n");}
+	| direct_declarator LPARENTHESES parameter_type_list RPARENTHESES     {printf("Brackets found with parameter\n");}
 	| direct_declarator LPARENTHESES identifier_list RPARENTHESES          {printf("Brackets found\n");}
 	| direct_declarator LPARENTHESES RPARENTHESES 						{printf("Brackets found\n");}
 	;
 
 pointer
-	: STAR
+	: STAR { $$ = strdup("*"); }
 	| STAR type_qualifier_list
-	| STAR pointer
+	| STAR pointer   
+	{ 
+        $$ = malloc(strlen($2) + 2); 
+        sprintf($$, "*%s", $2);  
+        free($2);
+    }
 	| STAR type_qualifier_list pointer
 	;
 
@@ -495,7 +595,14 @@ parameter_list
 	;
 
 parameter_declaration
-	: declaration_specifiers declarator
+	: declaration_specifiers declarator  
+	{
+		char type_str[10];
+        get_type_string(type_str, $1);
+        printf("Variable declaration: %s = %s\n", $1, $2); 
+        assign_type(type_str);
+        insert_symtab('V', $2); 
+	}
 	| declaration_specifiers abstract_declarator
 	| declaration_specifiers
 	;
@@ -578,19 +685,26 @@ expression_statement
 
 selection_statement
 	: IF LPARENTHESES expression RPARENTHESES statement
-	| IF LPARENTHESES expression RPARENTHESES statement ELSE statement
-	| SWITCH LPARENTHESES expression RPARENTHESES statement
+	| IF LPARENTHESES expression RPARENTHESES statement ELSE statement      {printf("It is in if-else block\n");}
+	| SWITCH LPARENTHESES expression RPARENTHESES statement					{printf("It is in switch block\n");}
 	;
 
 iteration_statement
 	: WHILE LPARENTHESES expression RPARENTHESES statement
 	| DO statement WHILE LPARENTHESES expression RPARENTHESES SEMICOLON
 	| FOR LPARENTHESES expression_statement expression_statement RPARENTHESES statement
-	| FOR LPARENTHESES expression_statement expression_statement expression RPARENTHESES statement
+	| FOR LPARENTHESES expression_statement expression_statement expression RPARENTHESES statement    {printf("For loop\n");}
 	;
 
 jump_statement
-	: GOTO ID SEMICOLON
+	: GOTO ID SEMICOLON				
+	{ 
+		printf("Goto statement: %s\n",$2);
+		
+      	insert_symtab('G',$2);
+		
+
+	}
 	| CONTINUE SEMICOLON
 	| BREAK SEMICOLON
 	| RETURN SEMICOLON
@@ -599,7 +713,7 @@ jump_statement
 
 translation_unit
 	: external_declaration 				{printf("Reached the root node.\n");}
-	| translation_unit external_declaration
+	| translation_unit external_declaration {printf("Reached the root node.\n");}
 	;
 
 external_declaration
@@ -609,7 +723,13 @@ external_declaration
 
 function_definition
 	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement
+	| declaration_specifiers declarator compound_statement    
+	{printf("Function is there: %s %s\n",$1,$2);
+		char type_str[10];
+      	get_type_string(type_str,$1);
+      	assign_type(type_str);
+      	insert_symtab('F',$2);
+	}
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
 	;
