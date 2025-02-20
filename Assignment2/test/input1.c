@@ -6,6 +6,6 @@ int main() {
     float d = 5.5;
     char c = 'x';
     int i=0;
-    for(i=0;i<5;i++) 
+    for(i=0;i<5;i++) ;
     return 0;
 }

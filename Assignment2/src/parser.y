@@ -87,7 +87,6 @@
     }
 
 %}
-
 %union {
     char *str;
 }
