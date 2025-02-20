@@ -1,0 +1,15 @@
+This is an include statement: #include<stdio.h>
+Variable declaration: int = a
+Variable declaration: float = d
+Variable declaration: char = c
+Variable declaration: int = i
+
+SYMBOL TABLE
+------------------------------------------------------
+| Identifier      | Type       | Data Type  | Line No |
+------------------------------------------------------
+| a               | Variable   | INT        | 5       |
+| d               | Variable   | FLOAT      | 6       |
+| c               | Variable   | CHAR       | 7       |
+| i               | Variable   | INT        | 8       |
+------------------------------------------------------

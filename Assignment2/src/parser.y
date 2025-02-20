@@ -594,7 +594,12 @@ void assign_type(char *str) {
 }
 
 
-int main() {
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        return 1;
+    }
+
+    freopen(argv[1], "r", stdin);
     yyparse();
     print_symbol_table();
 
