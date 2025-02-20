@@ -87,6 +87,7 @@
     }
 
 %}
+
 %union {
     char *str;
 }
@@ -97,66 +98,81 @@
 
 %token RBRACE LBRACE LBRACKET RBRACKET LPARENTHESES RPARENTHESES DOT COMMA COLON SEMICOLON PLUS MINUS STAR DIVIDE MODULO AMPERSAND OR XOR EXCLAMATION TILDE EQUALS LESS_THAN GREATER_THAN QUESTION_MARK INCREMENT DECREMENT REL_AND REL_OR REL_EQUALS REL_NOT_EQ LESS_EQUALS GREATER_EQUALS ASSIGN_PLUS ASSIGN_MINUS ASSIGN_STAR ASSIGN_DIV ASSIGN_MOD ASSIGN_AND ASSIGN_OR ASSIGN_XOR LEFT_SHIFT LEFT_SHIFT_EQ RIGHT_SHIFT RIGHT_SHIFT_EQ LAMBDA_ARROW VARIABLE_ARGS
 
-%type <str> expression statement declaration type_specifier program
+
+%type <str> primary_expression postfix_expression argument_expression_list unary_expression 
+%type <str> unary_operator cast_expression multiplicative_expression additive_expression 
+%type <str> shift_expression relational_expression equality_expression and_expression 
+%type <str> exclusive_or_expression inclusive_or_expression logical_and_expression 
+%type <str> logical_or_expression conditional_expression assignment_expression 
+%type <str> assignment_operator expression constant_expression declaration 
+%type <str> declaration_specifiers init_declarator_list init_declarator 
+%type <str> storage_class_specifier type_specifier struct_or_union_specifier 
+%type <str> struct_or_union struct_declaration_list struct_declaration 
+%type <str> specifier_qualifier_list struct_declarator_list struct_declarator 
+%type <str> enum_specifier enumerator_list enumerator type_qualifier declarator 
+%type <str> direct_declarator pointer type_qualifier_list parameter_type_list 
+%type <str> parameter_list parameter_declaration identifier_list type_name 
+%type <str> abstract_declarator direct_abstract_declarator initializer 
+%type <str> initializer_list statement labeled_statement compound_statement 
+%type <str> declaration_list statement_list expression_statement 
+%type <str> selection_statement iteration_statement jump_statement 
+%type <str> translation_unit external_declaration function_definition
+
+%start translation_unit
 
 %%
-program:
-    include_statements function_definitions
-    ;
+// program:
+//     include_statements function_definitions
+//     ;
 
-include_statements:
-    include_statements include_statement
-    | /* empty */
-    ;
+// include_statements:
+//     include_statements include_statement
+//     | /* empty */
+//     ;
 
-include_statement:
-    INCLUDE { printf("This is an include statement: %s\n", $1); }
-    | INCLUDE ID { printf("This is an include statement: %s\n", $1); }
-    ;
+// include_statement:
+//     INCLUDE { printf("This is an include statement: %s\n", $1); }
+//     | INCLUDE ID { printf("This is an include statement: %s\n", $1); }
+//     ;
 
-function_definitions:
-    function_definitions function_definition
-    | 
-    ;
+// function_definitions:
+//     function_definitions function_definition
+//     | 
+//     ;
 
-function_definition:
-    type_specifier ID LPARENTHESES RPARENTHESES LBRACE statements RBRACE 
-    { printf("This is a function: %s\n", $2);
-      char type_str[10];
-      get_type_string(type_str,$1);
-      assign_type(type_str);
-      insert_symtab('F',$2); }
-    ;
+// function_definition:
+//     type_specifier ID LPARENTHESES RPARENTHESES LBRACE statements RBRACE 
+//     { printf("This is a function: %s\n", $2);
+//       char type_str[10];
+//       get_type_string(type_str,$1);
+//       assign_type(type_str);
+//       insert_symtab('F',$2); }
+//     ;
 
-type_specifier:
-    INT
-    | FLOAT
-    | DOUBLE
-    | CHAR
-    | LONG
-    ;
 
-statements:
-    statements statement
-    | /* empty */
-    ;
 
-statement:
-    RETURN DECIMAL_LITERAL SEMICOLON { printf("Return statement with value %s\n", $2); }
-    | RETURN SEMICOLON { printf("Return statement without value\n"); }
-    | variable_declaration
-    | /* other statements */
-    ;
 
-variable_declaration:
-    type_specifier ID EQUALS constant SEMICOLON { 
-        char type_str[10];
-        get_type_string(type_str, $1);
-        printf("Variable declaration: %s = %s\n", $1, $2); 
-        assign_type(type_str);
-        insert_symtab('V', $2); 
-    }
-    ;
+// statements:
+//     statements statement
+//     | /* empty */
+//     ;
+
+// statement:
+//     RETURN DECIMAL_LITERAL SEMICOLON { printf("Return statement with value %s\n", $2); }
+//     | RETURN SEMICOLON { printf("Return statement without value\n"); }
+//     | variable_declaration
+//     | /* other statements */
+//     ;
+
+// variable_declaration:
+//     type_specifier ID EQUALS constant SEMICOLON { 
+        // char type_str[10];
+        // get_type_string(type_str, $1);
+        // printf("Variable declaration: %s = %s\n", $1, $2); 
+        // assign_type(type_str);
+        // insert_symtab('V', $2); 
+//     }
+//     ;
 
 constant: 
     DECIMAL_LITERAL
@@ -175,15 +191,15 @@ primary_expression
 	| STRING_LITERAL {
         printf("This is a string literal: %s",$1);
     }
-	| '(' expression ')'
+	| LPARENTHESES expression RPARENTHESES
 	;
 
 postfix_expression
 	: primary_expression
-	| postfix_expression '[' expression ']'
-	| postfix_expression '(' ')'
-	| postfix_expression '(' argument_expression_list ')'
-	| postfix_expression '.' ID
+	| postfix_expression LBRACKET expression RBRACKET
+	| postfix_expression LPARENTHESES RPARENTHESES					{printf("Brackets found\n");}
+	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES
+	| postfix_expression DOT ID
 	| postfix_expression LAMBDA_ARROW ID
 	| postfix_expression INCREMENT
 	| postfix_expression DECREMENT
@@ -191,7 +207,7 @@ postfix_expression
 
 argument_expression_list
 	: assignment_expression
-	| argument_expression_list ',' assignment_expression
+	| argument_expression_list COMMA assignment_expression
 	;
 
 unary_expression
@@ -200,34 +216,34 @@ unary_expression
 	| DECREMENT unary_expression
 	| unary_operator cast_expression
 	| SIZEOF unary_expression
-	| SIZEOF '(' type_name ')'
+	| SIZEOF LPARENTHESES type_name RPARENTHESES
 	;
 
 unary_operator
-	: '&'
-	| '*'
-	| '+'
-	| '-'
-	| '~'
-	| '!'
+	: AMPERSAND
+	| STAR
+	| PLUS
+	| MINUS
+	| TILDE
+	| EXCLAMATION
 	;
 
 cast_expression
 	: unary_expression
-	| '(' type_name ')' cast_expression
+	| LPARENTHESES type_name RPARENTHESES cast_expression
 	;
 
 multiplicative_expression
 	: cast_expression
-	| multiplicative_expression '*' cast_expression
-	| multiplicative_expression '/' cast_expression
-	| multiplicative_expression '%' cast_expression
+	| multiplicative_expression STAR cast_expression
+	| multiplicative_expression DIVIDE cast_expression
+	| multiplicative_expression MODULO cast_expression
 	;
 
 additive_expression
 	: multiplicative_expression
-	| additive_expression '+' multiplicative_expression
-	| additive_expression '-' multiplicative_expression
+	| additive_expression PLUS multiplicative_expression
+	| additive_expression MINUS multiplicative_expression
 	;
 
 shift_expression
@@ -238,8 +254,8 @@ shift_expression
 
 relational_expression
 	: shift_expression
-	| relational_expression '<' shift_expression
-	| relational_expression '>' shift_expression
+	| relational_expression LESS_THAN shift_expression
+	| relational_expression GREATER_THAN shift_expression
 	| relational_expression LESS_EQUALS shift_expression
 	| relational_expression GREATER_EQUALS shift_expression
 	;
@@ -252,17 +268,17 @@ equality_expression
 
 and_expression
 	: equality_expression
-	| and_expression '&' equality_expression
+	| and_expression AMPERSAND equality_expression
 	;
 
 exclusive_or_expression
 	: and_expression
-	| exclusive_or_expression '^' and_expression
+	| exclusive_or_expression XOR and_expression
 	;
 
 inclusive_or_expression
 	: exclusive_or_expression
-	| inclusive_or_expression '|' exclusive_or_expression
+	| inclusive_or_expression OR exclusive_or_expression
 	;
 
 logical_and_expression
@@ -277,7 +293,7 @@ logical_or_expression
 
 conditional_expression
 	: logical_or_expression
-	| logical_or_expression '?' expression ':' conditional_expression
+	| logical_or_expression QUESTION_MARK expression COLON conditional_expression
 	;
 
 assignment_expression
@@ -286,7 +302,7 @@ assignment_expression
 	;
 
 assignment_operator
-	: '='
+	: EQUALS
 	| ASSIGN_STAR
 	| ASSIGN_DIV
 	| ASSIGN_MOD
@@ -301,7 +317,7 @@ assignment_operator
 
 expression
 	: assignment_expression
-	| expression ',' assignment_expression
+	| expression COMMA assignment_expression
 	;
 
 constant_expression
@@ -309,8 +325,24 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers ';'
-	| declaration_specifiers init_declarator_list ';'
+	: declaration_specifiers SEMICOLON
+	| declaration_specifiers init_declarator_list SEMICOLON 
+	{
+        printf("declaration  = %s\n", $2);
+        char type_str[10];
+        get_type_string(type_str, $1);
+
+        // Tokenize the init_declarator_list to extract variable names
+        char *token = strtok($2, ",");
+		
+        while (token != NULL) {
+            printf("Variable declaration: %s = %s\n", type_str, token); 
+			assign_type(type_str);
+            insert_symtab('V', token);
+            token = strtok(NULL, ",");
+        }
+		free($2);
+	}
 	;
 
 declaration_specifiers
@@ -323,13 +355,24 @@ declaration_specifiers
 	;
 
 init_declarator_list
-	: init_declarator
-	| init_declarator_list ',' init_declarator
+	: init_declarator { 
+        $$ = strdup($1);  // Store the first variable
+        printf("init_declarator = %s\n", $$);
+    }
+	| init_declarator_list COMMA init_declarator { 
+        $$ = malloc(strlen($1) + strlen($3) + 2); // Allocate space for "a,b"
+        sprintf($$, "%s,%s", $1, $3);  // Concatenate "a,b"
+        free($1); free($3);
+        printf("init_declarator_list = %s\n", $$);
+    }
 	;
 
 init_declarator
 	: declarator
-	| declarator '=' initializer
+	| declarator EQUALS initializer				
+	// {printf("here\n");
+	// printf("%s\n",$1);
+	// printf("end\n");}
 	;
 
 storage_class_specifier
@@ -344,7 +387,7 @@ type_specifier
 	: VOID
 	| CHAR
 	| SHORT
-	| INT
+	| INT				{printf("Integer\n");}
 	| LONG
 	| FLOAT
 	| DOUBLE
@@ -356,8 +399,8 @@ type_specifier
 	;
 
 struct_or_union_specifier
-	: struct_or_union ID '{' struct_declaration_list '}'
-	| struct_or_union '{' struct_declaration_list '}'
+	: struct_or_union ID LBRACE struct_declaration_list RBRACE
+	| struct_or_union LBRACE struct_declaration_list RBRACE
 	| struct_or_union ID
 
 struct_or_union
@@ -371,7 +414,7 @@ struct_declaration_list
 	;
 
 struct_declaration
-	: specifier_qualifier_list struct_declarator_list ';'
+	: specifier_qualifier_list struct_declarator_list SEMICOLON
 	;
 
 specifier_qualifier_list
@@ -383,29 +426,29 @@ specifier_qualifier_list
 
 struct_declarator_list
 	: struct_declarator
-	| struct_declarator_list ',' struct_declarator
+	| struct_declarator_list COMMA struct_declarator
 	;
 
 struct_declarator
 	: declarator
-	| ':' constant_expression
-	| declarator ':' constant_expression
+	| COLON constant_expression
+	| declarator COLON constant_expression
 	;
 
 enum_specifier
-	: ENUM '{' enumerator_list '}'
-	| ENUM ID '{' enumerator_list '}'
+	: ENUM LBRACE enumerator_list RBRACE
+	| ENUM ID LBRACE enumerator_list RBRACE
 	| ENUM ID
 	;
 
 enumerator_list
 	: enumerator
-	| enumerator_list ',' enumerator
+	| enumerator_list COMMA enumerator
 	;
 
 enumerator
 	: ID
-	| ID '=' constant_expression
+	| ID EQUALS constant_expression
 	;
 
 type_qualifier
@@ -419,20 +462,20 @@ declarator
 	;
 
 direct_declarator
-	: ID
-	| '(' declarator ')'
-	| direct_declarator '[' constant_expression ']'
-	| direct_declarator '[' ']'
-	| direct_declarator '(' parameter_type_list ')'
-	| direct_declarator '(' identifier_list ')'
-	| direct_declarator '(' ')'
+	: ID                {printf("Identifier in direct declarator = %s\n",$1);}
+	| LPARENTHESES declarator RPARENTHESES
+	| direct_declarator LBRACKET constant_expression RBRACKET
+	| direct_declarator LBRACKET RBRACKET
+	| direct_declarator LPARENTHESES parameter_type_list RPARENTHESES
+	| direct_declarator LPARENTHESES identifier_list RPARENTHESES          {printf("Brackets found\n");}
+	| direct_declarator LPARENTHESES RPARENTHESES 						{printf("Brackets found\n");}
 	;
 
 pointer
-	: '*'
-	| '*' type_qualifier_list
-	| '*' pointer
-	| '*' type_qualifier_list pointer
+	: STAR
+	| STAR type_qualifier_list
+	| STAR pointer
+	| STAR type_qualifier_list pointer
 	;
 
 type_qualifier_list
@@ -443,12 +486,12 @@ type_qualifier_list
 
 parameter_type_list
 	: parameter_list
-	| parameter_list ',' VARIABLE_ARGS
+	| parameter_list COMMA VARIABLE_ARGS
 	;
 
 parameter_list
 	: parameter_declaration
-	| parameter_list ',' parameter_declaration
+	| parameter_list COMMA parameter_declaration
 	;
 
 parameter_declaration
@@ -458,8 +501,8 @@ parameter_declaration
 	;
 
 identifier_list
-	: ID
-	| identifier_list ',' ID
+	: ID				{printf("Identifier in list = %s",$1);}
+	| identifier_list COMMA ID
 	;
 
 type_name
@@ -474,26 +517,26 @@ abstract_declarator
 	;
 
 direct_abstract_declarator
-	: '(' abstract_declarator ')'
-	| '[' ']'
-	| '[' constant_expression ']'
-	| direct_abstract_declarator '[' ']'
-	| direct_abstract_declarator '[' constant_expression ']'
-	| '(' ')'
-	| '(' parameter_type_list ')'
-	| direct_abstract_declarator '(' ')'
-	| direct_abstract_declarator '(' parameter_type_list ')'
+	: LPARENTHESES abstract_declarator RPARENTHESES
+	| LBRACKET RBRACKET
+	| LBRACKET constant_expression RBRACKET
+	| direct_abstract_declarator LBRACKET RBRACKET
+	| direct_abstract_declarator LBRACKET constant_expression RBRACKET
+	| LPARENTHESES RPARENTHESES											{printf("Brackets found\n");}
+	| LPARENTHESES parameter_type_list RPARENTHESES
+	| direct_abstract_declarator LPARENTHESES RPARENTHESES         {printf("Brackets found\n");}
+	| direct_abstract_declarator LPARENTHESES parameter_type_list RPARENTHESES
 	;
 
 initializer
 	: assignment_expression
-	| '{' initializer_list '}'
-	| '{' initializer_list ',' '}'
+	| LBRACE initializer_list RBRACE
+	| LBRACE initializer_list COMMA RBRACE
 	;
 
 initializer_list
 	: initializer
-	| initializer_list ',' initializer
+	| initializer_list COMMA initializer
 	;
 
 statement
@@ -506,16 +549,16 @@ statement
 	;
 
 labeled_statement
-	: ID ':' statement
-	| CASE constant_expression ':' statement
-	| DEFAULT ':' statement
+	: ID COLON statement
+	| CASE constant_expression COLON statement
+	| DEFAULT COLON statement
 	;
 
 compound_statement
-	: '{' '}'
-	| '{' statement_list '}'
-	| '{' declaration_list '}'
-	| '{' declaration_list statement_list '}'
+	: LBRACE RBRACE
+	| LBRACE statement_list RBRACE
+	| LBRACE declaration_list RBRACE
+	| LBRACE declaration_list statement_list RBRACE
 	;
 
 declaration_list
@@ -529,33 +572,33 @@ statement_list
 	;
 
 expression_statement
-	: ';'
-	| expression ';'
+	: SEMICOLON
+	| expression SEMICOLON
 	;
 
 selection_statement
-	: IF '(' expression ')' statement
-	| IF '(' expression ')' statement ELSE statement
-	| SWITCH '(' expression ')' statement
+	: IF LPARENTHESES expression RPARENTHESES statement
+	| IF LPARENTHESES expression RPARENTHESES statement ELSE statement
+	| SWITCH LPARENTHESES expression RPARENTHESES statement
 	;
 
 iteration_statement
-	: WHILE '(' expression ')' statement
-	| DO statement WHILE '(' expression ')' ';'
-	| FOR '(' expression_statement expression_statement ')' statement
-	| FOR '(' expression_statement expression_statement expression ')' statement
+	: WHILE LPARENTHESES expression RPARENTHESES statement
+	| DO statement WHILE LPARENTHESES expression RPARENTHESES SEMICOLON
+	| FOR LPARENTHESES expression_statement expression_statement RPARENTHESES statement
+	| FOR LPARENTHESES expression_statement expression_statement expression RPARENTHESES statement
 	;
 
 jump_statement
-	: GOTO ID ';'
-	| CONTINUE ';'
-	| BREAK ';'
-	| RETURN ';'
-	| RETURN expression ';'
+	: GOTO ID SEMICOLON
+	| CONTINUE SEMICOLON
+	| BREAK SEMICOLON
+	| RETURN SEMICOLON
+	| RETURN expression SEMICOLON
 	;
 
 translation_unit
-	: external_declaration
+	: external_declaration 				{printf("Reached the root node.\n");}
 	| translation_unit external_declaration
 	;
 
@@ -593,12 +636,7 @@ void assign_type(char *str) {
 }
 
 
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        return 1;
-    }
-
-    freopen(argv[1], "r", stdin);
+int main() {
     yyparse();
     print_symbol_table();
 
