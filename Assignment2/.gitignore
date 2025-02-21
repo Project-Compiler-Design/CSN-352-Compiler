@@ -1,0 +1,17 @@
+# Ignore compiled files
+**/lex.yy.c
+**/lexer
+**/parser
+**/parser.tab.c
+**/parser.tab.h
+
+# Ignore backup and temporary files
+**/*.swp
+**/*.swo
+**/*.bak
+**/*~
+
+# Ignore build artifacts
+**/*.o
+**/*.out
+**/*.exe
