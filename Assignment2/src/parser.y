@@ -145,8 +145,12 @@
             strcpy(type_str, "UNION");
         
         }
+		else if (strcmp(type_spec, "unknown") == 0) {
+            strcpy(type_str, "UNKNOWN");
+        
+        }
         else {
-            strcpy(type_str, type_spec);
+            strcpy(type_str, "UNKNOWN");
         }
     }
 
@@ -242,7 +246,12 @@ postfix_expression
 	| postfix_expression LBRACKET expression RBRACKET
 	| postfix_expression LPARENTHESES RPARENTHESES					//{printf("Brackets found\n");}
 	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES   
-	{//printf("Function call\n");
+	{//printf("Function call= %s\n",$1);
+		char type_str[10];
+        get_type_string(type_str, "unknown");
+ 
+        assign_type(type_str);
+        insert_symtab('F', $1);
 		for (int i = 0; i < argList.count_arg; i++) {
             //printf("%s", argList.args[i]);
             if (i < argList.count_arg - 1){} //printf(", ");

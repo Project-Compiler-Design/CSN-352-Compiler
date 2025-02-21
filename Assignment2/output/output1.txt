@@ -10,9 +10,9 @@ SYMBOL TABLE
 | a               | Variable             | INT        | 11      |
 | b               | Variable             | INT        | 11      |
 | d               | Variable             | FLOAT      | 13      |
-| c               | Variable             | static     | 14      |
 | i               | Variable             | INT        | 15      |
 | ptr             | Pointer              | INT        | 17      |
+| malloc          | Function             | UNKNOWN    | 18      |
 | main            | Function             | INT        | 20      |
 -----------------------------------------------------------------
 
@@ -25,6 +25,5 @@ Constant Table:
 | 10                          | Integer Constant     | 10       |
 | 5                           | Integer Constant     | 12       |
 | 5.5                         | Real Constant        | 13       |
-| 'x'                         | Character Constant   | 14       |
 | 0                           | Integer Constant     | 15       |
 -----------------------------------------------------------------

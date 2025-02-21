@@ -4,13 +4,7 @@ struct Student{
     int subject_marks[4][5];
 };
 
-void printf(char* s){
 
-}
-
-void scanf(char s){
-
-}
 
 int main(){
 

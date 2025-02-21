@@ -3,11 +3,12 @@ SYMBOL TABLE
 -----------------------------------------------------------------
 | Identifier      | Type                 | Data Type  | Line No |
 -----------------------------------------------------------------
-| Integer         | Variable             | typedef    | 1       |
+| Integer         | Variable             | UNKNOWN    | 1       |
 | a               | Variable             | INT        | 3       |
 | b               | Variable             | INT        | 3       |
 | subtract        | Function             | INT        | 5       |
 | op              | Pointer              | INT        | 7       |
+| printf          | Function             | UNKNOWN    | 8       |
 | calc            | Function             | VOID       | 9       |
 | i               | Variable             | INT        | 12      |
 | f               | Variable             | FLOAT      | 13      |

@@ -11,7 +11,7 @@ int main() {
     ;
     a=5;
     float d = 5.5;
-    static char c = 'x';
+    
     int i=0;
     
     int* ptr;
