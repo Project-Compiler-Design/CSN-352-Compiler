@@ -1,15 +1,15 @@
 # CSN-352-Compiler
 
 This project implements a **C to MIPS compiler** using **3-address code (3AC)** as an intermediate representation.  
-Currently, the project is in **Phase 1**, which involves building a **Lexical Analyzer** for tokenization.
+Currently, the project is in **Phase 2**, which involves building a **Parser** for parsing.
 
 ---
 
 ## 📂 Project Directory Structure  
 ```bash
-CSN-352-Compiler/
+Assignment2/
 │── src/                 # Source code directory
-│   ├── lexer.l          # Lex file for lexical analysis
+│   ├── scanner.l          # Lex file for lexical analysis
 |   ├── parser.y         # File for syntax analysis
 │── test/                # Test cases for the compiler
 │   ├── input1.c         # Sample test case 1
@@ -50,8 +50,10 @@ Errors for each code are written within the generated output file corresponding 
 ## 🛠️ Implementation Details
 
     - Lexical Analysis: Uses Flex (Lex) to tokenize C source code.
+    - Parsing: Uses Bison (Yacc) to parse the tokenized code according to standard C grammar. 
     - Intermediate Representation: Will use 3AC (Three Address Code) in later phases.
     - Compiler Backend: Will generate MIPS Assembly Code.
+
 ## 📌 Notes
 
     - Ensure that flex, bison, and g++ are installed before running the project.
