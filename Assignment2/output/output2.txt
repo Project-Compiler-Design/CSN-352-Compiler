@@ -1,3 +1,4 @@
+Error at line 13: syntax error
 Integer
 Identifier in direct declaratorrr = Integer
 Direct declarator Integer
@@ -59,21 +60,8 @@ conditional inside assignment = 100
 init_declarator with initializer = m=100
 init_declarator = m=100
 declaration  = m=100
-Integer
-Identifier in direct declaratorrr = ptr
-Pointer direct declarator
-it is $$: *ptr
-conditional inside assignment = m
-init_declarator with initializer = *ptr=m
-init_declarator = *ptr=m
-declaration  = *ptr=m
-conditional inside assignment = 10
-conditional inside assignment = 5
-conditional inside assignment = subtract
-Function call
-"%d\n", a, b, op, 10, 5, subtract
-conditional inside assignment = calc
-Expression semicolon
+Identifier in direct declaratorrr = fun
+Direct declarator fun
 conditional inside assignment = 0
 Function is there: int main
 Reached the root node.
@@ -89,7 +77,6 @@ SYMBOL TABLE
 | op              | Pointer              | INT        | 7       |
 | calc            | Function             | VOID       | 9       |
 | m               | Variable             | INT        | 12      |
-| ptr             | Pointer              | INT        | 13      |
 | main            | Function             | INT        | 21      |
 -----------------------------------------------------------------
 
@@ -99,7 +86,5 @@ Constant Table:
 -----------------------------------------------------
 | "%d\n"          | String Constant      | 8        |
 | 100             | Integer Constant     | 12       |
-| 10              | Integer Constant     | 14       |
-| 5               | Integer Constant     | 14       |
 | 0               | Integer Constant     | 20       |
 -----------------------------------------------------

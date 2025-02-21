@@ -10,9 +10,9 @@ void calc(int a, int b, int (*op)(char, char)) {
 
 int main(){
     int m=100;
-    int *ptr=&m;
-    calc(10, 5, subtract);
+    auto fun = [&](int a, int b) -> int{
 
+};
     
     
     

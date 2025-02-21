@@ -16,7 +16,7 @@ all: $(EXEC)
 
 # Rule to compile the parser and scanner
 $(EXEC): $(YACC_FILE) $(LEX_FILE)
-	$(BISON) -d $(YACC_FILE)
+	$(BISON) -d -Wno-all $(YACC_FILE)
 	$(LEX) $(LEX_FILE)
 	$(CC) $(CFLAGS) parser.tab.c lex.yy.c -o $(EXEC) -lfl
 
