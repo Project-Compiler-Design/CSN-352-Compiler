@@ -73,6 +73,10 @@
 				strcpy(symbol_table[count_sym].datatype, d_type);
                 strcpy(symbol_table[count_sym].type, "Pointer");
 			}
+			else if(c=='f'){
+				strcpy(symbol_table[count_sym].datatype, d_type);
+                strcpy(symbol_table[count_sym].type, "Pointer");
+			}
             count_sym++;
         }
     }
@@ -128,7 +132,7 @@
 	else if (strcmp(type_spec, "struct") == 0) {
         strcpy(type_str, "STRUCT");
     } else {
-        strcpy(type_str, "UNKNOWN");
+        strcpy(type_str, type_spec);
     }
 }
 
@@ -136,17 +140,17 @@
 
     void print_symbol_table() {
         printf("\nSYMBOL TABLE\n");
-        printf("------------------------------------------------------\n");
-        printf("| %-15s | %-10s | %-10s | Line No |\n", "Identifier", "Type", "Data Type");
-        printf("------------------------------------------------------\n");
+        printf("-----------------------------------------------------------------\n");
+        printf("| %-15s | %-20s | %-10s | Line No |\n", "Identifier", "Type", "Data Type");
+        printf("-----------------------------------------------------------------\n");
         for (int i = 0; i < count_sym; i++) {
-            printf("| %-15s | %-10s | %-10s | %-7d |\n",
+            printf("| %-15s | %-20s | %-10s | %-7d |\n",
                    symbol_table[i].identifier_name,
                    symbol_table[i].type,
                    symbol_table[i].datatype,
                    symbol_table[i].lineno);
         }
-        printf("------------------------------------------------------\n");
+        printf("-----------------------------------------------------------------\n");
     }
 
     void print_constant_table() {
@@ -393,7 +397,7 @@ conditional_expression
 assignment_expression
 	: conditional_expression				
 	{ 
-		printf("conditional inside assignment = %s\n",$1);
+		printf("conditional inside assignment = %s\n",$$);
 		$$ = strdup($1);
 	}
 	| unary_expression assignment_operator assignment_expression {printf("Assignment expression = %s\n",$1);}
@@ -507,7 +511,7 @@ storage_class_specifier
 
 type_specifier
 	: VOID
-	| CHAR
+	| CHAR				{printf("Character\n");}
 	| SHORT
 	| INT				{printf("Integer\n");}
 	| LONG
@@ -604,21 +608,28 @@ type_qualifier
 
 declarator
     : pointer direct_declarator { 
+		printf("Pointer direct declarator\n");
         $$ = malloc(strlen($1) + strlen($2) + 1); 
-        sprintf($$, "%s%s", $1, $2);  
+        sprintf($$, "%s%s", $1, $2); 
+		printf("it is $$: %s\n",$$); 
         free($1); free($2);
     }
     | direct_declarator { 
         $$ = strdup($1);  
+		printf("Direct declarator %s\n",$$);
     }
     ;
 
 direct_declarator
 	: ID                {printf("Identifier in direct declaratorrr = %s\n",$1);}
-	| LPARENTHESES declarator RPARENTHESES
+	| LPARENTHESES declarator RPARENTHESES			
+	{ 
+		printf("LPar declarator RPar= %s\n",$2);
+		$$=strdup($2);
+	}
 	| direct_declarator LBRACKET constant_expression RBRACKET
 	| direct_declarator LBRACKET RBRACKET								{printf("Array\n");}
-	| direct_declarator LPARENTHESES parameter_type_list RPARENTHESES     {printf("Brackets found with parameter\n");}
+	| direct_declarator LPARENTHESES parameter_type_list RPARENTHESES     {printf("Brackets found with parameter= %s\n",$1);}
 	| direct_declarator LPARENTHESES identifier_list RPARENTHESES          {printf("Brackets found\n");}
 	| direct_declarator LPARENTHESES RPARENTHESES 						{printf("Brackets found\n");}
 	;
@@ -654,11 +665,42 @@ parameter_list
 parameter_declaration
 	: declaration_specifiers declarator  
 	{
+		// char type_str[10];
+        // get_type_string(type_str, $1);
+        // printf("Variable declaration: %s = %s\n", $1, $2); 
+        // assign_type(type_str);
+        // insert_symtab('V', $2);
 		char type_str[10];
         get_type_string(type_str, $1);
-        printf("Variable declaration: %s = %s\n", $1, $2); 
-        assign_type(type_str);
-        insert_symtab('V', $2); 
+
+        // Tokenize the init_declarator_list to extract variable names
+        char *token = strtok($2, ",");
+        while (token != NULL) {
+            char *var_name = token;
+            char *value = strchr(token, '=');
+
+            if (value) {
+                *value = '\0';  // Split variable name from value
+                value++;  // Move to actual value
+            }
+
+            assign_type(type_str);
+
+            // Count '*' characters to determine pointer level
+            int pointer_level = 0;
+            while (*var_name == '*') {
+                pointer_level++;
+                var_name++;  // Move past '*'
+            }
+			assign_type(type_str);
+            if (pointer_level > 0) {
+                insert_symtab('f',var_name);
+            } else {
+                insert_symtab('V',var_name);
+            }
+
+            token = strtok(NULL, ",");
+        } 
 	}
 	| declaration_specifiers abstract_declarator
 	| declaration_specifiers
@@ -720,9 +762,17 @@ labeled_statement
 
 compound_statement
 	: LBRACE RBRACE
+	| LBRACE statement_declaration_list RBRACE
 	| LBRACE statement_list RBRACE
 	| LBRACE declaration_list RBRACE
 	| LBRACE declaration_list statement_list RBRACE
+	;
+
+statement_declaration_list
+	: statement_list statement_declaration_list
+	| declaration_list statement_declaration_list
+	| statement_list
+	| declaration_list
 	;
 
 declaration_list
@@ -737,7 +787,7 @@ statement_list
 
 expression_statement
 	: SEMICOLON
-	| expression SEMICOLON
+	| expression SEMICOLON   {printf("Expression semicolon\n");}
 	;
 
 selection_statement

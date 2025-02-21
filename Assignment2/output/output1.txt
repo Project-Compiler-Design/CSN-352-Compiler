@@ -1,5 +1,6 @@
 Integer
 Identifier in direct declaratorrr = k
+Direct declarator k
 conditional inside assignment = 5
 init_declarator with initializer = k=5
 init_declarator = k=5
@@ -8,11 +9,13 @@ Reached the root node.
 Identifier in direct declaratorrr = func1
 Integer
 Identifier in direct declaratorrr = e
-Variable declaration: int = e
+Pointer direct declarator
+it is $$: *e
 Integer
 Identifier in direct declaratorrr = f
-Variable declaration: int = f
-Brackets found with parameter
+Direct declarator f
+Brackets found with parameter= func1
+Direct declarator func1
 conditional inside assignment = e
 conditional inside assignment = return
 Function is there: void func1
@@ -20,51 +23,75 @@ Reached the root node.
 Integer
 Identifier in direct declaratorrr = main
 Brackets found
+Direct declarator main
 Integer
 Identifier in direct declaratorrr = a
+Direct declarator a
 declarator = a
 init_declarator = a
 Identifier in direct declaratorrr = b
+Direct declarator b
 conditional inside assignment = 10
 init_declarator with initializer = b=10
 init_declarator_list = a,b=10
 declaration  = a,b=10
 Identifier in direct declaratorrr = d
+Direct declarator d
 conditional inside assignment = 5.5
 init_declarator with initializer = d=5.5
 init_declarator = d=5.5
 declaration  = d=5.5
+Character
 Identifier in direct declaratorrr = c
+Direct declarator c
 conditional inside assignment = 'x'
 init_declarator with initializer = c='x'
 init_declarator = c='x'
 declaration  = c='x'
 Integer
 Identifier in direct declaratorrr = i
+Direct declarator i
 conditional inside assignment = 0
 init_declarator with initializer = i=0
 init_declarator = i=0
 declaration  = i=0
+Integer
+Identifier in direct declaratorrr = ptr
+Pointer direct declarator
+it is $$: *ptr
+declarator = *ptr
+init_declarator = *ptr
+declaration  = *ptr
+Integer
+Integer
+conditional inside assignment = a
+Function call
+a
+conditional inside assignment = ptr
+Assignment expression = ptr
+Expression semicolon
 Brackets found
 conditional inside assignment = main
+Expression semicolon
 Function is there: int main
 Reached the root node.
 
 SYMBOL TABLE
-------------------------------------------------------
-| Identifier      | Type       | Data Type  | Line No |
-------------------------------------------------------
-| k               | Variable   | INT        | 1       |
-| e               | Variable   | INT        | 3       |
-| f               | Variable   | INT        | 3       |
-| func1           | Function   | VOID       | 5       |
-| a               | Variable   | INT        | 10      |
-| b               | Variable   | INT        | 10      |
-| d               | Variable   | FLOAT      | 11      |
-| c               | Variable   | UNKNOWN    | 12      |
-| i               | Variable   | INT        | 13      |
-| main            | Function   | INT        | 15      |
-------------------------------------------------------
+-----------------------------------------------------------------
+| Identifier      | Type                 | Data Type  | Line No |
+-----------------------------------------------------------------
+| k               | Variable             | INT        | 1       |
+| e               | Pointer              | INT        | 3       |
+| f               | Variable             | INT        | 3       |
+| func1           | Function             | VOID       | 5       |
+| a               | Variable             | INT        | 10      |
+| b               | Variable             | INT        | 10      |
+| d               | Variable             | FLOAT      | 11      |
+| c               | Variable             | static     | 12      |
+| i               | Variable             | INT        | 13      |
+| ptr             | Pointer              | INT        | 15      |
+| main            | Function             | INT        | 18      |
+-----------------------------------------------------------------
 
 Constant Table:
 -----------------------------------------------------

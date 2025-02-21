@@ -1,35 +1,105 @@
-Error at line 4: syntax error
+Integer
+Identifier in direct declaratorrr = Integer
+Direct declarator Integer
+declarator = Integer
+init_declarator = Integer
+declaration  = Integer
+Reached the root node.
+Integer
+Identifier in direct declaratorrr = subtract
+Integer
+Identifier in direct declaratorrr = a
+Direct declarator a
+Integer
+Identifier in direct declaratorrr = b
+Direct declarator b
+Brackets found with parameter= subtract
+Direct declarator subtract
+conditional inside assignment = a
+Function is there: int subtract
+Reached the root node.
+Identifier in direct declaratorrr = calc
+Integer
+Identifier in direct declaratorrr = a
+Direct declarator a
+Integer
+Identifier in direct declaratorrr = b
+Direct declarator b
+Integer
+Identifier in direct declaratorrr = op
+Pointer direct declarator
+it is $$: *op
+LPar declarator RPar= *op
+Character
+Character
+Brackets found with parameter= *op
+Direct declarator *op
+Brackets found with parameter= calc
+Direct declarator calc
+conditional inside assignment = "%d\n"
+conditional inside assignment = a
+conditional inside assignment = b
+Function call
+"%d\n", a, b
+conditional inside assignment = op
+Function call
+"%d\n", a, b, op
+conditional inside assignment = printf
+Expression semicolon
+Function is there: void calc
+Reached the root node.
 Integer
 Identifier in direct declaratorrr = main
 Brackets found
+Direct declarator main
 Integer
-Identifier in direct declaratorrr = a
-declarator = a
-init_declarator = a
-Identifier in direct declaratorrr = b
+Identifier in direct declaratorrr = m
+Direct declarator m
+conditional inside assignment = 100
+init_declarator with initializer = m=100
+init_declarator = m=100
+declaration  = m=100
+Integer
+Identifier in direct declaratorrr = ptr
+Pointer direct declarator
+it is $$: *ptr
+conditional inside assignment = m
+init_declarator with initializer = *ptr=m
+init_declarator = *ptr=m
+declaration  = *ptr=m
 conditional inside assignment = 10
-init_declarator with initializer = b=10
-init_declarator_list = a,b=10
-declaration  = a,b=10
-Identifier in direct declaratorrr = d
-conditional inside assignment = 5.5
-init_declarator with initializer = d=5.5
-init_declarator = d=5.5
-declaration  = d=5.5
+conditional inside assignment = 5
+conditional inside assignment = subtract
+Function call
+"%d\n", a, b, op, 10, 5, subtract
+conditional inside assignment = calc
+Expression semicolon
+conditional inside assignment = 0
+Function is there: int main
+Reached the root node.
 
 SYMBOL TABLE
-------------------------------------------------------
-| Identifier      | Type       | Data Type  | Line No |
-------------------------------------------------------
-| a               | Variable   | INT        | 2       |
-| b               | Variable   | INT        | 2       |
-| d               | Variable   | FLOAT      | 3       |
-------------------------------------------------------
+-----------------------------------------------------------------
+| Identifier      | Type                 | Data Type  | Line No |
+-----------------------------------------------------------------
+| Integer         | Variable             | typedef    | 1       |
+| a               | Variable             | INT        | 3       |
+| b               | Variable             | INT        | 3       |
+| subtract        | Function             | INT        | 5       |
+| op              | Pointer              | INT        | 7       |
+| calc            | Function             | VOID       | 9       |
+| m               | Variable             | INT        | 12      |
+| ptr             | Pointer              | INT        | 13      |
+| main            | Function             | INT        | 21      |
+-----------------------------------------------------------------
 
 Constant Table:
 -----------------------------------------------------
 | Constant Value  | Constant Type        | Line no. |
 -----------------------------------------------------
-| 10              | Integer Constant     | 2        |
-| 5.5             | Real Constant        | 3        |
+| "%d\n"          | String Constant      | 8        |
+| 100             | Integer Constant     | 12       |
+| 10              | Integer Constant     | 14       |
+| 5               | Integer Constant     | 14       |
+| 0               | Integer Constant     | 20       |
 -----------------------------------------------------

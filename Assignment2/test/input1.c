@@ -1,6 +1,6 @@
 int k=5;
 
-void func1(int e, int f,...){
+void func1(int *e, int f,...){
     return (e+f);
 }
 
@@ -11,6 +11,9 @@ int main() {
     float d = 5.5;
     static char c = 'x';
     int i=0;
+    
+    int* ptr;
+    ptr = (int*)malloc(a * sizeof(int));
     main();
 }
 
