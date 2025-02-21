@@ -74,6 +74,15 @@ UNION           "union"
 UNSIGNED        "unsigned" 
 VOLATILE        "volatile"
 
+CLASS           "class"
+PUBLIC          "public"
+PRIVATE         "private"
+PROTECTED       "protected"
+NULLPTR         "nullptr"
+NAMESPACE       "namespace"
+VIRTUAL         "virtual"
+CATCH           "catch"
+
 NOTLETTER       [^A-Za-z_]
 LETTER          [A-Za-z]
 DIGIT           [0-9]
@@ -184,6 +193,16 @@ INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
 {UNION}            { yylval.str = strdup(yytext); return UNION; }
 {UNSIGNED}         { yylval.str = strdup(yytext); return UNSIGNED; }
 {VOLATILE}         { yylval.str = strdup(yytext); return VOLATILE; }
+{CLASS}            { yylval.str = strdup(yytext); return CLASS; }
+{PUBLIC}           { yylval.str = strdup(yytext); return PUBLIC; }
+{PRIVATE}          { yylval.str = strdup(yytext); return PRIVATE; }
+{PROTECTED}        { yylval.str = strdup(yytext); return PROTECTED; }
+{NULLPTR}          { yylval.str = strdup(yytext); return NULLPTR; }
+{NAMESPACE}        { yylval.str = strdup(yytext); return NAMESPACE; }
+{VIRTUAL}          { yylval.str = strdup(yytext); return VIRTUAL; }
+{CATCH}            { yylval.str = strdup(yytext); return CATCH; }
+
+
 
 {ID}               { yylval.str = strdup(yytext); return ID; }
 {HEXA_LITERAL}     { yylval.str = strdup(yytext); return HEXA_LITERAL; }
