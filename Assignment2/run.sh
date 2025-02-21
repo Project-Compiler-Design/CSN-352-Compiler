@@ -13,8 +13,8 @@ counter=1
 for testfile in $TEST_DIR/*.c; do
     output_file="$OUTPUT_DIR/output${counter}.txt"
     echo "Processing $(basename "$testfile") -> $(basename "$output_file")"
-    $EXEC "$testfile" > "$output_file"
+    $EXEC < "$testfile"> "$output_file" 2>&1
     ((counter++))
 done
 
-echo "All test cases executed. Outputs stored in $OUTPUT_DIR."
+# echo "All test cases executed. Outputs stored in $OUTPUT_DIR."

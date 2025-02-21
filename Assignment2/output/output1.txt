@@ -1,108 +1,78 @@
-Symbol Table:
+Integer
+Identifier in direct declaratorrr = k
+conditional inside assignment = 5
+init_declarator with initializer = k=5
+init_declarator = k=5
+declaration  = k=5
+Reached the root node.
+Identifier in direct declaratorrr = func1
+Integer
+Identifier in direct declaratorrr = e
+Variable declaration: int = e
+Integer
+Identifier in direct declaratorrr = f
+Variable declaration: int = f
+Brackets found with parameter
+conditional inside assignment = e
+conditional inside assignment = return
+Function is there: void func1
+Reached the root node.
+Integer
+Identifier in direct declaratorrr = main
+Brackets found
+Integer
+Identifier in direct declaratorrr = a
+declarator = a
+init_declarator = a
+Identifier in direct declaratorrr = b
+conditional inside assignment = 10
+init_declarator with initializer = b=10
+init_declarator_list = a,b=10
+declaration  = a,b=10
+Identifier in direct declaratorrr = d
+conditional inside assignment = 5.5
+init_declarator with initializer = d=5.5
+init_declarator = d=5.5
+declaration  = d=5.5
+Identifier in direct declaratorrr = c
+conditional inside assignment = 'x'
+init_declarator with initializer = c='x'
+init_declarator = c='x'
+declaration  = c='x'
+Integer
+Identifier in direct declaratorrr = i
+conditional inside assignment = 0
+init_declarator with initializer = i=0
+init_declarator = i=0
+declaration  = i=0
+Brackets found
+conditional inside assignment = main
+Function is there: int main
+Reached the root node.
 
-Token                                                       Data Type                
-------------------------------------------------------------------------------------------
-test_goto                                                   Procedure                
-x                                                           unsigned int             
-test_do_while                                               Procedure                
-x                                                           int                      
-func                                                        Procedure                
-arr                                                         int[]                    
-i                                                           int                      
-str1                                                        char[]                   
-str2                                                        char[]                   
-WHITE                                                       int                      
-GRAY                                                        int                      
-BLACK                                                       int                      
-head                                                        int                      
-tail                                                        int                      
-main                                                        Procedure                
-a                                                           const  int               
-b                                                           static  char             
-b                                                           int*                     
-x                                                           int                      
-                                                                                     
-printf                                                      Procedure                
-scanf                                                       Procedure                
-malloc                                                      Procedure                
-calloc                                                      Procedure                
-free                                                        Procedure                
-fopen                                                       Procedure                
-fputs                                                       Procedure                
-fgets                                                       Procedure                
-fclose                                                      Procedure                
-fprintf                                                     Procedure                
-fscanf                                                      Procedure                
-fputc                                                       Procedure                
-fgetc                                                       Procedure                
-strlen                                                      Procedure                
-strcmp                                                      Procedure                
-strncmp                                                     Procedure                
-strcpy                                                      Procedure                
-strcat                                                      Procedure                
-strncat                                                     Procedure                
-atoi                                                        Procedure                
-------------------------------------------------------------------------------------------
+SYMBOL TABLE
+------------------------------------------------------
+| Identifier      | Type       | Data Type  | Line No |
+------------------------------------------------------
+| k               | Variable   | INT        | 1       |
+| e               | Variable   | INT        | 3       |
+| f               | Variable   | INT        | 3       |
+| func1           | Function   | VOID       | 5       |
+| a               | Variable   | INT        | 10      |
+| b               | Variable   | INT        | 10      |
+| d               | Variable   | FLOAT      | 11      |
+| c               | Variable   | UNKNOWN    | 12      |
+| i               | Variable   | INT        | 13      |
+| main            | Function   | INT        | 15      |
+------------------------------------------------------
 
 Constant Table:
-
-Constant                                                    Constant Type            
-------------------------------------------------------------------------------------------
-0                                                           Integer Constant         
-10                                                          Integer Constant         
-5                                                           Integer Constant         
-5                                                           Integer Constant         
-5                                                           Integer Constant         
-5                                                           Integer Constant         
-1                                                           Integer Constant         
-2                                                           Integer Constant         
-3                                                           Integer Constant         
-4                                                           Integer Constant         
-5                                                           Integer Constant         
-0                                                           Integer Constant         
-0                                                           Integer Constant         
-5                                                           Integer Constant         
-0                                                           Integer Constant         
-0                                                           Integer Constant         
-0                                                           Integer Constant         
-0                                                           Integer Constant         
-0                                                           Integer Constant         
-1                                                           Integer Constant         
-2                                                           Integer Constant         
-5                                                           Integer Constant         
-'c'                                                         Character Constant       
-5                                                           Integer Constant         
-0                                                           Integer Constant         
-0                                                           Integer Constant         
-10                                                          Integer Constant         
-5                                                           Integer Constant         
-5                                                           Integer Constant         
-5                                                           Integer Constant         
-"Fail"                                                      String Literal           
-5                                                           Integer Constant         
-1                                                           Integer Constant         
-2                                                           Integer Constant         
-3                                                           Integer Constant         
-4                                                           Integer Constant         
-5                                                           Integer Constant         
-0                                                           Integer Constant         
-"Hello"                                                     String Literal           
-"Hello"                                                     String Literal           
-0                                                           Integer Constant         
-5                                                           Integer Constant         
-"%d "                                                       String Literal           
-"Array in reverse"                                          String Literal           
-0                                                           Integer Constant         
-"%d "                                                       String Literal           
-0                                                           Integer Constant         
-0                                                           Integer Constant         
-0                                                           Integer Constant         
-0                                                           Integer Constant         
-1                                                           Integer Constant         
-2                                                           Integer Constant         
-5                                                           Integer Constant         
-'c'                                                         Character Constant       
-5                                                           Integer Constant         
-"ehllo world"                                               String Literal           
-0                                                           Integer Constant         
-------------------------------------------------------------------------------------------
+-----------------------------------------------------
+| Constant Value  | Constant Type        | Line no. |
+-----------------------------------------------------
+| 5               | Integer Constant     | 1        |
+| 10              | Integer Constant     | 10       |
+| 5.5             | Real Constant        | 11       |
+| 'x'             | Character Constant   | 12       |
+| 0               | Integer Constant     | 13       |
+-----------------------------------------------------
