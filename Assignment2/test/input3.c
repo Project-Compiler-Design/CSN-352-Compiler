@@ -1,11 +1,17 @@
 int main(){
-    int aabc;
-int bca
-int abc;
-int def;
-int hello
-int ghi
-int jkl;
+    int x = 2+3*(9-10)+8/4;
+    int y = x*x-1;
 
-return 0;
+    if(x>y){
+        y++;
+    }else{
+        x++;
+    }
+
+    int i;
+    for(i=0;i<12;i++){
+        do{
+            y++;
+        }while (x>y);
+    }
 }

@@ -1,0 +1,41 @@
+
+SYMBOL TABLE
+-----------------------------------------------------------------
+| Identifier      | Type                 | Data Type  | Line No |
+-----------------------------------------------------------------
+| name            | Pointer              | CHAR       | 2       |
+| roll_no         | Variable             | INT        | 3       |
+| subject_marks   | Variable             | INT        | 4       |
+| Student         | Variable             | STRUCT     | 5       |
+| s               | Pointer              | CHAR       | 7       |
+| printf          | Function             | VOID       | 9       |
+| scanf           | Function             | VOID       | 13      |
+| x               | Variable             | INT        | 17      |
+| arr             | Variable             | INT        | 25      |
+| c               | Variable             | CHAR       | 27      |
+| char_ptr        | Pointer              | CHAR       | 28      |
+| main            | Function             | INT        | 32      |
+-----------------------------------------------------------------
+
+
+Constant Table:
+-----------------------------------------------------------------
+| Constant Value              | Constant Type        | Line no. |
+-----------------------------------------------------------------
+| 4                           | Integer Constant     | 4        |
+| 5                           | Integer Constant     | 4        |
+| 11                          | Integer Constant     | 17       |
+| 1                           | Integer Constant     | 19       |
+| 2                           | Integer Constant     | 20       |
+| 2                           | Integer Constant     | 20       |
+| 11                          | Integer Constant     | 21       |
+| 3                           | Integer Constant     | 25       |
+| 2                           | Integer Constant     | 25       |
+| 2                           | Integer Constant     | 25       |
+| 3                           | Integer Constant     | 25       |
+| 5                           | Integer Constant     | 25       |
+| 6                           | Integer Constant     | 25       |
+| 7                           | Integer Constant     | 25       |
+| 8                           | Integer Constant     | 25       |
+| "hello world"               | String Constant      | 30       |
+-----------------------------------------------------------------

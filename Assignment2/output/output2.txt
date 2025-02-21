@@ -1,95 +1,3 @@
-Integer
-Identifier in direct declaratorrr = Integer
-Direct declarator Integer
-declarator = Integer
-init_declarator = Integer
-declaration  = Integer
-Reached the root node.
-Integer
-Identifier in direct declaratorrr = subtract
-Integer
-Identifier in direct declaratorrr = a
-Direct declarator a
-Integer
-Identifier in direct declaratorrr = b
-Direct declarator b
-Brackets found with parameter= subtract
-Direct declarator subtract
-conditional inside assignment = a
-Function is there: int subtract
-Reached the root node.
-Identifier in direct declaratorrr = calc
-Integer
-Identifier in direct declaratorrr = a
-Direct declarator a
-Integer
-Identifier in direct declaratorrr = b
-Direct declarator b
-Integer
-Identifier in direct declaratorrr = op
-Pointer direct declarator
-it is $$: *op
-LPar declarator RPar= *op
-Character
-Character
-Brackets found with parameter= *op
-Direct declarator *op
-Brackets found with parameter= calc
-Direct declarator calc
-conditional inside assignment = "%d\n"
-conditional inside assignment = a
-conditional inside assignment = b
-Function call
-"%d\n", a, b
-conditional inside assignment = op
-Function call
-"%d\n", a, b, op
-conditional inside assignment = printf
-Expression semicolon
-Function is there: void calc
-Reached the root node.
-Integer
-Identifier in direct declaratorrr = i
-Direct declarator i
-Struct declarator = i
-Struct declaration int = i
-Identifier in direct declaratorrr = f
-Direct declarator f
-Struct declarator = f
-Struct declaration float = f
-Character
-Identifier in direct declaratorrr = s
-Direct declarator s
-Struct declarator = s
-Struct declaration char = s
-Variable declaration: union = A
-Reached the root node.
-Integer
-Identifier in direct declaratorrr = main
-Brackets found
-Direct declarator main
-Integer
-Identifier in direct declaratorrr = m
-Direct declarator m
-declarator = m
-init_declarator = m
-Identifier in direct declaratorrr = n
-Direct declarator n
-declarator = n
-init_declarator_list = m,n
-declaration  = m,n
-enum is here = enum
-Character
-Identifier in direct declaratorrr = c
-Pointer direct declarator
-it is $$: *c
-conditional inside assignment = "hello"
-init_declarator with initializer = *c="hello"
-init_declarator = *c="hello"
-declaration  = *c="hello"
-conditional inside assignment = 0
-Function is there: int main
-Reached the root node.
 
 SYMBOL TABLE
 -----------------------------------------------------------------
@@ -112,12 +20,13 @@ SYMBOL TABLE
 | main            | Function             | INT        | 27      |
 -----------------------------------------------------------------
 
+
 Constant Table:
------------------------------------------------------
-| Constant Value  | Constant Type        | Line no. |
------------------------------------------------------
-| "%d\n"          | String Constant      | 8        |
-| 20              | Integer Constant     | 14       |
-| "hello"         | String Constant      | 20       |
-| 0               | Integer Constant     | 26       |
------------------------------------------------------
+-----------------------------------------------------------------
+| Constant Value              | Constant Type        | Line no. |
+-----------------------------------------------------------------
+| "%d\n"                      | String Constant      | 8        |
+| 20                          | Integer Constant     | 14       |
+| "hello"                     | String Constant      | 20       |
+| 0                           | Integer Constant     | 26       |
+-----------------------------------------------------------------

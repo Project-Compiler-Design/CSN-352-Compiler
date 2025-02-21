@@ -11,7 +11,7 @@
 
     extern int yylex();
     extern int yylineno;
-    extern char *yytext;  // Fix for yytext undeclared error
+    extern char *yytext;  
 
     int count_sym = 0;
     int count_const = 0;
@@ -19,13 +19,13 @@
     char d_type[10];
 
     struct sym_tab {
-        char identifier_name[50];  // Use a fixed-size array instead of pointer
+        char identifier_name[50]; 
         char datatype[50];
         char type[20];
         int lineno;
     };
 
-    struct sym_tab symbol_table[100]; // Use an array instead of C++ vector
+    struct sym_tab symbol_table[100]; 
 
     struct const_tab {
         char constant_value[50];
@@ -36,9 +36,9 @@
     struct const_tab constant_table[100];
 
 	struct ArgList {
-    char *args[MAX_ARGS];
-    int count_arg;
-} argList;
+        char *args[MAX_ARGS];
+        int count_arg;
+    } argList;
 
     void insert_symtab(char c, char *yytext) {
         if (search_symtab(yytext) == 0) {
@@ -120,35 +120,35 @@
 
     
     void get_type_string(char *type_str, char *type_spec) {
-    if (strcmp(type_spec, "int") == 0) {
-        strcpy(type_str, "INT");
-    } else if (strcmp(type_spec, "float") == 0) {
-        strcpy(type_str, "FLOAT");
-    } else if (strcmp(type_spec, "double") == 0) {
-        strcpy(type_str, "DOUBLE");
-    } else if (strcmp(type_spec, "char") == 0) {
-        strcpy(type_str, "CHAR");
-    } else if (strcmp(type_spec, "long") == 0) {
-        strcpy(type_str, "LONG");
-	}
-	else if (strcmp(type_spec, "void") == 0) {
-        strcpy(type_str, "VOID");	
-	}
-	else if (strcmp(type_spec, "struct") == 0) {
-        strcpy(type_str, "STRUCT");
-	}
-	else if (strcmp(type_spec, "enum") == 0) {
-        strcpy(type_str, "ENUM");
-	
+        if (strcmp(type_spec, "int") == 0) {
+            strcpy(type_str, "INT");
+        } else if (strcmp(type_spec, "float") == 0) {
+            strcpy(type_str, "FLOAT");
+        } else if (strcmp(type_spec, "double") == 0) {
+            strcpy(type_str, "DOUBLE");
+        } else if (strcmp(type_spec, "char") == 0) {
+            strcpy(type_str, "CHAR");
+        } else if (strcmp(type_spec, "long") == 0) {
+            strcpy(type_str, "LONG");
+        }
+        else if (strcmp(type_spec, "void") == 0) {
+            strcpy(type_str, "VOID");	
+        }
+        else if (strcmp(type_spec, "struct") == 0) {
+            strcpy(type_str, "STRUCT");
+        }
+        else if (strcmp(type_spec, "enum") == 0) {
+            strcpy(type_str, "ENUM");
+        
+        }
+        else if (strcmp(type_spec, "union") == 0) {
+            strcpy(type_str, "UNION");
+        
+        }
+        else {
+            strcpy(type_str, type_spec);
+        }
     }
-	else if (strcmp(type_spec, "union") == 0) {
-        strcpy(type_str, "UNION");
-	
-    }
-	 else {
-        strcpy(type_str, type_spec);
-    }
-}
 
 
 
@@ -169,16 +169,16 @@
 
     void print_constant_table() {
         printf("\nConstant Table:\n");
-        printf("-----------------------------------------------------\n");
-        printf("| %-15s | %-20s | Line no. |\n", "Constant Value", "Constant Type");
-        printf("-----------------------------------------------------\n");
+        printf("-----------------------------------------------------------------\n");
+        printf("| %-27s | %-20s | Line no. |\n", "Constant Value", "Constant Type");
+        printf("-----------------------------------------------------------------\n");
         for (int i = 0; i < count_const; i++) {
-            printf("| %-15s | %-20s | %-8d |\n",
+            printf("| %-27s | %-20s | %-8d |\n",
                    constant_table[i].constant_value,
                    constant_table[i].constant_type, 
                    constant_table[i].lineno);
         }
-        printf("-----------------------------------------------------\n");
+        printf("-----------------------------------------------------------------\n");
     }
 
 %}
@@ -216,58 +216,6 @@
 %start translation_unit
 
 %%
-// program:
-//     include_statements function_definitions
-//     ;
-
-// include_statements:
-//     include_statements include_statement
-//     | /* empty */
-//     ;
-
-// include_statement:
-//     INCLUDE { printf("This is an include statement: %s\n", $1); }
-//     | INCLUDE ID { printf("This is an include statement: %s\n", $1); }
-//     ;
-
-// function_definitions:
-//     function_definitions function_definition
-//     | 
-//     ;
-
-// function_definition:
-//     type_specifier ID LPARENTHESES RPARENTHESES LBRACE statements RBRACE 
-//     { printf("This is a function: %s\n", $2);
-//       char type_str[10];
-//       get_type_string(type_str,$1);
-//       assign_type(type_str);
-//       insert_symtab('F',$2); }
-//     ;
-
-
-
-
-// statements:
-//     statements statement
-//     | /* empty */
-//     ;
-
-// statement:
-//     RETURN DECIMAL_LITERAL SEMICOLON { printf("Return statement with value %s\n", $2); }
-//     | RETURN SEMICOLON { printf("Return statement without value\n"); }
-//     | variable_declaration
-//     | /* other statements */
-//     ;
-
-// variable_declaration:
-//     type_specifier ID EQUALS constant SEMICOLON { 
-        // char type_str[10];
-        // get_type_string(type_str, $1);
-        // printf("Variable declaration: %s = %s\n", $1, $2); 
-        // assign_type(type_str);
-        // insert_symtab('V', $2); 
-//     }
-//     ;
 
 constant: 
     DECIMAL_LITERAL      { insert_const_tab('I', $1); }
@@ -284,7 +232,7 @@ primary_expression
 	: ID			{ $$ = strdup($1); }
 	| constant		
 	| STRING_LITERAL {
-        printf("This is a string literal: %s",$1);
+        // printf("This is a string literal: %s",$1);
     }
 	| LPARENTHESES expression RPARENTHESES
 	;
@@ -292,14 +240,14 @@ primary_expression
 postfix_expression
 	: primary_expression
 	| postfix_expression LBRACKET expression RBRACKET
-	| postfix_expression LPARENTHESES RPARENTHESES					{printf("Brackets found\n");}
+	| postfix_expression LPARENTHESES RPARENTHESES					//{printf("Brackets found\n");}
 	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES   
-	{printf("Function call\n");
+	{//printf("Function call\n");
 		for (int i = 0; i < argList.count_arg; i++) {
-            printf("%s", argList.args[i]);
-            if (i < argList.count_arg - 1) printf(", ");
+            //printf("%s", argList.args[i]);
+            if (i < argList.count_arg - 1){} //printf(", ");
         }
-        printf("\n");
+        //printf("\n");
 	}
 	| postfix_expression DOT ID
 	| postfix_expression LAMBDA_ARROW ID
@@ -411,10 +359,10 @@ conditional_expression
 assignment_expression
 	: conditional_expression				
 	{ 
-		printf("conditional inside assignment = %s\n",$$);
+		//printf("conditional inside assignment = %s\n",$$);
 		$$ = strdup($1);
 	}
-	| unary_expression assignment_operator assignment_expression {printf("Assignment expression = %s\n",$1);}
+	| unary_expression assignment_operator assignment_expression //{printf("Assignment expression = %s\n",$1);}
 	;
 
 assignment_operator
@@ -444,28 +392,26 @@ declaration
     : declaration_specifiers SEMICOLON
     | declaration_specifiers init_declarator_list SEMICOLON 
     {
-        printf("declaration  = %s\n", $2);
+        //printf("declaration  = %s\n", $2);
         char type_str[10];
         get_type_string(type_str, $1);
 
-        // Tokenize the init_declarator_list to extract variable names
         char *token = strtok($2, ",");
         while (token != NULL) {
             char *var_name = token;
             char *value = strchr(token, '=');
 
             if (value) {
-                *value = '\0';  // Split variable name from value
-                value++;  // Move to actual value
+                *value = '\0';  
+                value++;  
             }
 
             assign_type(type_str);
 
-            // Count '*' characters to determine pointer level
             int pointer_level = 0;
             while (*var_name == '*') {
                 pointer_level++;
-                var_name++;  // Move past '*'
+                var_name++;  
             }
 			assign_type(type_str);
             if (pointer_level > 0) {
@@ -492,26 +438,26 @@ declaration_specifiers
 init_declarator_list
     : init_declarator { 
         $$ = strdup($1);  
-        printf("init_declarator = %s\n", $$);
+        //printf("init_declarator = %s\n", $$);
     }
     | init_declarator_list COMMA init_declarator { 
         $$ = malloc(strlen($1) + strlen($3) + 2); 
         sprintf($$, "%s,%s", $1, $3);  
         free($1); free($3);
-        printf("init_declarator_list = %s\n", $$);
+        //printf("init_declarator_list = %s\n", $$);
     }
     ;
 
 init_declarator
     : declarator { 
         $$ = strdup($1); 
-        printf("declarator = %s\n", $$);
+        //printf("declarator = %s\n", $$);
     }
     | declarator EQUALS initializer { 
         $$ = malloc(strlen($1) + strlen($3) + 2);  
         sprintf($$, "%s=%s", $1, $3);  
         free($1); free($3);
-        printf("init_declarator with initializer = %s\n", $$);
+        //printf("init_declarator with initializer = %s\n", $$);
     }
     ;
 
@@ -525,9 +471,9 @@ storage_class_specifier
 
 type_specifier
 	: VOID
-	| CHAR				{printf("Character\n");}
+	| CHAR				//{printf("Character\n");}
 	| SHORT
-	| INT				{printf("Integer\n");}
+	| INT				//{printf("Integer\n");}
 	| LONG
 	| FLOAT
 	| DOUBLE
@@ -535,7 +481,6 @@ type_specifier
 	| UNSIGNED
 	| struct_or_union_specifier
 	| enum_specifier
-	// | TYPE_NAME
 	;
 
 struct_or_union_specifier
@@ -543,7 +488,7 @@ struct_or_union_specifier
 	{
 		char type_str[10];
         get_type_string(type_str, $1);
-        printf("Variable declaration: %s = %s\n", $1, $2); 
+        //printf("Variable declaration: %s = %s\n", $1, $2); 
         assign_type(type_str);
         insert_symtab('V', $2); 
 	}
@@ -553,7 +498,7 @@ struct_or_union_specifier
 	{
 		char type_str[10];
         get_type_string(type_str, $1);
-        printf("Variable declaration: %s = %s\n", $1, $2); 
+        //printf("Variable declaration: %s = %s\n", $1, $2); 
         assign_type(type_str);
         insert_symtab('V', $2); 
 	}
@@ -572,12 +517,36 @@ struct_declaration_list
 struct_declaration
 	: specifier_qualifier_list struct_declarator_list SEMICOLON      
 	{ 
-		printf("Struct declaration %s = %s\n",$1,$2);
+		//printf("Struct declaration %s = %s\n",$1,$2);
 		char type_str[10];
         get_type_string(type_str, $1);
         
-        assign_type(type_str);
-        insert_symtab('V', $2); 
+        char *token = strtok($2, ",");
+        while (token != NULL) {
+            char *var_name = token;
+            char *value = strchr(token, '=');
+
+            if (value) {
+                *value = '\0';  
+                value++;  
+            }
+
+            assign_type(type_str);
+
+            int pointer_level = 0;
+            while (*var_name == '*') {
+                pointer_level++;
+                var_name++;  
+            }
+			assign_type(type_str);
+            if (pointer_level > 0) {
+                insert_symtab('P',var_name);
+            } else {
+                insert_symtab('V',var_name);
+            }
+
+            token = strtok(NULL, ",");
+        } 
 	}
 	;
 
@@ -594,7 +563,7 @@ struct_declarator_list
 	;
 
 struct_declarator
-	: declarator        {printf("Struct declarator = %s\n",$1);}
+	: declarator        //{printf("Struct declarator = %s\n",$1);}
 	| COLON constant_expression
 	| declarator COLON constant_expression
 	;
@@ -603,7 +572,7 @@ enum_specifier
 	: ENUM LBRACE enumerator_list RBRACE
 	| ENUM ID LBRACE enumerator_list RBRACE 
 	{
-		printf("enum is here = %s\n",$$);
+		//printf("enum is here = %s\n",$$);
 		char type_str[10];
       	get_type_string(type_str,$$);
       	assign_type(type_str);
@@ -629,30 +598,30 @@ type_qualifier
 
 declarator
     : pointer direct_declarator { 
-		printf("Pointer direct declarator\n");
+		//printf("Pointer direct declarator\n");
         $$ = malloc(strlen($1) + strlen($2) + 1); 
         sprintf($$, "%s%s", $1, $2); 
-		printf("it is $$: %s\n",$$); 
+		//printf("it is $$: %s\n",$$); 
         free($1); free($2);
     }
     | direct_declarator { 
         $$ = strdup($1);  
-		printf("Direct declarator %s\n",$$);
+		//printf("Direct declarator %s\n",$$);
     }
     ;
 
 direct_declarator
-	: ID                {printf("Identifier in direct declaratorrr = %s\n",$1);}
+	: ID                //{printf("Identifier in direct declaratorrr = %s\n",$1);}
 	| LPARENTHESES declarator RPARENTHESES			
 	{ 
-		printf("LPar declarator RPar= %s\n",$2);
+		//printf("LPar declarator RPar= %s\n",$2);
 		$$=strdup($2);
 	}
 	| direct_declarator LBRACKET constant_expression RBRACKET
-	| direct_declarator LBRACKET RBRACKET								{printf("Array\n");}
-	| direct_declarator LPARENTHESES parameter_type_list RPARENTHESES     {printf("Brackets found with parameter= %s\n",$1);}
-	| direct_declarator LPARENTHESES identifier_list RPARENTHESES          {printf("Brackets found\n");}
-	| direct_declarator LPARENTHESES RPARENTHESES 						{printf("Brackets found\n");}
+	| direct_declarator LBRACKET RBRACKET								//{printf("Array\n");}
+	| direct_declarator LPARENTHESES parameter_type_list RPARENTHESES     //{printf("Brackets found with parameter= %s\n",$1);}
+	| direct_declarator LPARENTHESES identifier_list RPARENTHESES          //{printf("Brackets found\n");}
+	| direct_declarator LPARENTHESES RPARENTHESES 						//{printf("Brackets found\n");}
 	;
 
 pointer
@@ -694,24 +663,22 @@ parameter_declaration
 		char type_str[10];
         get_type_string(type_str, $1);
 
-        // Tokenize the init_declarator_list to extract variable names
         char *token = strtok($2, ",");
         while (token != NULL) {
             char *var_name = token;
             char *value = strchr(token, '=');
 
             if (value) {
-                *value = '\0';  // Split variable name from value
-                value++;  // Move to actual value
+                *value = '\0';  
+                value++;  
             }
 
             assign_type(type_str);
 
-            // Count '*' characters to determine pointer level
             int pointer_level = 0;
             while (*var_name == '*') {
                 pointer_level++;
-                var_name++;  // Move past '*'
+                var_name++;  
             }
 			assign_type(type_str);
             if (pointer_level > 0) {
@@ -728,7 +695,7 @@ parameter_declaration
 	;
 
 identifier_list
-	: ID				{printf("Identifier in list = %s",$1);}
+	: ID				//{printf("Identifier in list = %s",$1);}
 	| identifier_list COMMA ID
 	;
 
@@ -749,9 +716,9 @@ direct_abstract_declarator
 	| LBRACKET constant_expression RBRACKET
 	| direct_abstract_declarator LBRACKET RBRACKET
 	| direct_abstract_declarator LBRACKET constant_expression RBRACKET
-	| LPARENTHESES RPARENTHESES											{printf("Brackets found\n");}
+	| LPARENTHESES RPARENTHESES											//{printf("Brackets found\n");}
 	| LPARENTHESES parameter_type_list RPARENTHESES
-	| direct_abstract_declarator LPARENTHESES RPARENTHESES         {printf("Brackets found\n");}
+	| direct_abstract_declarator LPARENTHESES RPARENTHESES         //{printf("Brackets found\n");}
 	| direct_abstract_declarator LPARENTHESES parameter_type_list RPARENTHESES
 	;
 
@@ -810,26 +777,26 @@ statement_list
 
 expression_statement
 	: SEMICOLON
-	| expression SEMICOLON   {printf("Expression semicolon\n");}
+	| expression SEMICOLON   //{printf("Expression semicolon\n");}
 	;
 
 selection_statement
 	: IF LPARENTHESES expression RPARENTHESES statement
-	| IF LPARENTHESES expression RPARENTHESES statement ELSE statement      {printf("It is in if-else block\n");}
-	| SWITCH LPARENTHESES expression RPARENTHESES statement					{printf("It is in switch block\n");}
+	| IF LPARENTHESES expression RPARENTHESES statement ELSE statement      //{printf("It is in if-else block\n");}
+	| SWITCH LPARENTHESES expression RPARENTHESES statement					//{printf("It is in switch block\n");}
 	;
 
 iteration_statement
 	: WHILE LPARENTHESES expression RPARENTHESES statement
 	| DO statement WHILE LPARENTHESES expression RPARENTHESES SEMICOLON
 	| FOR LPARENTHESES expression_statement expression_statement RPARENTHESES statement
-	| FOR LPARENTHESES expression_statement expression_statement expression RPARENTHESES statement    {printf("For loop\n");}
+	| FOR LPARENTHESES expression_statement expression_statement expression RPARENTHESES statement    //{printf("For loop\n");}
 	;
 
 jump_statement
 	: GOTO ID SEMICOLON				
 	{ 
-		printf("Goto statement: %s\n",$2);
+		//printf("Goto statement: %s\n",$2);
 		
       	insert_symtab('G',$2);
 		
@@ -842,8 +809,8 @@ jump_statement
 	;
 
 translation_unit
-	: external_declaration 				{printf("Reached the root node.\n");}
-	| translation_unit external_declaration {printf("Reached the root node.\n");}
+	: external_declaration 				    //{printf("Reached the root node.\n");}
+	| translation_unit external_declaration //{printf("Reached the root node.\n");}
 	| 
 	;
 
@@ -855,7 +822,7 @@ external_declaration
 function_definition
 	: declaration_specifiers declarator declaration_list compound_statement
 	| declaration_specifiers declarator compound_statement    
-	{printf("Function is there: %s %s\n",$1,$2);
+	{   //printf("Function is there: %s %s\n",$1,$2);
 		char type_str[10];
       	get_type_string(type_str,$1);
       	assign_type(type_str);
@@ -888,10 +855,11 @@ void assign_type(char *str) {
 
 
 int main() {
+
     yyparse();
+
     print_symbol_table();
+    printf("\n");
     print_constant_table();
-
-
 
 }
