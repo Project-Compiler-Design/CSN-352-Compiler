@@ -35,6 +35,9 @@ conditional inside assignment = 10
 init_declarator with initializer = b=10
 init_declarator_list = a,b=10
 declaration  = a,b=10
+conditional inside assignment = 5
+Assignment expression = a
+Expression semicolon
 Identifier in direct declaratorrr = d
 Direct declarator d
 conditional inside assignment = 5.5
@@ -84,13 +87,13 @@ SYMBOL TABLE
 | e               | Pointer              | INT        | 3       |
 | f               | Variable             | INT        | 3       |
 | func1           | Function             | VOID       | 5       |
-| a               | Variable             | INT        | 10      |
-| b               | Variable             | INT        | 10      |
-| d               | Variable             | FLOAT      | 11      |
-| c               | Variable             | static     | 12      |
-| i               | Variable             | INT        | 13      |
-| ptr             | Pointer              | INT        | 15      |
-| main            | Function             | INT        | 18      |
+| a               | Variable             | INT        | 11      |
+| b               | Variable             | INT        | 11      |
+| d               | Variable             | FLOAT      | 13      |
+| c               | Variable             | static     | 14      |
+| i               | Variable             | INT        | 15      |
+| ptr             | Pointer              | INT        | 17      |
+| main            | Function             | INT        | 20      |
 -----------------------------------------------------------------
 
 Constant Table:
@@ -99,7 +102,8 @@ Constant Table:
 -----------------------------------------------------
 | 5               | Integer Constant     | 1        |
 | 10              | Integer Constant     | 10       |
-| 5.5             | Real Constant        | 11       |
-| 'x'             | Character Constant   | 12       |
-| 0               | Integer Constant     | 13       |
+| 5               | Integer Constant     | 12       |
+| 5.5             | Real Constant        | 13       |
+| 'x'             | Character Constant   | 14       |
+| 0               | Integer Constant     | 15       |
 -----------------------------------------------------

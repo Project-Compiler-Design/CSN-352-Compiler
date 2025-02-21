@@ -7,7 +7,9 @@ void func1(int *e, int f,...){
 
 
 int main() {
-    int a,b = 10;
+    int a,b = 10
+    ;
+    a=5;
     float d = 5.5;
     static char c = 'x';
     int i=0;

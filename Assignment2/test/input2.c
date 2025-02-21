@@ -8,11 +8,17 @@ void calc(int a, int b, int (*op)(char, char)) {
     printf("%d\n", op(a, b));
 }
 
-int main(){
-    int m=100;
-    auto fun = [&](int a, int b) -> int{
-
+union A {
+    int i;
+    float f;
+    char s[20];
 };
+
+int main(){
+    int m,n;
+    enum Gender { Male, Female };
+    char *c="hello";
+
     
     
     

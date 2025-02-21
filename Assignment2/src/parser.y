@@ -77,6 +77,10 @@
 				strcpy(symbol_table[count_sym].datatype, d_type);
                 strcpy(symbol_table[count_sym].type, "Pointer");
 			}
+			else if(c=='E'){
+				strcpy(symbol_table[count_sym].datatype, d_type);
+                strcpy(symbol_table[count_sym].type, "Enum");
+			}
             count_sym++;
         }
     }
@@ -128,10 +132,20 @@
         strcpy(type_str, "LONG");
 	}
 	else if (strcmp(type_spec, "void") == 0) {
-        strcpy(type_str, "VOID");	}
+        strcpy(type_str, "VOID");	
+	}
 	else if (strcmp(type_spec, "struct") == 0) {
         strcpy(type_str, "STRUCT");
-    } else {
+	}
+	else if (strcmp(type_spec, "enum") == 0) {
+        strcpy(type_str, "ENUM");
+	
+    }
+	else if (strcmp(type_spec, "union") == 0) {
+        strcpy(type_str, "UNION");
+	
+    }
+	 else {
         strcpy(type_str, type_spec);
     }
 }
@@ -587,7 +601,14 @@ struct_declarator
 
 enum_specifier
 	: ENUM LBRACE enumerator_list RBRACE
-	| ENUM ID LBRACE enumerator_list RBRACE
+	| ENUM ID LBRACE enumerator_list RBRACE 
+	{
+		printf("enum is here = %s\n",$$);
+		char type_str[10];
+      	get_type_string(type_str,$$);
+      	assign_type(type_str);
+      	insert_symtab('V',$2);
+	}
 	| ENUM ID
 	;
 

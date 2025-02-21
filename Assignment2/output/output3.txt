@@ -1,0 +1,47 @@
+Error at line 4: syntax error
+Error at line 7: syntax error
+Integer
+Identifier in direct declaratorrr = main
+Brackets found
+Direct declarator main
+Integer
+Identifier in direct declaratorrr = aabc
+Direct declarator aabc
+declarator = aabc
+init_declarator = aabc
+declaration  = aabc
+Integer
+Identifier in direct declaratorrr = bca
+Direct declarator bca
+declarator = bca
+init_declarator = bca
+Integer
+Identifier in direct declaratorrr = def
+Direct declarator def
+declarator = def
+init_declarator = def
+declaration  = def
+Integer
+Identifier in direct declaratorrr = hello
+Direct declarator hello
+declarator = hello
+init_declarator = hello
+conditional inside assignment = 0
+Function is there: int main
+Reached the root node.
+
+SYMBOL TABLE
+-----------------------------------------------------------------
+| Identifier      | Type                 | Data Type  | Line No |
+-----------------------------------------------------------------
+| aabc            | Variable             | INT        | 2       |
+| def             | Variable             | INT        | 5       |
+| main            | Function             | INT        | 11      |
+-----------------------------------------------------------------
+
+Constant Table:
+-----------------------------------------------------
+| Constant Value  | Constant Type        | Line no. |
+-----------------------------------------------------
+| 0               | Integer Constant     | 10       |
+-----------------------------------------------------

@@ -1,4 +1,3 @@
-Error at line 13: syntax error
 Integer
 Identifier in direct declaratorrr = Integer
 Direct declarator Integer
@@ -50,18 +49,44 @@ Expression semicolon
 Function is there: void calc
 Reached the root node.
 Integer
+Identifier in direct declaratorrr = i
+Direct declarator i
+Struct declarator = i
+Struct declaration int = i
+Identifier in direct declaratorrr = f
+Direct declarator f
+Struct declarator = f
+Struct declaration float = f
+Character
+Identifier in direct declaratorrr = s
+Direct declarator s
+Struct declarator = s
+Struct declaration char = s
+Variable declaration: union = A
+Reached the root node.
+Integer
 Identifier in direct declaratorrr = main
 Brackets found
 Direct declarator main
 Integer
 Identifier in direct declaratorrr = m
 Direct declarator m
-conditional inside assignment = 100
-init_declarator with initializer = m=100
-init_declarator = m=100
-declaration  = m=100
-Identifier in direct declaratorrr = fun
-Direct declarator fun
+declarator = m
+init_declarator = m
+Identifier in direct declaratorrr = n
+Direct declarator n
+declarator = n
+init_declarator_list = m,n
+declaration  = m,n
+enum is here = enum
+Character
+Identifier in direct declaratorrr = c
+Pointer direct declarator
+it is $$: *c
+conditional inside assignment = "hello"
+init_declarator with initializer = *c="hello"
+init_declarator = *c="hello"
+declaration  = *c="hello"
 conditional inside assignment = 0
 Function is there: int main
 Reached the root node.
@@ -76,8 +101,15 @@ SYMBOL TABLE
 | subtract        | Function             | INT        | 5       |
 | op              | Pointer              | INT        | 7       |
 | calc            | Function             | VOID       | 9       |
-| m               | Variable             | INT        | 12      |
-| main            | Function             | INT        | 21      |
+| i               | Variable             | INT        | 12      |
+| f               | Variable             | FLOAT      | 13      |
+| s               | Variable             | CHAR       | 14      |
+| A               | Variable             | UNION      | 15      |
+| m               | Variable             | INT        | 18      |
+| n               | Variable             | INT        | 18      |
+| Gender          | Variable             | ENUM       | 19      |
+| c               | Pointer              | CHAR       | 20      |
+| main            | Function             | INT        | 27      |
 -----------------------------------------------------------------
 
 Constant Table:
@@ -85,6 +117,7 @@ Constant Table:
 | Constant Value  | Constant Type        | Line no. |
 -----------------------------------------------------
 | "%d\n"          | String Constant      | 8        |
-| 100             | Integer Constant     | 12       |
-| 0               | Integer Constant     | 20       |
+| 20              | Integer Constant     | 14       |
+| "hello"         | String Constant      | 20       |
+| 0               | Integer Constant     | 26       |
 -----------------------------------------------------
