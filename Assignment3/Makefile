@@ -1,7 +1,7 @@
 # Define compiler and tools
 LEX = flex
 BISON = bison
-CC = gcc
+CC = g++
 CFLAGS = -w
 
 # Output executable name
@@ -18,7 +18,7 @@ all: $(EXEC)
 $(EXEC): $(YACC_FILE) $(LEX_FILE)
 	$(BISON) -d -Wno-all $(YACC_FILE)
 	$(LEX) $(LEX_FILE)
-	$(CC) $(CFLAGS) parser.tab.c lex.yy.c -o $(EXEC) -lfl
+	$(CC) $(CFLAGS) parser.tab.c lex.yy.c -o $(EXEC) -ll
 
 # Clean build files
 clean:
