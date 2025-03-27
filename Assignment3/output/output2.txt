@@ -1,3 +1,19 @@
-Declaration specifiers = typedef
+Error at line 1: syntax error
+Error at line 3: syntax error
+Error at line 5: syntax error
+Error at line 9: syntax error
+Integer
+Integer
+int
+subtract
+subtract
+a
+a
+b
+b
+float
+f
+f
+Declaration specifiers = float
 Init declarator list = 0.000000
 Error: Type mismatch in declaration

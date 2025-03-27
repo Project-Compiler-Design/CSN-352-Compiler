@@ -1279,7 +1279,7 @@ YY_RULE_SETUP
     yylval.symbol_info->type = "int";
     yylval.symbol_info->ptr = new int(atoi(yytext));
     yylval.symbol_info->symbol_size=4;
-    return DECIMAL_LITERAL; return DECIMAL_LITERAL; }
+    return DECIMAL_LITERAL; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
@@ -1298,7 +1298,7 @@ YY_RULE_SETUP
     yylval.symbol_info->type = "float";
     yylval.symbol_info->ptr = new float(atof(yytext));
     yylval.symbol_info->symbol_size=8;
-    return FLOAT_LITERAL; return FLOAT_LITERAL; }
+    return FLOAT_LITERAL; }
 	YY_BREAK
 case 53:
 /* rule 53 can match eol */

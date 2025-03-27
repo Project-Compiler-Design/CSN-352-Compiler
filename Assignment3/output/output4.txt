@@ -1,9 +1,26 @@
+name
+name
+roll_no
+roll_no
+subject_marks
+subject_marks
+main
+main
+int
+x
+x
 Declaration specifiers = int
 Init declarator list = 0.000000
 Declaration is correct
+int
+arr
+arr
 Declaration specifiers = int
 Init declarator list = 0.000000
 Declaration is correct
+char
+c
+c
 Declaration specifiers = char
 Init declarator list = 0.000000
 Error: Type mismatch in declaration

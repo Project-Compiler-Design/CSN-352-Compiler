@@ -1,6 +1,14 @@
+main
+main
+int
+x
+x
 Declaration specifiers = int
 Init declarator list = 0.000000
 Declaration is correct
+int
+y
+y
 Declaration specifiers = int
 Init declarator list = 0.000000
 Error: Type mismatch in declaration

@@ -5,6 +5,7 @@
     #include<iostream>
     #include<map>
     #include<vector>
+	#include<stack>
 
 	#include "symbol_table.h"
     using namespace std;
@@ -26,7 +27,7 @@
 	    strcpy(d_type, str);
     }
 
-
+	stack<string> parsing_stack;
 
     struct sym_tab {
         char identifier_name[50]; 
@@ -233,7 +234,9 @@
 %type <symbol_info> exclusive_or_expression inclusive_or_expression logical_and_expression 
 %type <symbol_info> logical_or_expression conditional_expression assignment_expression 
 %type <symbol_info> assignment_operator expression constant_expression declaration 
-%type <symbol_info> init_declarator_list init_declarator constant
+%type <symbol_info> constant
+
+%type <symbol_info> init_declarator init_declarator_list
 
 %type <symbol_info> struct_or_union struct_declaration_list struct_declaration 
 %type <symbol_info> specifier_qualifier_list struct_declarator_list struct_declarator 
@@ -436,11 +439,11 @@ constant_expression
 
 declaration
     : declaration_specifiers SEMICOLON
-    | declaration_specifiers init_declarator_list SEMICOLON 
+    | declaration_specifiers {printf("%s\n",$1); parsing_stack.push($1);} init_declarator_list SEMICOLON 
     {
 		printf("Declaration specifiers = %s\n", $1);
-		printf("Init declarator list = %f\n", $2->symbol_size);
-		if($1!=$2->type){
+		printf("Init declarator list = %f\n", $3->symbol_size);
+		if($1!=$3->type){
 			printf("Error: Type mismatch in declaration\n");
 			exit(1);
 		}
@@ -511,6 +514,7 @@ init_declarator_list
 init_declarator
     : declarator { 
         $$ =$1; 
+		parsing_stack.push($1->name.c_str());
         //printf("declarator = %s\n", $$);
     }
     | declarator EQUALS initializer { 
@@ -521,8 +525,9 @@ init_declarator
         // string result = string($1) + "=" + string($3);
         // $$ = strdup(result.c_str());
         //printf("init_declarator with initializer = %s\n", $$);
-
+		parsing_stack.push($1->name.c_str());
 		$$ = $3;
+		
     }
     ;
 
@@ -673,13 +678,22 @@ declarator
         // $$ = strdup(result.c_str());
     }
     | direct_declarator { 
+		$$=$1;
         // $$ = strdup($1);  
 		//printf("Direct declarator %s\n",$$);
     }
     ;
 
 direct_declarator
-	: ID                //{printf("Identifier in direct declaratorrr = %s\n",$1);}
+	: ID     
+	{
+		printf("%s\n",$1);
+		symbol_info* x=new symbol_info();
+		x->name = $1;
+
+		$$=x;
+		printf("%s\n",$$->name.c_str());
+	}        //{printf("Identifier in direct declaratorrr = %s\n",$1);}
 	| LPARENTHESES declarator RPARENTHESES			
 	{ 
 		//printf("LPar declarator RPar= %s\n",$2);
@@ -929,5 +943,9 @@ int main() {
     print_symbol_table();
     printf("\n");
     print_constant_table();
+	while(!parsing_stack.empty()){
+		printf("%s\n",parsing_stack.top().c_str());
+		parsing_stack.pop();
+	}
 
 }
