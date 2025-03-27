@@ -27,12 +27,6 @@
 
     struct sym_tab symbol_table[100]; 
 
-    struct const_tab {
-        char constant_value[50];
-        char constant_type[50];
-        int lineno;
-    };
-
     struct const_tab constant_table[100];
 
 	struct ArgList {
