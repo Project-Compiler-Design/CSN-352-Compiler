@@ -212,14 +212,14 @@ INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
     yylval.symbol_info->type = "int";
     yylval.symbol_info->ptr = new int(atoi(yytext));
     yylval.symbol_info->symbol_size=4;
-    return DECIMAL_LITERAL; return DECIMAL_LITERAL; }
+    return DECIMAL_LITERAL; }
 {EXP_LITERAL}      { yylval.str = strdup(yytext); return EXP_LITERAL; }
 {REAL_LITERAL}     { yylval.str = strdup(yytext); return REAL_LITERAL; }
 {FLOAT_LITERAL}    { yylval.symbol_info = new symbol_info();
     yylval.symbol_info->type = "float";
     yylval.symbol_info->ptr = new float(atof(yytext));
     yylval.symbol_info->symbol_size=8;
-    return FLOAT_LITERAL; return FLOAT_LITERAL; }
+    return FLOAT_LITERAL; }
 {STRING_LITERAL}   { yylval.str = strdup(yytext); return STRING_LITERAL; }
 {CHARACTER_LITERAL} { yylval.str = strdup(yytext); return CHARACTER_LITERAL; }
 
