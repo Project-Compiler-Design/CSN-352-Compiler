@@ -1,33 +1,3 @@
-
-SYMBOL TABLE
------------------------------------------------------------------
-| Identifier      | Type                 | Data Type  | Line No |
------------------------------------------------------------------
-| Integer         | Variable             | UNKNOWN    | 1       |
-| a               | Variable             | INT        | 3       |
-| b               | Variable             | INT        | 3       |
-| subtract        | Function             | INT        | 5       |
-| op              | Pointer              | INT        | 7       |
-| printf          | Function             | UNKNOWN    | 8       |
-| calc            | Function             | VOID       | 9       |
-| i               | Variable             | INT        | 12      |
-| f               | Variable             | FLOAT      | 13      |
-| s               | Variable             | CHAR       | 14      |
-| A               | Variable             | UNION      | 15      |
-| m               | Variable             | INT        | 18      |
-| n               | Variable             | INT        | 18      |
-| Gender          | Variable             | ENUM       | 19      |
-| c               | Pointer              | CHAR       | 20      |
-| main            | Function             | INT        | 27      |
------------------------------------------------------------------
-
-
-Constant Table:
------------------------------------------------------------------
-| Constant Value              | Constant Type        | Line no. |
------------------------------------------------------------------
-| "%d\n"                      | String Constant      | 8        |
-| 20                          | Integer Constant     | 14       |
-| "hello"                     | String Constant      | 20       |
-| 0                           | Integer Constant     | 26       |
------------------------------------------------------------------
+Declaration specifiers = typedef
+Init declarator list = 0.000000
+Error: Type mismatch in declaration

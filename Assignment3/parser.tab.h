@@ -54,17 +54,17 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    ID = 258,                      /* ID  */
-    DECIMAL_LITERAL = 259,         /* DECIMAL_LITERAL  */
-    HEXA_LITERAL = 260,            /* HEXA_LITERAL  */
-    OCTAL_LITERAL = 261,           /* OCTAL_LITERAL  */
-    EXP_LITERAL = 262,             /* EXP_LITERAL  */
-    REAL_LITERAL = 263,            /* REAL_LITERAL  */
-    FLOAT_LITERAL = 264,           /* FLOAT_LITERAL  */
-    STRING_LITERAL = 265,          /* STRING_LITERAL  */
-    CHARACTER_LITERAL = 266,       /* CHARACTER_LITERAL  */
-    INCLUDE = 267,                 /* INCLUDE  */
-    INVALID_ID = 268,              /* INVALID_ID  */
+    DECIMAL_LITERAL = 258,         /* DECIMAL_LITERAL  */
+    HEXA_LITERAL = 259,            /* HEXA_LITERAL  */
+    OCTAL_LITERAL = 260,           /* OCTAL_LITERAL  */
+    EXP_LITERAL = 261,             /* EXP_LITERAL  */
+    REAL_LITERAL = 262,            /* REAL_LITERAL  */
+    FLOAT_LITERAL = 263,           /* FLOAT_LITERAL  */
+    STRING_LITERAL = 264,          /* STRING_LITERAL  */
+    CHARACTER_LITERAL = 265,       /* CHARACTER_LITERAL  */
+    ID = 266,                      /* ID  */
+    INVALID_ID = 267,              /* INVALID_ID  */
+    INCLUDE = 268,                 /* INCLUDE  */
     AUTO = 269,                    /* AUTO  */
     STRUCT = 270,                  /* STRUCT  */
     BOOL = 271,                    /* BOOL  */
@@ -162,15 +162,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-<<<<<<< HEAD
-#line 208 "src/parser.y"
-=======
-#line 215 "src/parser.y"
->>>>>>> origin/main
+#line 217 "src/parser.y"
 
-    char *str;
+    char* str;  // For type_specifier, declarator
+    struct symbol_info* symbol_info; // For expressions and constants
 
-#line 170 "parser.tab.h"
+#line 171 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

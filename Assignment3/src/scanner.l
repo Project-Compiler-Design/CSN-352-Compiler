@@ -1,6 +1,7 @@
 %option noyywrap
 %{
     #include "parser.tab.h"
+    #include "symbol_table.h"
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
@@ -95,7 +96,7 @@ IS			    (u|U|l|L)*
 ID              ({LETTER}|_)({LETTER}|_|{DIGIT})*
 HEXA_LITERAL      0[xX]{HEXA_DIGIT}+{IS}?
 OCTAL_LITERAL    0[0-7]+{IS}?
-DECIMAL_LITERAL   {DIGIT}+{IS}?
+DECIMAL_LITERAL   {DIGIT}+{IS}? 
 EXP_LITERAL       {DIGIT}+[Ee][+-]?{DIGIT}+{FS}?
 REAL_LITERAL           {DIGIT}*"."{DIGIT}+({EXP})?
 FLOAT_LITERAL     {DIGIT}*"."{DIGIT}+({EXP})?{FS}
@@ -207,10 +208,18 @@ INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
 {ID}               { yylval.str = strdup(yytext); return ID; }
 {HEXA_LITERAL}     { yylval.str = strdup(yytext); return HEXA_LITERAL; }
 {OCTAL_LITERAL}    { yylval.str = strdup(yytext); return OCTAL_LITERAL; }
-{DECIMAL_LITERAL}  { yylval.str = strdup(yytext); return DECIMAL_LITERAL; }
+{DECIMAL_LITERAL}  { yylval.symbol_info = new symbol_info();
+    yylval.symbol_info->type = "int";
+    yylval.symbol_info->ptr = new int(atoi(yytext));
+    yylval.symbol_info->symbol_size=4;
+    return DECIMAL_LITERAL; return DECIMAL_LITERAL; }
 {EXP_LITERAL}      { yylval.str = strdup(yytext); return EXP_LITERAL; }
 {REAL_LITERAL}     { yylval.str = strdup(yytext); return REAL_LITERAL; }
-{FLOAT_LITERAL}    { yylval.str = strdup(yytext); return FLOAT_LITERAL; }
+{FLOAT_LITERAL}    { yylval.symbol_info = new symbol_info();
+    yylval.symbol_info->type = "float";
+    yylval.symbol_info->ptr = new float(atof(yytext));
+    yylval.symbol_info->symbol_size=8;
+    return FLOAT_LITERAL; return FLOAT_LITERAL; }
 {STRING_LITERAL}   { yylval.str = strdup(yytext); return STRING_LITERAL; }
 {CHARACTER_LITERAL} { yylval.str = strdup(yytext); return CHARACTER_LITERAL; }
 
