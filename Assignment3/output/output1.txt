@@ -1,0 +1,29 @@
+
+SYMBOL TABLE
+-----------------------------------------------------------------
+| Identifier      | Type                 | Data Type  | Line No |
+-----------------------------------------------------------------
+| k               | Variable             | INT        | 1       |
+| e               | Pointer              | INT        | 3       |
+| f               | Variable             | INT        | 3       |
+| func1           | Function             | VOID       | 5       |
+| a               | Variable             | INT        | 11      |
+| b               | Variable             | INT        | 11      |
+| d               | Variable             | FLOAT      | 13      |
+| i               | Variable             | INT        | 15      |
+| ptr             | Pointer              | INT        | 17      |
+| malloc          | Function             | UNKNOWN    | 18      |
+| main            | Function             | INT        | 20      |
+-----------------------------------------------------------------
+
+
+Constant Table:
+-----------------------------------------------------------------
+| Constant Value              | Constant Type        | Line no. |
+-----------------------------------------------------------------
+| 5                           | Integer Constant     | 1        |
+| 10                          | Integer Constant     | 10       |
+| 5                           | Integer Constant     | 12       |
+| 5.5                         | Real Constant        | 13       |
+| 0                           | Integer Constant     | 15       |
+-----------------------------------------------------------------

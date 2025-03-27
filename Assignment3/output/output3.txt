@@ -1,0 +1,26 @@
+
+SYMBOL TABLE
+-----------------------------------------------------------------
+| Identifier      | Type                 | Data Type  | Line No |
+-----------------------------------------------------------------
+| x               | Variable             | INT        | 2       |
+| y               | Variable             | INT        | 3       |
+| i               | Variable             | INT        | 11      |
+| main            | Function             | INT        | 17      |
+-----------------------------------------------------------------
+
+
+Constant Table:
+-----------------------------------------------------------------
+| Constant Value              | Constant Type        | Line no. |
+-----------------------------------------------------------------
+| 2                           | Integer Constant     | 2        |
+| 3                           | Integer Constant     | 2        |
+| 9                           | Integer Constant     | 2        |
+| 10                          | Integer Constant     | 2        |
+| 8                           | Integer Constant     | 2        |
+| 4                           | Integer Constant     | 2        |
+| 1                           | Integer Constant     | 3        |
+| 0                           | Integer Constant     | 12       |
+| 12                          | Integer Constant     | 12       |
+-----------------------------------------------------------------

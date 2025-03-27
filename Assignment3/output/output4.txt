@@ -1,0 +1,39 @@
+Error at line 22: syntax error
+
+SYMBOL TABLE
+-----------------------------------------------------------------
+| Identifier      | Type                 | Data Type  | Line No |
+-----------------------------------------------------------------
+| name            | Pointer              | CHAR       | 2       |
+| roll_no         | Variable             | INT        | 3       |
+| subject_marks   | Variable             | INT        | 4       |
+| Student         | Variable             | STRUCT     | 5       |
+| x               | Variable             | INT        | 11      |
+| arr             | Variable             | INT        | 19      |
+| printf          | Function             | UNKNOWN    | 24      |
+| scanf           | Function             | UNKNOWN    | 25      |
+| main            | Function             | INT        | 26      |
+-----------------------------------------------------------------
+
+
+Constant Table:
+-----------------------------------------------------------------
+| Constant Value              | Constant Type        | Line no. |
+-----------------------------------------------------------------
+| 4                           | Integer Constant     | 4        |
+| 5                           | Integer Constant     | 4        |
+| 11                          | Integer Constant     | 11       |
+| 1                           | Integer Constant     | 13       |
+| 2                           | Integer Constant     | 14       |
+| 2                           | Integer Constant     | 14       |
+| 11                          | Integer Constant     | 15       |
+| 3                           | Integer Constant     | 19       |
+| 2                           | Integer Constant     | 19       |
+| 2                           | Integer Constant     | 19       |
+| 3                           | Integer Constant     | 19       |
+| 5                           | Integer Constant     | 19       |
+| 6                           | Integer Constant     | 19       |
+| 7                           | Integer Constant     | 19       |
+| 8                           | Integer Constant     | 19       |
+| "hello world"               | String Constant      | 24       |
+-----------------------------------------------------------------
