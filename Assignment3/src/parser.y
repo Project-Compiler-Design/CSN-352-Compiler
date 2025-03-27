@@ -2,12 +2,16 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
+    #include<iostream>
+    #include<map>
+    #include<vector>
+    
+    using namespace std;
 
 	#define MAX_ARGS 100
 
     void yyerror(const char *s);
     int search_symtab(char *);
-    void assign_type();
 
     extern int yylex();
     extern int yylineno;
@@ -17,6 +21,11 @@
     int count_const = 0;
 
     char d_type[10];
+    void assign_type(char *str) {
+	    strcpy(d_type, str);
+    }
+
+
 
     struct sym_tab {
         char identifier_name[50]; 
@@ -26,6 +35,28 @@
     };
 
     struct sym_tab symbol_table[100]; 
+
+    struct scoped_symtab;
+
+    struct symbol_info{
+        char type[20];
+        char* ptr = nullptr;
+        int symbol_size = 0;
+    };
+
+    struct scoped_symtab{
+        scoped_symtab* parent = nullptr;
+        std::map<string,symbol_info> symbol_map;
+        std::vector<scoped_symtab*> child_list; 
+    };
+
+    scoped_symtab* curr_scope = new scoped_symtab(); 
+
+    struct const_tab {
+        char constant_value[50];
+        char constant_type[50];
+        int lineno;
+    };
 
     struct const_tab constant_table[100];
 
@@ -444,9 +475,12 @@ init_declarator_list
         //printf("init_declarator = %s\n", $$);
     }
     | init_declarator_list COMMA init_declarator { 
-        $$ = malloc(strlen($1) + strlen($3) + 2); 
-        sprintf($$, "%s,%s", $1, $3);  
-        free($1); free($3);
+        // $$ = (char*)malloc(strlen($1) + strlen($3) + 2); 
+        // sprintf($$, "%s,%s", $1, $3);  
+        // free($1); free($3);
+
+        string result = string($1) + "," + string($3);
+        $$ = strdup(result.c_str());
         //printf("init_declarator_list = %s\n", $$);
     }
     ;
@@ -457,9 +491,12 @@ init_declarator
         //printf("declarator = %s\n", $$);
     }
     | declarator EQUALS initializer { 
-        $$ = malloc(strlen($1) + strlen($3) + 2);  
-        sprintf($$, "%s=%s", $1, $3);  
-        free($1); free($3);
+        // $$ = malloc(strlen($1) + strlen($3) + 2);  
+        // sprintf($$, "%s=%s", $1, $3);  
+        // free($1); free($3);
+
+        string result = string($1) + "=" + string($3);
+        $$ = strdup(result.c_str());
         //printf("init_declarator with initializer = %s\n", $$);
     }
     ;
@@ -602,10 +639,13 @@ type_qualifier
 declarator
     : pointer direct_declarator { 
 		//printf("Pointer direct declarator\n");
-        $$ = malloc(strlen($1) + strlen($2) + 1); 
-        sprintf($$, "%s%s", $1, $2); 
-		//printf("it is $$: %s\n",$$); 
-        free($1); free($2);
+        // $$ = malloc(strlen($1) + strlen($2) + 1); 
+        // sprintf($$, "%s%s", $1, $2); 
+		// //printf("it is $$: %s\n",$$); 
+        // free($1); free($2);
+
+        string result = string($1) + string($2);
+        $$ = strdup(result.c_str());
     }
     | direct_declarator { 
         $$ = strdup($1);  
@@ -632,9 +672,12 @@ pointer
 	| STAR type_qualifier_list
 	| STAR pointer   
 	{ 
-        $$ = malloc(strlen($2) + 2); 
-        sprintf($$, "*%s", $2);  
-        free($2);
+        // $$ = malloc(strlen($2) + 2); 
+        // sprintf($$, "*%s", $2);  
+        // free($2);
+
+        string result = string("*") + string($2);
+        $$ = strdup(result.c_str());
     }
 	| STAR type_qualifier_list pointer
 	;
@@ -852,9 +895,6 @@ int search_symtab(char *id_name) {
 	return 0;
 }
 
-void assign_type(char *str) {
-	strcpy(d_type, str);
-}
 
 
 int main() {

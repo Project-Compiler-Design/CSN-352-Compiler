@@ -1,4 +1,3 @@
-Error at line 22: syntax error
 
 SYMBOL TABLE
 -----------------------------------------------------------------
@@ -10,6 +9,8 @@ SYMBOL TABLE
 | Student         | Variable             | STRUCT     | 5       |
 | x               | Variable             | INT        | 11      |
 | arr             | Variable             | INT        | 19      |
+| c               | Variable             | CHAR       | 21      |
+| char_ptr        | Pointer              | CHAR       | 22      |
 | printf          | Function             | UNKNOWN    | 24      |
 | scanf           | Function             | UNKNOWN    | 25      |
 | main            | Function             | INT        | 26      |
