@@ -13,34 +13,14 @@
 	#define MAX_ARGS 100
 
     void yyerror(const char *s);
-    int search_symtab(char *);
 
     extern int yylex();
     extern int yylineno;
     extern char *yytext;  
 
-    int count_sym = 0;
-    int count_const = 0;
-
-    char d_type[10];
-    void assign_type(char *str) {
-	    strcpy(d_type, str);
-    }
-
 	stack<string> parsing_stack;
 
-    struct sym_tab {
-        char identifier_name[50]; 
-        char datatype[50];
-        char type[20];
-        int lineno;
-    };
-
-    struct sym_tab symbol_table[100]; 
-
     struct scoped_symtab;
-
-    
 
     struct scoped_symtab{
         scoped_symtab* parent = nullptr;
@@ -50,168 +30,10 @@
 
     scoped_symtab* curr_scope = new scoped_symtab();
 
-
-	
-
-
-
-    struct const_tab {
-        char constant_value[50];
-        char constant_type[50];
-        int lineno;
-    };
-
-    struct const_tab constant_table[100];
-
 	struct ArgList {
         char *args[MAX_ARGS];
         int count_arg;
     } argList;
-
-    void insert_symtab(char c, char *yytext) {
-        if (search_symtab(yytext) == 0) {
-            strcpy(symbol_table[count_sym].identifier_name, yytext);
-            symbol_table[count_sym].lineno = yylineno;
-
-            if (c == 'H') {
-                strcpy(symbol_table[count_sym].datatype, d_type);
-                strcpy(symbol_table[count_sym].type, "Header");
-            }
-            else if (c == 'K') {
-                strcpy(symbol_table[count_sym].datatype, yytext);
-                strcpy(symbol_table[count_sym].type, "Keyword");
-            }
-            else if (c == 'V') {
-                strcpy(symbol_table[count_sym].datatype, d_type);
-                strcpy(symbol_table[count_sym].type, "Variable");
-            }
-            else if (c == 'C') {
-                strcpy(symbol_table[count_sym].datatype, "CONST");
-                strcpy(symbol_table[count_sym].type, "Constant");
-            }
-            else if (c == 'F') {
-                strcpy(symbol_table[count_sym].datatype, d_type);
-                strcpy(symbol_table[count_sym].type, "Function");
-            }
-			else if(c=='G'){
-				strcpy(symbol_table[count_sym].datatype, "GOTO");
-                strcpy(symbol_table[count_sym].type, "Label");
-			}
-			else if(c=='P'){
-				strcpy(symbol_table[count_sym].datatype, d_type);
-                strcpy(symbol_table[count_sym].type, "Pointer");
-			}
-			else if(c=='f'){
-				strcpy(symbol_table[count_sym].datatype, d_type);
-                strcpy(symbol_table[count_sym].type, "Pointer");
-			}
-			else if(c=='E'){
-				strcpy(symbol_table[count_sym].datatype, d_type);
-                strcpy(symbol_table[count_sym].type, "Enum");
-			}
-            count_sym++;
-        }
-    }
-
-    void insert_const_tab(char c, char *yytext) {
-        
-        strcpy(constant_table[count_const].constant_value, yytext);
-        constant_table[count_const].lineno = yylineno;
-
-        if (c == 'I') {
-            strcpy(constant_table[count_const].constant_type, "Integer Constant");
-        }
-        else if (c == 'F') {
-            strcpy(constant_table[count_const].constant_type, "Float Constant");
-        }
-        else if (c == 'E') {
-            strcpy(constant_table[count_const].constant_type, "Exponential Constant");
-        }
-        else if (c == 'H') {
-            strcpy(constant_table[count_const].constant_type, "Hexadecimal Constant");
-        }
-        else if (c == 'R') {
-            strcpy(constant_table[count_const].constant_type, "Real Constant");
-        }
-        else if (c == 'S') {
-            strcpy(constant_table[count_const].constant_type, "String Constant");
-        }
-        else if (c == 'O') {
-            strcpy(constant_table[count_const].constant_type, "Octal Constant");
-        }
-        else if (c == 'C') {
-            strcpy(constant_table[count_const].constant_type, "Character Constant");
-        }
-        count_const++;
-        
-    }
-
-    
-    void get_type_string(char *type_str, char *type_spec) {
-        if (strcmp(type_spec, "int") == 0) {
-            strcpy(type_str, "INT");
-        } else if (strcmp(type_spec, "float") == 0) {
-            strcpy(type_str, "FLOAT");
-        } else if (strcmp(type_spec, "double") == 0) {
-            strcpy(type_str, "DOUBLE");
-        } else if (strcmp(type_spec, "char") == 0) {
-            strcpy(type_str, "CHAR");
-        } else if (strcmp(type_spec, "long") == 0) {
-            strcpy(type_str, "LONG");
-        }
-        else if (strcmp(type_spec, "void") == 0) {
-            strcpy(type_str, "VOID");	
-        }
-        else if (strcmp(type_spec, "struct") == 0) {
-            strcpy(type_str, "STRUCT");
-        }
-        else if (strcmp(type_spec, "enum") == 0) {
-            strcpy(type_str, "ENUM");
-        
-        }
-        else if (strcmp(type_spec, "union") == 0) {
-            strcpy(type_str, "UNION");
-        
-        }
-		else if (strcmp(type_spec, "unknown") == 0) {
-            strcpy(type_str, "UNKNOWN");
-        
-        }
-        else {
-            strcpy(type_str, "UNKNOWN");
-        }
-    }
-
-
-
-    void print_symbol_table() {
-        printf("\nSYMBOL TABLE\n");
-        printf("-----------------------------------------------------------------\n");
-        printf("| %-15s | %-20s | %-10s | Line No |\n", "Identifier", "Type", "Data Type");
-        printf("-----------------------------------------------------------------\n");
-        for (int i = 0; i < count_sym; i++) {
-            printf("| %-15s | %-20s | %-10s | %-7d |\n",
-                   symbol_table[i].identifier_name,
-                   symbol_table[i].type,
-                   symbol_table[i].datatype,
-                   symbol_table[i].lineno);
-        }
-        printf("-----------------------------------------------------------------\n");
-    }
-
-    void print_constant_table() {
-        printf("\nConstant Table:\n");
-        printf("-----------------------------------------------------------------\n");
-        printf("| %-27s | %-20s | Line no. |\n", "Constant Value", "Constant Type");
-        printf("-----------------------------------------------------------------\n");
-        for (int i = 0; i < count_const; i++) {
-            printf("| %-27s | %-20s | %-8d |\n",
-                   constant_table[i].constant_value,
-                   constant_table[i].constant_type, 
-                   constant_table[i].lineno);
-        }
-        printf("-----------------------------------------------------------------\n");
-    }
 
 %}
 
@@ -260,17 +82,17 @@ constant:
 	{ 
 		$$=$1;
 		printf("I am in int\n");
-	}//insert_const_tab('I', $1); }
+	}
     | FLOAT_LITERAL      
 	{ $$=$1;
 	printf("I am in float\n");
-	}//insert_const_tab('F', $1); }
-    | EXP_LITERAL         //insert_const_tab('E', $1); }
-    | HEXA_LITERAL       //{ insert_const_tab('H', $1); }
-    | REAL_LITERAL       //{ insert_const_tab('R', $1); }
-    | STRING_LITERAL     //{ insert_const_tab('S', $1); }
-    | OCTAL_LITERAL      //{ insert_const_tab('O', $1); }
-    | CHARACTER_LITERAL  //{ insert_const_tab('C', $1); }
+	}
+    | EXP_LITERAL        {$$=$1;} 
+    | HEXA_LITERAL       {$$=$1;}
+    | REAL_LITERAL      {$$=$1;}
+    | STRING_LITERAL     {$$=$1;}
+    | OCTAL_LITERAL      {$$=$1;}
+    | CHARACTER_LITERAL  {$$=$1;}
 
 
 primary_expression
@@ -299,16 +121,16 @@ postfix_expression
 	| postfix_expression LPARENTHESES RPARENTHESES					//{printf("Brackets found\n");}
 	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES   
 	{//printf("Function call= %s\n",$1);
-		char type_str[10];
-        get_type_string(type_str, "unknown");
+		// char type_str[10];
+        // get_type_string(type_str, "unknown");
  
-        assign_type(type_str);
-        //insert_symtab('F', $1);
-		for (int i = 0; i < argList.count_arg; i++) {
-            //printf("%s", argList.args[i]);
-            if (i < argList.count_arg - 1){} //printf(", ");
-        }
-        //printf("\n");
+        // assign_type(type_str);
+        // //insert_symtab('F', $1);
+		// for (int i = 0; i < argList.count_arg; i++) {
+        //     //printf("%s", argList.args[i]);
+        //     if (i < argList.count_arg - 1){} //printf(", ");
+        // }
+        // //printf("\n");
 	}
 	| postfix_expression DOT ID
 	| postfix_expression LAMBDA_ARROW ID
@@ -479,18 +301,18 @@ constant_expression
 
 declaration
     : declaration_specifiers SEMICOLON
-    | declaration_specifiers {parsing_stack.push($1);} init_declarator_list SEMICOLON 
+    | declaration_specifiers init_declarator_list SEMICOLON 
     {
 		printf("parsing stack top = %s\n",parsing_stack.top().c_str());
 		printf("Declaration specifiers = %s\n", $1);
-		printf("Init declarator list = %f\n", $3->name.c_str());
-		printf("dollar 3 type = %s\n",$3->type);
+		printf("Init declarator list = %f\n", $2->name.c_str());
+		printf("dollar 3 type = %s\n",$2->type);
 		// while(!parsing_stack.empty()){
 		// 	printf("top= %s\n",parsing_stack.top().c_str());
 		// 	parsing_stack.pop();
 		// }
 		int flag=0;
-		while (parsing_stack.top() != $1) {
+		while (!parsing_stack.empty()) {
 			std::string top_symbol = parsing_stack.top();  // Store the top of the stack
 			parsing_stack.pop();  // Pop before using it in the map (avoids multiple lookups)
 
@@ -510,42 +332,9 @@ declaration
 				printf("Created new symbol: %s with type %s\n", top_symbol.c_str(), ($1));
 			}
 		}
-		parsing_stack.pop();
+		
 		
 		if(flag==0) printf("Correct type declaration\n");
-		
-		
-
-        //printf("declaration  = %s\n", $2);
-        // char type_str[10];
-        // get_type_string(type_str, $1);
-
-        // char *token = strtok($2, ",");
-        // while (token != NULL) {
-        //     char *var_name = token;
-        //     char *value = strchr(token, '=');
-
-        //     if (value) {
-        //         *value = '\0';  
-        //         value++;  
-        //     }
-
-        //     assign_type(type_str);
-
-        //     int pointer_level = 0;
-        //     while (*var_name == '*') {
-        //         pointer_level++;
-        //         var_name++;  
-        //     }
-		// 	assign_type(type_str);
-        //     if (pointer_level > 0) {
-        //         insert_symtab('P',var_name);
-        //     } else {
-        //         insert_symtab('V',var_name);
-        //     }
-
-        //     token = strtok(NULL, ",");
-        // }
     }
     ;
 
@@ -563,16 +352,8 @@ init_declarator_list
     : init_declarator { 
         $$ = $1; 
 		printf("init_d %s\n",$$->name.c_str());  
-        //printf("init_declarator = %s\n", $$);
     }
     | init_declarator_list COMMA init_declarator { 
-        // $$ = (char*)malloc(strlen($1) + strlen($3) + 2); 
-        // sprintf($$, "%s,%s", $1, $3);  
-        // free($1); free($3);
-
-        // string result = string($1) + "," + string($3);
-        // $$ = strdup(result.c_str());
-        //printf("init_declarator_list = %s\n", $$);
 		$$=$3;
 		printf("init_D %s\n",$$->name.c_str()); 
     }
@@ -580,20 +361,14 @@ init_declarator_list
 
 init_declarator
     : declarator { 
+		printf("declarator11 %s\n",$1->name.c_str());
 		curr_scope->symbol_map[$1->name]=nullptr;
         $$ =$1;
 		printf("declarator %s\n",$$->name.c_str()); 
 		parsing_stack.push($1->name.c_str());
-        //printf("declarator = %s\n", $$);
     }
     | declarator EQUALS initializer { 
-        // $$ = malloc(strlen($1) + strlen($3) + 2);  
-        // sprintf($$, "%s=%s", $1, $3);  
-        // free($1); free($3);
-
-        // string result = string($1) + "=" + string($3);
-        // $$ = strdup(result.c_str());
-        //printf("init_declarator with initializer = %s\n", $$);
+		printf("declaratoreiii %s\n",$1->name.c_str());
 		curr_scope->symbol_map[$1->name]=$3;
 		if($3->type=="float") printf("Yes float found\n");
 		if($3->type=="int") printf("Yes int found\n");
@@ -613,39 +388,24 @@ storage_class_specifier
 	;
 
 type_specifier
-	: VOID
-	| CHAR				//{printf("Character\n");}
-	| SHORT
+	: VOID				{$$=strdup("void");}
+	| CHAR				{$$=strdup("char");}
+	| SHORT				{$$=strdup("short");}
 	| INT				{$$=strdup("int");}
-	| LONG
+	| LONG				{$$=strdup("long");}
 	| FLOAT				{$$=strdup("float");}
-	| DOUBLE
-	| SIGNED
-	| UNSIGNED
+	| DOUBLE			{$$=strdup("double");}
+	| SIGNED			{$$=strdup("signed");}
+	| UNSIGNED			{$$=strdup("unsigned");}
 	| struct_or_union_specifier
 	| enum_specifier
 	;
 
 struct_or_union_specifier
 	: struct_or_union ID LBRACE struct_declaration_list RBRACE 
-	{
-		char type_str[10];
-        // get_type_string(type_str, $1);
-        //printf("Variable declaration: %s = %s\n", $1, $2); 
-        // assign_type(type_str);
-        // insert_symtab('V', $2); 
-	}
 	| struct_or_union LBRACE struct_declaration_list RBRACE
 	| struct_or_union ID 
-	
-	{
-		char type_str[10];
-        // get_type_string(type_str, $1);
-        //printf("Variable declaration: %s = %s\n", $1, $2); 
-        assign_type(type_str);
-        // insert_symtab('V', $2); 
-	}
-	
+	;
 
 struct_or_union
 	: STRUCT
@@ -661,35 +421,6 @@ struct_declaration
 	: specifier_qualifier_list struct_declarator_list SEMICOLON      
 	{ 
 		//printf("Struct declaration %s = %s\n",$1,$2);
-		char type_str[10];
-        // get_type_string(type_str, $1);
-        
-        // char *token = strtok($2, ",");
-        // while (token != NULL) {
-        //     char *var_name = token;
-        //     char *value = strchr(token, '=');
-
-        //     if (value) {
-        //         *value = '\0';  
-        //         value++;  
-        //     }
-
-        //     assign_type(type_str);
-
-        //     int pointer_level = 0;
-        //     while (*var_name == '*') {
-        //         pointer_level++;
-        //         var_name++;  
-        //     }
-		// 	assign_type(type_str);
-        //     if (pointer_level > 0) {
-        //         insert_symtab('P',var_name);
-        //     } else {
-        //         insert_symtab('V',var_name);
-        //     }
-
-        //     token = strtok(NULL, ",");
-        // } 
 	}
 	;
 
@@ -716,10 +447,6 @@ enum_specifier
 	| ENUM ID LBRACE enumerator_list RBRACE 
 	{
 		//printf("enum is here = %s\n",$$);
-		char type_str[10];
-      	// get_type_string(type_str,$$);
-      	assign_type(type_str);
-      	// insert_symtab('V',$2);
 	}
 	| ENUM ID
 	;
@@ -742,18 +469,9 @@ type_qualifier
 declarator
     : pointer direct_declarator { 
 		//printf("Pointer direct declarator\n");
-        // $$ = malloc(strlen($1) + strlen($2) + 1); 
-        // sprintf($$, "%s%s", $1, $2); 
-		// //printf("it is $$: %s\n",$$); 
-        // free($1); free($2);
-
-        // string result = string($1) + string($2);
-        // $$ = strdup(result.c_str());
     }
     | direct_declarator { 
-		$$=$1;
-        // $$ = strdup($1);  
-		//printf("Direct declarator %s\n",$$);
+		$$=$1; 
 		printf("Direct declarator %s\n",$$->name.c_str());
     }
     ;
@@ -771,7 +489,6 @@ direct_declarator
 	| LPARENTHESES declarator RPARENTHESES			
 	{ 
 		//printf("LPar declarator RPar= %s\n",$2);
-		// $$=strdup($2);
 	}
 	| direct_declarator LBRACKET constant_expression RBRACKET
 	| direct_declarator LBRACKET RBRACKET								//{printf("Array\n");}
@@ -784,14 +501,6 @@ pointer
 	: STAR //{ $$ = strdup("*"); }
 	| STAR type_qualifier_list
 	| STAR pointer   
-	{ 
-        // $$ = malloc(strlen($2) + 2); 
-        // sprintf($$, "*%s", $2);  
-        // free($2);
-
-        // string result = string("*") + string($2);
-        // $$ = strdup(result.c_str());
-    }
 	| STAR type_qualifier_list pointer
 	;
 
@@ -814,40 +523,7 @@ parameter_list
 parameter_declaration
 	: declaration_specifiers declarator  
 	{
-		// char type_str[10];
-        // get_type_string(type_str, $1);
-        // printf("Variable declaration: %s = %s\n", $1, $2); 
-        // assign_type(type_str);
-        // insert_symtab('V', $2);
-		char type_str[10];
-        // get_type_string(type_str, $1);
-
-        // char *token = strtok($2, ",");
-        // while (token != NULL) {
-        //     char *var_name = token;
-        //     char *value = strchr(token, '=');
-
-        //     if (value) {
-        //         *value = '\0';  
-        //         value++;  
-        //     }
-
-        //     assign_type(type_str);
-
-        //     int pointer_level = 0;
-        //     while (*var_name == '*') {
-        //         pointer_level++;
-        //         var_name++;  
-        //     }
-		// 	assign_type(type_str);
-        //     if (pointer_level > 0) {
-        //         insert_symtab('f',var_name);
-        //     } else {
-        //         insert_symtab('V',var_name);
-        //     }
-
-        //     token = strtok(NULL, ",");
-        // } 
+        // printf("Variable declaration: %s = %s\n", $1, $2); 	
 	}
 	| declaration_specifiers abstract_declarator
 	| declaration_specifiers
@@ -956,10 +632,6 @@ jump_statement
 	: GOTO ID SEMICOLON				
 	{ 
 		//printf("Goto statement: %s\n",$2);
-		
-      	// insert_symtab('G',$2);
-		
-
 	}
 	| CONTINUE SEMICOLON
 	| BREAK SEMICOLON
@@ -982,10 +654,7 @@ function_definition
 	: declaration_specifiers declarator declaration_list compound_statement
 	| declaration_specifiers declarator compound_statement    
 	{   //printf("Function is there: %s %s\n",$1,$2);
-		char type_str[10];
-      	// get_type_string(type_str,$1);
-      	assign_type(type_str);
-      	// insert_symtab('F',$2);
+		
 	}
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
@@ -995,17 +664,6 @@ function_definition
 void yyerror(const char *s) {
     
     fprintf(stderr, "Error at line %d: %s\n", yylineno, s);
-}
-
-int search_symtab(char *id_name) {
-	
-	for(int i=count_sym-1; i>=0; i--) {
-		if(strcmp(symbol_table[i].identifier_name, id_name)==0) {
-			return 1;
-			break;
-		}
-	}
-	return 0;
 }
 
 void print_scope_table() {
@@ -1058,9 +716,7 @@ int main() {
 
     yyparse();
 
-    // print_symbol_table();
-    // printf("\n");
-    // print_constant_table();
+    
 	printf("Parsing stack size = %d\n",parsing_stack.size());
 	while(!parsing_stack.empty()){
 		printf("Parsing stack%s\n",parsing_stack.top().c_str());

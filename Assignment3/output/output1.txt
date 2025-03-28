@@ -4,20 +4,28 @@ Direct declarator main
 a
 ID a
 Direct declarator a
+declarator11 a
+declarator a
+init_d a
+b
+ID b
+Direct declarator b
 I am in int
 Primary expression 
 Postfix expression 
 Unary expression 
 cond expression = int
 cond expression2 = 
+declaratoreiii b
 Yes int found
-declarator equals initializer a
-init_d a
-parsing stack top = a
+declarator equals initializer b
+init_D b
+parsing stack top = b
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = `uŽìþ
+dollar 3 type = P|ywþ
 top ka type = int
+Created new symbol: a with type int
 Correct type declaration
 ID a
 ID2 a
@@ -36,20 +44,28 @@ Correct type assignment
 c
 ID c
 Direct declarator c
+declarator11 c
+declarator c
+init_d c
+d
+ID d
+Direct declarator d
 I am in float
 Primary expression 
 Postfix expression 
 Unary expression 
 cond expression = float
 cond expression2 = 
+declaratoreiii d
 Yes float found
-declarator equals initializer c
-init_d c
-parsing stack top = c
+declarator equals initializer d
+init_D d
+parsing stack top = d
 Declaration specifiers = float
 Init declarator list = 0.000000
-dollar 3 type = `uŽìþ
+dollar 3 type = P|ywþ
 top ka type = float
+Created new symbol: c with type float
 Correct type declaration
 ID c
 ID2 c
@@ -65,22 +81,31 @@ unary inside assignment = c
 Assignment expression = float
 Symbol found
 Correct type assignment
-b
-ID b
-Direct declarator b
-declarator b
-init_d b
-parsing stack top = b
+a
+ID a
+Direct declarator a
+I am in int
+Primary expression 
+Postfix expression 
+Unary expression 
+cond expression = int
+cond expression2 = 
+declaratoreiii a
+Yes int found
+declarator equals initializer a
+init_d a
+parsing stack top = a
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = `uŽìþ
-Created new symbol: b with type int
+dollar 3 type = P|ywþ
+top ka type = int
 Correct type declaration
 Parsing stack size = 0
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | int                  | 4       | 6          |
-| b               | int                  | 4       | N/A        |
+| a               | int                  | 4       | 3          |
+| b               | int                  | 4       | 5          |
 | c               | float                | 4       | 3.400000   |
+| d               | float                | 4       | 4.300000   |
 -----------------------------------------------------------------

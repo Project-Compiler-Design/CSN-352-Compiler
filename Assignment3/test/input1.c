@@ -1,9 +1,9 @@
 int main(){
-    int a=5;
+    int a,b=5;
     a=6;
-    float c=4.3f;
+    float c,d=4.3f;
     c=3.4f;
-    int b;
+    int a=3;
     
 
 }
