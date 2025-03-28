@@ -9,10 +9,12 @@ I am in int
 Primary expression 
 Postfix expression 
 Unary expression 
+Array length = 4
 I am in int
 Primary expression 
 Postfix expression 
 Unary expression 
+Array length = 5
 Direct declarator subject_marks
 main
 ID main
@@ -33,7 +35,7 @@ init_d x
 parsing stack top = x
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = †∑Rˇ
+dollar 3 type = êü4¸
 top ka type = int
 Correct type declaration
 ID found: x
@@ -105,10 +107,12 @@ I am in int
 Primary expression 
 Postfix expression 
 Unary expression 
+Array length = 3
 I am in int
 Primary expression 
 Postfix expression 
 Unary expression 
+Array length = 2
 Direct declarator arr
 I am in int
 Primary expression 
@@ -148,12 +152,13 @@ cond expression = int
 cond expression2 = 
 declaratoreiii arr
 Yes int found
+Error: Elements Greater than Declared
 declarator equals initializer arr
 init_d arr
 parsing stack top = arr
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = †∑Rˇ
+dollar 3 type = êü4¸
 top ka type = int
 Correct type declaration
 c
@@ -165,7 +170,7 @@ init_d c
 parsing stack top = c
 Declaration specifiers = char
 Init declarator list = 0.000000
-dollar 3 type = †∑Rˇ
+dollar 3 type = êü4¸
 Created new symbol: c with type char
 Correct type declaration
 char_ptr

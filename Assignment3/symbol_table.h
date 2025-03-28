@@ -26,8 +26,12 @@ struct symbol_info {
     void* ptr = nullptr;  // Pointer to hold int* or float*
     int symbol_size=0;
     std::string str_val;
+    bool is_array = false;
+    int array_length = 0;
+    std::vector<symbol_info*> int_array;
 
-    symbol_info(std::string name="", std::string type="", void* ptr=nullptr, int symbol_size=0)
+
+    symbol_info(std::string name="", std::string type="", void* ptr=nullptr, int symbol_size=0, bool is_array=false, int array_length=0, std::vector<int> int_array={})
         : name(name), type(type), ptr(ptr), symbol_size(symbol_size){}
 };
 

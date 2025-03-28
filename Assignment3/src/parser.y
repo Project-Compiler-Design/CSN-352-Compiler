@@ -304,6 +304,7 @@ declaration
     : declaration_specifiers SEMICOLON
     | declaration_specifiers init_declarator_list SEMICOLON 
     {
+		
 		printf("parsing stack top = %s\n",parsing_stack.top().c_str());
 		printf("Declaration specifiers = %s\n", $1);
 		printf("Init declarator list = %f\n", $2->name.c_str());
@@ -388,6 +389,15 @@ init_declarator
 		if($3->type=="int") printf("Yes int found\n");
 		if($3->type=="char") printf("Yes char found %s\n",$3->str_val.c_str());
 		parsing_stack.push($1->name.c_str());
+		if($1->is_array){
+			if($3->int_array.size() > $1->array_length){
+				printf("Error: Elements Greater than Declared\n");
+			}
+			else{
+				$1->int_array = $3->int_array;
+				$1->type = $3->type;
+			}
+		}
 		$$ = $1;
 		printf("declarator equals initializer %s\n",$$->name.c_str()); 
 		
@@ -505,8 +515,16 @@ direct_declarator
 	{ 
 		//printf("LPar declarator RPar= %s\n",$2);
 	}
-	| direct_declarator LBRACKET constant_expression RBRACKET
-	| direct_declarator LBRACKET RBRACKET								//{printf("Array\n");}
+	| direct_declarator LBRACKET constant_expression RBRACKET			{$$->is_array = true;
+																		if($3->type=="int"){
+																			$$->array_length = *(int*)($3->ptr);
+																			printf("Array length = %d\n",$$->array_length);
+																		}
+																		else{
+																			printf("Error: Array size not an integer\n");
+																			$$->array_length=100;
+																		}}
+	| direct_declarator LBRACKET RBRACKET								{printf("Array Size not declared\n"), $$->is_array = true, $$->array_length = 100;}
 	| direct_declarator LPARENTHESES parameter_type_list RPARENTHESES     //{printf("Brackets found with parameter= %s\n",$1);}
 	| direct_declarator LPARENTHESES identifier_list RPARENTHESES          //{printf("Brackets found\n");}
 	| direct_declarator LPARENTHESES RPARENTHESES 						//{printf("Brackets found\n");}
@@ -573,14 +591,25 @@ direct_abstract_declarator
 	;
 
 initializer
-	: assignment_expression {$$=$1;}
-	| LBRACE initializer_list RBRACE
-	| LBRACE initializer_list COMMA RBRACE
+	: assignment_expression {
+		$1->int_array.push_back($1);
+		$$=$1;
+	}
+	| LBRACE initializer_list RBRACE {$$ = $2;}
+	| LBRACE initializer_list COMMA RBRACE {$$ = $2;}
 	;
 
 initializer_list
-	: initializer
-	| initializer_list COMMA initializer
+	: initializer {$$ = $1;}
+	| initializer_list COMMA initializer {
+		if($1->type != $3->type){
+			printf("Error: Type mismatch in initializer list\n");
+		}
+		else{
+			$1->int_array.push_back($3);
+		}
+		$$ = $1;
+	}
 	;
 
 statement

@@ -3,112 +3,55 @@ ID main
 Direct declarator main
 a
 ID a
+I am in int
+Primary expression 
+Postfix expression 
+Unary expression 
+Array length = 5
 Direct declarator a
-declarator11 a
-declarator a
-init_d a
-b
-ID b
-Direct declarator b
 I am in int
 Primary expression 
 Postfix expression 
 Unary expression 
 cond expression = int
 cond expression2 = 
-declaratoreiii b
+I am in int
+Primary expression 
+Postfix expression 
+Unary expression 
+cond expression = int
+cond expression2 = 
+I am in int
+Primary expression 
+Postfix expression 
+Unary expression 
+cond expression = int
+cond expression2 = 
+I am in int
+Primary expression 
+Postfix expression 
+Unary expression 
+cond expression = int
+cond expression2 = 
+I am in int
+Primary expression 
+Postfix expression 
+Unary expression 
+cond expression = int
+cond expression2 = 
+declaratoreiii a
 Yes int found
-declarator equals initializer b
-init_D b
-parsing stack top = b
+declarator equals initializer a
+init_d a
+parsing stack top = a
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = 0éaœü
+dollar 3 type = ð°ð–þ
 top ka type = int
-Created new symbol: a with type int
-Correct type declaration
-ID found: a
-ID a
-ID2 a
-check
-Primary expression a
-Postfix expression a
-I am in int
-Primary expression 
-Postfix expression 
-Unary expression 
-cond expression = int
-cond expression2 = 
-unary inside assignment = a
-Assignment expression = int
-Correct type assignment
-c
-ID c
-Direct declarator c
-declarator11 c
-declarator c
-init_d c
-d
-ID d
-Direct declarator d
-I am in float
-Primary expression 
-Postfix expression 
-Unary expression 
-cond expression = float
-cond expression2 = 
-declaratoreiii d
-Yes float found
-declarator equals initializer d
-init_D d
-parsing stack top = d
-Declaration specifiers = float
-Init declarator list = 0.000000
-dollar 3 type = 0éaœü
-top ka type = float
-Created new symbol: c with type float
-Correct type declaration
-ID found: c
-ID c
-ID2 c
-check
-Primary expression c
-Postfix expression c
-I am in float
-Primary expression 
-Postfix expression 
-Unary expression 
-cond expression = float
-cond expression2 = 
-unary inside assignment = c
-Assignment expression = float
-Correct type assignment
-s
-ID s
-Direct declarator s
-I am in char a
-Primary expression 
-Postfix expression 
-Unary expression 
-cond expression = char
-cond expression2 = 
-declaratoreiii s
-Yes char found a
-declarator equals initializer s
-init_d s
-parsing stack top = s
-Declaration specifiers = char
-Init declarator list = 0.000000
-dollar 3 type = 0éaœü
-top ka type = char
 Correct type declaration
 Parsing stack size = 0
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | int                  | 4       | 6          |
-| b               | int                  | 4       | 5          |
-| c               | float                | 4       | 3.400000   |
-| d               | float                | 4       | 4.300000   |
-| s               | char                 | 2       | a          |
+| a               | int                  | 4       | 1          |
 -----------------------------------------------------------------
