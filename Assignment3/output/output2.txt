@@ -1,0 +1,32 @@
+Integer
+ID Integer
+Direct declarator Integer
+declarator11 Integer
+declarator Integer
+init_d Integer
+parsing stack top = Integer
+Declaration specifiers = typedef
+Init declarator list = 0.000000
+dollar 3 type = 
+Created new symbol: Integer with type typedef
+Correct type declaration
+subtract
+ID subtract
+a
+ID a
+Direct declarator a
+b
+ID b
+Direct declarator b
+Direct declarator subtract
+ID found: a
+ID a
+ID2 a
+check
+Primary expression a
+Postfix expression a
+Unary expression a
+ID found: b
+ID b
+ID2 b
+check

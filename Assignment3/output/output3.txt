@@ -42,19 +42,23 @@ init_d x
 parsing stack top = x
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = 0Êˆÿ
+dollar 3 type = àaëÐý
 top ka type = int
 Correct type declaration
 y
 ID y
 Direct declarator y
+ID found: x
 ID x
 ID2 x
+check
 Primary expression x
 Postfix expression x
 Unary expression x
+ID found: x
 ID x
 ID2 x
+check
 Primary expression x
 Postfix expression x
 Unary expression x
@@ -70,30 +74,38 @@ init_d y
 parsing stack top = y
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = 0Êˆÿ
+dollar 3 type = àaëÐý
 Created new symbol: y with type int
 Correct type declaration
+ID found: x
 ID x
 ID2 x
+check
 Primary expression x
 Postfix expression x
 Unary expression x
+ID found: y
 ID y
 ID2 y
+check
 Primary expression y
 Postfix expression y
 Unary expression y
 cond expression = 
 cond expression2 = x
+ID found: y
 ID y
 ID2 y
+check
 Primary expression y
 Postfix expression y
 Unary expression y
 cond expression = 
 cond expression2 = y
+ID found: x
 ID x
 ID2 x
+check
 Primary expression x
 Postfix expression x
 Unary expression x
@@ -108,11 +120,13 @@ init_d i
 parsing stack top = i
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = 0Êˆÿ
+dollar 3 type = àaëÐý
 Created new symbol: i with type int
 Correct type declaration
+ID found: i
 ID i
 ID2 i
+check
 Primary expression i
 Postfix expression i
 I am in int
@@ -123,10 +137,11 @@ cond expression = int
 cond expression2 = 
 unary inside assignment = i
 Assignment expression = int
-Symbol found
 Correct type assignment
+ID found: i
 ID i
 ID2 i
+check
 Primary expression i
 Postfix expression i
 Unary expression i
@@ -136,27 +151,35 @@ Postfix expression
 Unary expression 
 cond expression = 
 cond expression2 = i
+ID found: i
 ID i
 ID2 i
+check
 Primary expression i
 Postfix expression i
 Unary expression i
 cond expression = 
 cond expression2 = i
+ID found: y
 ID y
 ID2 y
+check
 Primary expression y
 Postfix expression y
 Unary expression y
 cond expression = 
 cond expression2 = y
+ID found: x
 ID x
 ID2 x
+check
 Primary expression x
 Postfix expression x
 Unary expression x
+ID found: y
 ID y
 ID2 y
+check
 Primary expression y
 Postfix expression y
 Unary expression y

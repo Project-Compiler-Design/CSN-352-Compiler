@@ -7,7 +7,8 @@
     #include<vector>
 	#include<stack>
 
-	#include "symbol_table.h"
+	// #include "symbol_table.h"
+	#include "functions.h"
     using namespace std;
 
 	#define MAX_ARGS 100
@@ -19,14 +20,6 @@
     extern char *yytext;  
 
 	stack<string> parsing_stack;
-
-    struct scoped_symtab;
-
-    struct scoped_symtab{
-        scoped_symtab* parent = nullptr;
-        std::map<string,symbol_info*> symbol_map;
-        std::vector<scoped_symtab*> child_list; 
-    };
 
     scoped_symtab* curr_scope = new scoped_symtab();
 
@@ -100,41 +93,35 @@ constant:
 
 primary_expression
 	: ID		
-	{
-		printf("ID %s\n",$1);
-		symbol_info* new_symbol = new symbol_info();
-		new_symbol->name = $1;
-		$$ = new_symbol;
-		printf("ID2 %s\n",$$->name.c_str());
-		
-	}
+        {
+            cerr<<"ID found: "<<$1<<endl;
+            printf("ID %s\n",$1);
+            symbol_info* new_symbol = new symbol_info($1);
+            $$ = new_symbol;
+            printf("ID2 %s\n",$$->name.c_str());
+            cerr<<"check"<<endl;
+            
+        }
 	| constant		{$$ = $1;}
-	| STRING_LITERAL {
-        // printf("This is a string literal: %s",$1);
-    }
+	| STRING_LITERAL 
+        {
+            // printf("This is a string literal: %s",$1);
+        }
 	| LPARENTHESES expression RPARENTHESES
 	;
 
 postfix_expression
 	: primary_expression 
-	{$$=$1;
-		printf("Primary expression %s\n",$$->name.c_str());
-	}
+        {
+            $$=$1;
+            printf("Primary expression %s\n",$$->name.c_str());
+        }
 	| postfix_expression LBRACKET expression RBRACKET
 	| postfix_expression LPARENTHESES RPARENTHESES					//{printf("Brackets found\n");}
 	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES   
-	{//printf("Function call= %s\n",$1);
-		// char type_str[10];
-        // get_type_string(type_str, "unknown");
- 
-        // assign_type(type_str);
-        // //insert_symtab('F', $1);
-		// for (int i = 0; i < argList.count_arg; i++) {
-        //     //printf("%s", argList.args[i]);
-        //     if (i < argList.count_arg - 1){} //printf(", ");
-        // }
-        // //printf("\n");
-	}
+	    {
+            //printf("Function call= %s\n",$1);
+        }
 	| postfix_expression DOT ID
 	| postfix_expression LAMBDA_ARROW ID
 	| postfix_expression INCREMENT
@@ -263,16 +250,27 @@ assignment_expression
 	{
 		printf("unary inside assignment = %s\n",$1->name.c_str());
 		printf("Assignment expression = %s\n",$3->type.c_str());
-		if(curr_scope->symbol_map[$1->name]!=nullptr){
-			printf("Symbol found\n");
-			if(curr_scope->symbol_map[$1->name]->type!=$3->type){
-				printf("Error: Type mismatch in assignment\n");
-			}
-			else{
-				printf("Correct type assignment\n");
-				curr_scope->symbol_map[$1->name]=$3;
-			}
-		}
+        symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
+        if(find_symbol != nullptr) {
+            if(find_symbol->type != $3->type) {
+                printf("Error: Type mismatch in assignment\n");
+            } else {
+                printf("Correct type assignment\n");
+                set_pointer_data(find_symbol, find_symbol->type, $3->ptr);  
+            }
+            
+        }
+
+		// if(curr_scope->symbol_map[$1->name]!=nullptr){
+		// 	printf("Symbol found\n");
+		// 	if(curr_scope->symbol_map[$1->name]->type!=$3->type){
+		// 		printf("Error: Type mismatch in assignment\n");
+		// 	}
+		// 	else{
+		// 		printf("Correct type assignment\n");
+		// 		curr_scope->symbol_map[$1->name]=$3;
+		// 	}
+		// }
 		else{
 			printf("Symbol not found\n");
 		}
@@ -327,9 +325,12 @@ declaration
 					printf("Error: Type mismatch in declaration\n");
 					flag = 1;
 				}
+                curr_scope->symbol_map[top_symbol]->name = top_symbol;
+
 			} else {
 				// Create new symbol_info and assign type = $1
 				curr_scope->symbol_map[top_symbol]->type = $1;
+                curr_scope->symbol_map[top_symbol]->name = top_symbol;
 				printf("Created new symbol: %s with type %s\n", top_symbol.c_str(), ($1));
 			}
 		}

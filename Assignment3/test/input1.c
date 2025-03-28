@@ -4,7 +4,5 @@ int main(){
     float c,d=4.3f;
     c=3.4f;
     char s='a';
-    
-
 }
 

@@ -23,12 +23,14 @@ init_D b
 parsing stack top = b
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type =  óÖòþ
+dollar 3 type = 0éaœü
 top ka type = int
 Created new symbol: a with type int
 Correct type declaration
+ID found: a
 ID a
 ID2 a
+check
 Primary expression a
 Postfix expression a
 I am in int
@@ -39,7 +41,6 @@ cond expression = int
 cond expression2 = 
 unary inside assignment = a
 Assignment expression = int
-Symbol found
 Correct type assignment
 c
 ID c
@@ -63,12 +64,14 @@ init_D d
 parsing stack top = d
 Declaration specifiers = float
 Init declarator list = 0.000000
-dollar 3 type =  óÖòþ
+dollar 3 type = 0éaœü
 top ka type = float
 Created new symbol: c with type float
 Correct type declaration
+ID found: c
 ID c
 ID2 c
+check
 Primary expression c
 Postfix expression c
 I am in float
@@ -79,7 +82,6 @@ cond expression = float
 cond expression2 = 
 unary inside assignment = c
 Assignment expression = float
-Symbol found
 Correct type assignment
 s
 ID s
@@ -97,7 +99,7 @@ init_d s
 parsing stack top = s
 Declaration specifiers = char
 Init declarator list = 0.000000
-dollar 3 type =  óÖòþ
+dollar 3 type = 0éaœü
 top ka type = char
 Correct type declaration
 Parsing stack size = 0
