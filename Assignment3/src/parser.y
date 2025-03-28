@@ -44,7 +44,7 @@
 
     struct scoped_symtab{
         scoped_symtab* parent = nullptr;
-        std::map<string,symbol_info> symbol_map;
+        std::map<string,symbol_info*> symbol_map;
         std::vector<scoped_symtab*> child_list; 
     };
 
@@ -259,9 +259,11 @@ constant:
     DECIMAL_LITERAL      
 	{ 
 		$$=$1;
+		printf("I am in int\n");
 	}//insert_const_tab('I', $1); }
     | FLOAT_LITERAL      
 	{ $$=$1;
+	printf("I am in float\n");
 	}//insert_const_tab('F', $1); }
     | EXP_LITERAL         //insert_const_tab('E', $1); }
     | HEXA_LITERAL       //{ insert_const_tab('H', $1); }
@@ -272,7 +274,15 @@ constant:
 
 
 primary_expression
-	: ID			//{ $$ = strdup($1); }
+	: ID		
+	{
+		printf("ID %s\n",$1);
+		symbol_info* new_symbol = new symbol_info();
+		new_symbol->name = $1;
+		$$ = new_symbol;
+		printf("ID2 %s\n",$$->name.c_str());
+		
+	}
 	| constant		{$$ = $1;}
 	| STRING_LITERAL {
         // printf("This is a string literal: %s",$1);
@@ -281,7 +291,10 @@ primary_expression
 	;
 
 postfix_expression
-	: primary_expression {$$=$1;}
+	: primary_expression 
+	{$$=$1;
+		printf("Primary expression %s\n",$$->name.c_str());
+	}
 	| postfix_expression LBRACKET expression RBRACKET
 	| postfix_expression LPARENTHESES RPARENTHESES					//{printf("Brackets found\n");}
 	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES   
@@ -319,7 +332,11 @@ argument_expression_list
     ;
 
 unary_expression
-	: postfix_expression {$$=$1;}
+	: postfix_expression 
+	{
+		$$=$1;
+		printf("Postfix expression %s\n",$$->name.c_str());
+		}
 	| INCREMENT unary_expression
 	| DECREMENT unary_expression
 	| unary_operator cast_expression
@@ -337,7 +354,11 @@ unary_operator
 	;
 
 cast_expression
-	: unary_expression {$$=$1;}
+	: unary_expression 
+	{
+		$$=$1;
+		printf("Unary expression %s\n",$$->name.c_str());
+		}
 	| LPARENTHESES type_name RPARENTHESES cast_expression
 	;
 
@@ -410,8 +431,27 @@ assignment_expression
 		//printf("conditional inside assignment = %s\n",$$);
 		// $$ = strdup($1);
 		$$=$1;
+		printf("cond expression = %s\n",$1->type.c_str());
+		printf("cond expression2 = %s\n",$1->name.c_str());
 	}
-	| unary_expression assignment_operator assignment_expression //{printf("Assignment expression = %s\n",$1);}
+	| unary_expression assignment_operator assignment_expression 
+	{
+		printf("unary inside assignment = %s\n",$1->name.c_str());
+		printf("Assignment expression = %s\n",$3->type.c_str());
+		if(curr_scope->symbol_map[$1->name]!=nullptr){
+			printf("Symbol found\n");
+			if(curr_scope->symbol_map[$1->name]->type!=$3->type){
+				printf("Error: Type mismatch in assignment\n");
+			}
+			else{
+				printf("Correct type assignment\n");
+				curr_scope->symbol_map[$1->name]=$3;
+			}
+		}
+		else{
+			printf("Symbol not found\n");
+		}
+	}
 	;
 
 assignment_operator
@@ -439,16 +479,40 @@ constant_expression
 
 declaration
     : declaration_specifiers SEMICOLON
-    | declaration_specifiers {printf("%s\n",$1); parsing_stack.push($1);} init_declarator_list SEMICOLON 
+    | declaration_specifiers {parsing_stack.push($1);} init_declarator_list SEMICOLON 
     {
+		printf("parsing stack top = %s\n",parsing_stack.top().c_str());
 		printf("Declaration specifiers = %s\n", $1);
-		printf("Init declarator list = %f\n", $3->symbol_size);
-		if($1!=$3->type){
-			printf("Error: Type mismatch in declaration\n");
-			exit(1);
+		printf("Init declarator list = %f\n", $3->name.c_str());
+		printf("dollar 3 type = %s\n",$3->type);
+		// while(!parsing_stack.empty()){
+		// 	printf("top= %s\n",parsing_stack.top().c_str());
+		// 	parsing_stack.pop();
+		// }
+		int flag=0;
+		while (parsing_stack.top() != $1) {
+			std::string top_symbol = parsing_stack.top();  // Store the top of the stack
+			parsing_stack.pop();  // Pop before using it in the map (avoids multiple lookups)
+
+			// Check if the symbol exists in the current scope
+			if (curr_scope->symbol_map[top_symbol] != nullptr) {
+				printf("top ka type = %s\n", curr_scope->symbol_map[top_symbol]->type.c_str());
+
+				if ($1 != curr_scope->symbol_map[top_symbol]->type) {
+					printf("Error: Type mismatch in declaration\n");
+					flag = 1;
+				}
+			} else {
+				// Create new symbol_info and assign type = $1
+				symbol_info* new_symbol = new symbol_info();
+				new_symbol->type = $1;
+				curr_scope->symbol_map[top_symbol] = new_symbol;
+				printf("Created new symbol: %s with type %s\n", top_symbol.c_str(), ($1));
+			}
 		}
+		parsing_stack.pop();
 		
-		else printf("Declaration is correct\n");
+		if(flag==0) printf("Correct type declaration\n");
 		
 		
 
@@ -497,7 +561,8 @@ declaration_specifiers
 
 init_declarator_list
     : init_declarator { 
-        $$ = $1;  
+        $$ = $1; 
+		printf("init_d %s\n",$$->name.c_str());  
         //printf("init_declarator = %s\n", $$);
     }
     | init_declarator_list COMMA init_declarator { 
@@ -508,12 +573,16 @@ init_declarator_list
         // string result = string($1) + "," + string($3);
         // $$ = strdup(result.c_str());
         //printf("init_declarator_list = %s\n", $$);
+		$$=$3;
+		printf("init_D %s\n",$$->name.c_str()); 
     }
     ;
 
 init_declarator
     : declarator { 
-        $$ =$1; 
+		curr_scope->symbol_map[$1->name]=nullptr;
+        $$ =$1;
+		printf("declarator %s\n",$$->name.c_str()); 
 		parsing_stack.push($1->name.c_str());
         //printf("declarator = %s\n", $$);
     }
@@ -525,8 +594,12 @@ init_declarator
         // string result = string($1) + "=" + string($3);
         // $$ = strdup(result.c_str());
         //printf("init_declarator with initializer = %s\n", $$);
+		curr_scope->symbol_map[$1->name]=$3;
+		if($3->type=="float") printf("Yes float found\n");
+		if($3->type=="int") printf("Yes int found\n");
 		parsing_stack.push($1->name.c_str());
-		$$ = $3;
+		$$ = $1;
+		printf("declarator equals initializer %s\n",$$->name.c_str()); 
 		
     }
     ;
@@ -681,6 +754,7 @@ declarator
 		$$=$1;
         // $$ = strdup($1);  
 		//printf("Direct declarator %s\n",$$);
+		printf("Direct declarator %s\n",$$->name.c_str());
     }
     ;
 
@@ -692,7 +766,7 @@ direct_declarator
 		x->name = $1;
 
 		$$=x;
-		printf("%s\n",$$->name.c_str());
+		printf("ID %s\n",$$->name.c_str());
 	}        //{printf("Identifier in direct declaratorrr = %s\n",$1);}
 	| LPARENTHESES declarator RPARENTHESES			
 	{ 
@@ -934,18 +1008,64 @@ int search_symtab(char *id_name) {
 	return 0;
 }
 
+void print_scope_table() {
+    printf("-----------------------------------------------------------------\n");
+    printf("| %-15s | %-20s | %-7s | %-10s |\n", "Identifier", "Type", "Size", "Value");
+    printf("-----------------------------------------------------------------\n");
+
+    for (const auto& it : curr_scope->symbol_map) {
+        if (!it.second) {  // Check if symbol_info* is null (shouldn't happen after your fix)
+            printf("| %-15s | %-20s | %-7s | %-10s |\n",
+                   it.first.c_str(), "uninitialized", "N/A", "N/A");
+            continue;
+        }
+
+        std::string valueStr = "N/A";  // Default value
+        int size = 0;  // Default size
+
+        // Assign size based on type
+        if (it.second->type == "int") {
+            size = 4;
+            if (it.second->ptr) valueStr = std::to_string(*(int*)(it.second->ptr));
+        } else if (it.second->type == "float") {
+            size = 4;
+            if (it.second->ptr) valueStr = std::to_string(*(float*)(it.second->ptr));
+        } else if (it.second->type == "char") {
+            size = 2;
+            if (it.second->ptr) valueStr = std::string(1, *(char*)(it.second->ptr));
+        } else if (it.second->type == "long") {
+            size = 8;
+            if (it.second->ptr) valueStr = std::to_string(*(long*)(it.second->ptr));
+        } else {
+            size = 0;  // Unknown type
+        }
+
+        printf("| %-15s | %-20s | %-7d | %-10s |\n",
+               it.first.c_str(),          // Identifier
+               it.second->type.c_str(),   // Type
+               size,                      // Size
+               valueStr.c_str());         // Value
+    }
+
+    printf("-----------------------------------------------------------------\n");
+}
+
+
+
 
 
 int main() {
 
     yyparse();
 
-    print_symbol_table();
-    printf("\n");
-    print_constant_table();
+    // print_symbol_table();
+    // printf("\n");
+    // print_constant_table();
+	printf("Parsing stack size = %d\n",parsing_stack.size());
 	while(!parsing_stack.empty()){
-		printf("%s\n",parsing_stack.top().c_str());
+		printf("Parsing stack%s\n",parsing_stack.top().c_str());
 		parsing_stack.pop();
 	}
+	print_scope_table();
 
 }

@@ -1,23 +1,86 @@
 main
-main
-int
+ID main
+Direct declarator main
 a
-a
+ID a
+Direct declarator a
+I am in int
+Primary expression 
+Postfix expression 
+Unary expression 
+cond expression = int
+cond expression2 = 
+Yes int found
+declarator equals initializer a
+init_d a
+parsing stack top = a
 Declaration specifiers = int
 Init declarator list = 0.000000
-Declaration is correct
-
-SYMBOL TABLE
+dollar 3 type = `uŽìþ
+top ka type = int
+Correct type declaration
+ID a
+ID2 a
+Primary expression a
+Postfix expression a
+I am in int
+Primary expression 
+Postfix expression 
+Unary expression 
+cond expression = int
+cond expression2 = 
+unary inside assignment = a
+Assignment expression = int
+Symbol found
+Correct type assignment
+c
+ID c
+Direct declarator c
+I am in float
+Primary expression 
+Postfix expression 
+Unary expression 
+cond expression = float
+cond expression2 = 
+Yes float found
+declarator equals initializer c
+init_d c
+parsing stack top = c
+Declaration specifiers = float
+Init declarator list = 0.000000
+dollar 3 type = `uŽìþ
+top ka type = float
+Correct type declaration
+ID c
+ID2 c
+Primary expression c
+Postfix expression c
+I am in float
+Primary expression 
+Postfix expression 
+Unary expression 
+cond expression = float
+cond expression2 = 
+unary inside assignment = c
+Assignment expression = float
+Symbol found
+Correct type assignment
+b
+ID b
+Direct declarator b
+declarator b
+init_d b
+parsing stack top = b
+Declaration specifiers = int
+Init declarator list = 0.000000
+dollar 3 type = `uŽìþ
+Created new symbol: b with type int
+Correct type declaration
+Parsing stack size = 0
 -----------------------------------------------------------------
-| Identifier      | Type                 | Data Type  | Line No |
+| Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+| a               | int                  | 4       | 6          |
+| b               | int                  | 4       | N/A        |
+| c               | float                | 4       | 3.400000   |
 -----------------------------------------------------------------
-
-
-Constant Table:
------------------------------------------------------------------
-| Constant Value              | Constant Type        | Line no. |
------------------------------------------------------------------
------------------------------------------------------------------
-a
-int
