@@ -317,7 +317,7 @@ declaration
 			parsing_stack.pop();  // Pop before using it in the map (avoids multiple lookups)
 
 			// Check if the symbol exists in the current scope
-			if (curr_scope->symbol_map[top_symbol] != nullptr) {
+			if (curr_scope->symbol_map[top_symbol]->type!= "") {
 				printf("top ka type = %s\n", curr_scope->symbol_map[top_symbol]->type.c_str());
 
 				if ($1 != curr_scope->symbol_map[top_symbol]->type) {
@@ -326,9 +326,7 @@ declaration
 				}
 			} else {
 				// Create new symbol_info and assign type = $1
-				symbol_info* new_symbol = new symbol_info();
-				new_symbol->type = $1;
-				curr_scope->symbol_map[top_symbol] = new_symbol;
+				curr_scope->symbol_map[top_symbol]->type = $1;
 				printf("Created new symbol: %s with type %s\n", top_symbol.c_str(), ($1));
 			}
 		}
@@ -362,13 +360,25 @@ init_declarator_list
 init_declarator
     : declarator { 
 		printf("declarator11 %s\n",$1->name.c_str());
-		curr_scope->symbol_map[$1->name]=nullptr;
+		if(curr_scope->symbol_map[$1->name]!=nullptr){
+			printf("Redeclaration error \n");
+			exit(1);
+		}
+		
+		symbol_info* new_symbol=new symbol_info();
+
+		curr_scope->symbol_map[$1->name]=new_symbol;
         $$ =$1;
 		printf("declarator %s\n",$$->name.c_str()); 
 		parsing_stack.push($1->name.c_str());
     }
     | declarator EQUALS initializer { 
 		printf("declaratoreiii %s\n",$1->name.c_str());
+		if(curr_scope->symbol_map[$1->name]!=nullptr){
+			printf("Redeclaration error \n");
+			exit(1);
+		}
+		
 		curr_scope->symbol_map[$1->name]=$3;
 		if($3->type=="float") printf("Yes float found\n");
 		if($3->type=="int") printf("Yes int found\n");
