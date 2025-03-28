@@ -92,7 +92,10 @@ constant:
     | REAL_LITERAL      {$$=$1;}
     | STRING_LITERAL     {$$=$1;}
     | OCTAL_LITERAL      {$$=$1;}
-    | CHARACTER_LITERAL  {$$=$1;}
+    | CHARACTER_LITERAL  
+	{$$=$1;
+	printf("I am in char %s\n",$1->str_val.c_str());
+	}
 
 
 primary_expression
@@ -382,6 +385,7 @@ init_declarator
 		curr_scope->symbol_map[$1->name]=$3;
 		if($3->type=="float") printf("Yes float found\n");
 		if($3->type=="int") printf("Yes int found\n");
+		if($3->type=="char") printf("Yes char found %s\n",$3->str_val.c_str());
 		parsing_stack.push($1->name.c_str());
 		$$ = $1;
 		printf("declarator equals initializer %s\n",$$->name.c_str()); 
@@ -700,7 +704,7 @@ void print_scope_table() {
             if (it.second->ptr) valueStr = std::to_string(*(float*)(it.second->ptr));
         } else if (it.second->type == "char") {
             size = 2;
-            if (it.second->ptr) valueStr = std::string(1, *(char*)(it.second->ptr));
+            valueStr = it.second->str_val;
         } else if (it.second->type == "long") {
             size = 8;
             if (it.second->ptr) valueStr = std::to_string(*(long*)(it.second->ptr));

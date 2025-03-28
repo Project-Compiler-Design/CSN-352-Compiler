@@ -8,6 +8,7 @@ struct symbol_info {
     std::string name;
     void* ptr = nullptr;  // Pointer to hold int* or float*
     int symbol_size=0;
+    std::string str_val;
 };
 
 #endif // SYMBOL_TABLE_H

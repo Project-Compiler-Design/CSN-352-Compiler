@@ -219,8 +219,17 @@ INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
     yylval.symbol_info->ptr = new float(atof(yytext));
     yylval.symbol_info->symbol_size=4;
     return FLOAT_LITERAL; }
-{STRING_LITERAL}   { yylval.str = strdup(yytext); return STRING_LITERAL; }
-{CHARACTER_LITERAL} { yylval.str = strdup(yytext); return CHARACTER_LITERAL; }
+{STRING_LITERAL}   {  yylval.symbol_info = new symbol_info();
+    yylval.symbol_info->type = "string";
+    yylval.symbol_info->str_val= strdup(yytext);
+    yylval.symbol_info->symbol_size=strlen(yytext);
+    return STRING_LITERAL; }
+{CHARACTER_LITERAL} { yylval.symbol_info = new symbol_info();
+    yylval.symbol_info->type = "char";
+    char* temp = strdup(yytext);
+    temp[strlen(temp) - 1] = '\0'; 
+    yylval.symbol_info->str_val = std::string(temp + 1); 
+    yylval.symbol_info->symbol_size=1; return CHARACTER_LITERAL; free(temp);}
 {REAL_LITERAL}     { yylval.str = strdup(yytext); return REAL_LITERAL; }
 {SINCMNT}          { /* ignore single-line comment */ }
 {MULCMNT}          { /* ignore multi-line comment */ }

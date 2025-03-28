@@ -3,7 +3,7 @@ int main(){
     a=6;
     float c,d=4.3f;
     c=3.4f;
-    
+    char s='a';
     
 
 }
