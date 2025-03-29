@@ -29,9 +29,11 @@ struct symbol_info {
     bool is_array = false;
     int array_length = 0;
     std::vector<symbol_info*> int_array;
+    bool is_param_list=false;
+    int parameter_no=0;
+    std::vector<std::string> param_types;
 
-
-    symbol_info(std::string name="", std::string type="", void* ptr=nullptr, int symbol_size=0, bool is_array=false, int array_length=0, std::vector<int> int_array={})
+    symbol_info(std::string name="", std::string type="", void* ptr=nullptr, int symbol_size=0, bool is_array=false, int array_length=0, std::vector<int> int_array={},bool is_param_list=false,std::vector<std::string> param_types={},int parameter_no=0)
         : name(name), type(type), ptr(ptr), symbol_size(symbol_size){}
 };
 

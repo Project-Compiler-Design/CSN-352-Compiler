@@ -7,7 +7,7 @@ init_d Integer
 parsing stack top = Integer
 Declaration specifiers = typedef
 Init declarator list = 0.000000
-dollar 3 type =  ÿwßþ
+dollar 3 type = à_áÿ
 Created new symbol: Integer with type typedef
 Correct type declaration
 subtract
@@ -18,6 +18,15 @@ Direct declarator a
 b
 ID b
 Direct declarator b
+par num $1 1
+par num $3 1
+int
+int
+par num2
+Brackets found with parameter= subtract
+Par list 2
+int
+int
 Direct declarator subtract
 ID found: a
 ID a
@@ -30,3 +39,25 @@ ID found: b
 ID b
 ID2 b
 check
+Primary expression b
+Postfix expression b
+Unary expression b
+cond expression = 
+cond expression2 = a
+calc
+ID calc
+a
+ID a
+Direct declarator a
+b
+ID b
+Direct declarator b
+par num $1 1
+par num $3 1
+op
+ID op
+par num $1 1
+par num $3 0
+char
+char
+par num1

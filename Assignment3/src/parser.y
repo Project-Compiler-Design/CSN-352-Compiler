@@ -120,6 +120,29 @@ postfix_expression
 	| postfix_expression LPARENTHESES RPARENTHESES					//{printf("Brackets found\n");}
 	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES   
 	    {
+			symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
+			if(find_symbol == nullptr) {
+				cout<<"Error: Undeclared function "<<$1->name<<endl;
+				
+			}
+			else{
+				cout<<"Function type "<<find_symbol->type<<endl;
+		  		std::vector<std::string> original_list=find_symbol->param_types;
+				std::vector<std::string> new_list=$3->param_types;
+				if(original_list.size()!=new_list.size()){
+					cout<<"Error: Size of actual and formal parameter list does not match "<<endl;
+				}
+				else{
+					for(int i=0;i<original_list.size();i++){
+						if(original_list[i]!=new_list[i]){
+							cout<<"Error: Type of actual and formal parameter does not match"<<endl;
+							break;
+						}
+					}
+				}
+
+			}
+
             //printf("Function call= %s\n",$1);
         }
 	| postfix_expression DOT ID
@@ -130,17 +153,55 @@ postfix_expression
 
 argument_expression_list
     : assignment_expression
-    //   { 
-    //       if (argList.count_arg < MAX_ARGS) {
-    //           argList.args[argList.count_arg++] = strdup($1);
-    //       }
-    //   }
+      { 
+			cout<<"$1 ka name "<<$1->name<<endl;
+		  if($1->name==""){
+
+			cout<<"is a number "<<$1->type<<endl;
+			$$=$1;
+			$$->param_types.push_back($1->type);
+		  }
+		  else{
+			symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
+			if(find_symbol == nullptr) {
+				cout<<"Error: Undeclared variable "<<$1->name<<endl;
+			}
+			else{
+				cout<<"Ass exp "<<find_symbol->type<<endl;
+		  		$$=find_symbol;
+		  		$$->param_types.push_back(find_symbol->type);
+			}
+		  }
+		  
+          
+      }
     | argument_expression_list COMMA assignment_expression
-    //   { 
-    //       if (argList.count_arg < MAX_ARGS) {
-    //           argList.args[argList.count_arg++] = strdup($3);
-    //       }
-    //   }
+
+       { 
+			cout<<"$3 ka name "<<$3->name<<endl;
+		  if($3->name==""){
+
+			cout<<"is a number "<<$3->type<<endl;
+			$$=$1;
+			$$->param_types.push_back($3->type);
+		  }
+		  else{
+			symbol_info* find_symbol = lookup_symbol_global($3->name, curr_scope);
+			if(find_symbol == nullptr) {
+				cout<<"Error: Undeclared variable "<<$3->name<<endl;
+				
+			}
+			else{
+				cout<<"Ass exp222 "<<find_symbol->type<<endl;
+		  		$$=$1;
+		  		$$->param_types.push_back(find_symbol->type);
+			}
+			
+			cout<<"Ass exp111 "<<$1->type<<endl;
+		  }
+			
+           
+       }
     ;
 
 unary_expression
@@ -525,8 +586,17 @@ direct_declarator
 																			$$->array_length=100;
 																		}}
 	| direct_declarator LBRACKET RBRACKET								{printf("Array Size not declared\n"), $$->is_array = true, $$->array_length = 100;}
-	| direct_declarator LPARENTHESES parameter_type_list RPARENTHESES     //{printf("Brackets found with parameter= %s\n",$1);}
-	| direct_declarator LPARENTHESES identifier_list RPARENTHESES          //{printf("Brackets found\n");}
+	| direct_declarator LPARENTHESES parameter_type_list RPARENTHESES     
+	{
+		printf("Brackets found with parameter= %s\n",$1->name.c_str());
+		printf("Par list %d\n",$3->parameter_no);
+		for(auto it: $3->param_types)
+					{
+						cout<<it<<endl;
+					}
+		curr_scope->symbol_map[$1->name]=$3;
+	}
+	| direct_declarator LPARENTHESES identifier_list RPARENTHESES          //{printf("Brackets found in function calllll\n");}
 	| direct_declarator LPARENTHESES RPARENTHESES 						//{printf("Brackets found\n");}
 	;
 
@@ -544,22 +614,54 @@ type_qualifier_list
 
 
 parameter_type_list
-	: parameter_list
+	: parameter_list{
+		$$=$1;
+		for(auto it: $1->param_types)
+					{
+						cout<<it<<endl;
+					}
+		cout<<"par num"<<$$->parameter_no<<endl;
+				}
+
 	| parameter_list COMMA VARIABLE_ARGS
 	;
 
 parameter_list
-	: parameter_declaration
-	| parameter_list COMMA parameter_declaration
+	: parameter_declaration{$$->is_param_list=true;
+	   						$$->parameter_no=1;
+							
+	   						$$->param_types.push_back($1->type);}
+	| parameter_list COMMA parameter_declaration {$$->is_param_list=true;
+							cout<<"par num $1 "<<$1->parameter_no<<endl;
+							cout<<"par num $3 "<<$3->parameter_no<<endl;
+	   						$$->parameter_no=$1->parameter_no+$3->parameter_no;
+	   						$$->param_types.push_back($3->type);
+							
+												}
+	
 	;
 
 parameter_declaration
 	: declaration_specifiers declarator  
 	{
-        // printf("Variable declaration: %s = %s\n", $1, $2); 	
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->type=$1;
+		$$->parameter_no=1;
+		// printf("%s",$$->type);
 	}
-	| declaration_specifiers abstract_declarator
-	| declaration_specifiers
+	| declaration_specifiers abstract_declarator{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->type=$1;
+		// printf("%s",$$->type);
+	}
+	| declaration_specifiers{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->type=$1;
+		// printf("%s",$$->type);
+	}
 	;
 
 identifier_list
