@@ -1,3 +1,4 @@
 int main(){
-    int a[4] = {1, 2, 3, 4};
+    int a,b=5;
+    float c=6;
 }

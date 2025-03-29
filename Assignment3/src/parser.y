@@ -22,6 +22,8 @@
 	stack<string> parsing_stack;
 
     scoped_symtab* curr_scope = new scoped_symtab();
+    vector<scoped_symtab*> all_scopes;
+
 
 	struct ArgList {
         char *args[MAX_ARGS];
@@ -71,20 +73,14 @@
 %%
 
 constant: 
-    DECIMAL_LITERAL      
-	{ 
-		$$= new symbol_info();$$->type="int";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;
-	}
-    | FLOAT_LITERAL      {$$= new symbol_info();$$->type="float";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;}
-    | EXP_LITERAL        {$$= new symbol_info();$$->type="exp";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;} 
-    | HEXA_LITERAL       {$$= new symbol_info();$$->type="hexa";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;}
-    | REAL_LITERAL       {$$= new symbol_info();$$->type="real";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;}
-    | STRING_LITERAL     {$$= new symbol_info();$$->type="string";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;}
-    | OCTAL_LITERAL      {$$= new symbol_info();$$->type="octal";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;}
-    | CHARACTER_LITERAL  
-	{
-		$$= new symbol_info();$$->type="char";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;
-	}
+    DECIMAL_LITERAL      {$$= new symbol_info("", "int", $1->ptr, $1->symbol_size);}
+    | FLOAT_LITERAL      {$$= new symbol_info("", "float", $1->ptr, $1->symbol_size);}
+    | EXP_LITERAL        {$$ = new symbol_info("", "exp", $1->ptr, $1->symbol_size);} 
+    | HEXA_LITERAL       {$$ = new symbol_info("", "hexa", $1->ptr, $1->symbol_size);}
+    | REAL_LITERAL       {$$ = new symbol_info("", "real", $1->ptr, $1->symbol_size);}
+    | STRING_LITERAL     {$$ = new symbol_info("", "string", $1->ptr, $1->symbol_size);}
+    | OCTAL_LITERAL      {$$ = new symbol_info("", "octal", $1->ptr, $1->symbol_size);}
+    | CHARACTER_LITERAL  {$$ = new symbol_info("", "char", $1->ptr, $1->symbol_size);}
 
 
 primary_expression
@@ -100,9 +96,6 @@ primary_expression
         }
 	| constant		{cerr << "con\n";$$ = $1;}
 	| STRING_LITERAL 
-        {
-            // printf("This is a string literal: %s",$1);
-        }
 	| LPARENTHESES expression RPARENTHESES
 	;
 
@@ -113,7 +106,7 @@ postfix_expression
             cerr << "Primary expression found: " << $1->type << endl;
         }
 	| postfix_expression LBRACKET expression RBRACKET
-	| postfix_expression LPARENTHESES RPARENTHESES					//{printf("Brackets found\n");}
+	| postfix_expression LPARENTHESES RPARENTHESES					
 	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES   
 	    {
 			symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
@@ -727,10 +720,10 @@ labeled_statement
 
 compound_statement
 	: LBRACE RBRACE
-	| LBRACE statement_declaration_list RBRACE
-	| LBRACE statement_list RBRACE
-	| LBRACE declaration_list RBRACE
-	| LBRACE declaration_list statement_list RBRACE
+	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} statement_declaration_list RBRACE {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
+	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} statement_list RBRACE {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
+	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} declaration_list RBRACE {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
+	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} declaration_list statement_list RBRACE {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
 	;
 
 statement_declaration_list
@@ -809,11 +802,12 @@ void yyerror(const char *s) {
 }
 
 void print_scope_table() {
+    for(auto scope : all_scopes) {
     printf("-----------------------------------------------------------------\n");
     printf("| %-15s | %-20s | %-7s | %-10s |\n", "Identifier", "Type", "Size", "Value");
     printf("-----------------------------------------------------------------\n");
 
-    for (const auto& it : curr_scope->symbol_map) {
+    for (const auto& it : scope->symbol_map) {
         if (!it.second) {  // Check if symbol_info* is null (shouldn't happen after your fix)
             printf("| %-15s | %-20s | %-7s | %-10s |\n",
                    it.first.c_str(), "uninitialized", "N/A", "N/A");
@@ -848,6 +842,8 @@ void print_scope_table() {
     }
 
     printf("-----------------------------------------------------------------\n");
+
+    }
 }
 
 

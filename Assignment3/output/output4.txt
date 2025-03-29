@@ -35,7 +35,7 @@ init_d x
 parsing stack top = x
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = 
+dollar 3 type = Ð¬Ï<ÿ
 top ka type = int
 Correct type declaration
 ID found: x
@@ -158,7 +158,7 @@ init_d arr
 parsing stack top = arr
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = 
+dollar 3 type = Ð¬Ï<ÿ
 top ka type = int
 Correct type declaration
 c
@@ -170,7 +170,7 @@ init_d c
 parsing stack top = c
 Declaration specifiers = char
 Init declarator list = 0.000000
-dollar 3 type = 
+dollar 3 type = Ð¬Ï<ÿ
 Created new symbol: c with type char
 Correct type declaration
 char_ptr
