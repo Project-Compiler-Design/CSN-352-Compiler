@@ -1,109 +1,51 @@
-func
-ID func
-a
-ID a
-Direct declarator a
-b
-ID b
-Direct declarator b
-par num $1 1
-par num $3 1
-c
-ID c
-Direct declarator c
-par num $1 2
-par num $3 1
-int
-int
-float
-par num3
-Brackets found with parameter= func
-Par list 3
-int
-int
-float
-Direct declarator func
 main
 ID main
 Direct declarator main
 a
 ID a
+con
+Primary expression found: int
+Postfix expression 
+Unary expression 
+Array length = 4
 Direct declarator a
-declarator11 a
-declarator a
-init_d a
-b
-ID b
-Direct declarator b
-declarator11 b
-declarator b
-init_D b
-parsing stack top = b
-Declaration specifiers = int
-Init declarator list = 0.000000
-dollar 3 type = ÐGŠËý
-Created new symbol: b with type int
-Created new symbol: a with type int
-Correct type declaration
-c
-ID c
-Direct declarator c
-declarator11 c
-declarator c
-init_d c
-parsing stack top = c
-Declaration specifiers = float
-Init declarator list = 0.000000
-dollar 3 type = ÐGŠËý
-Created new symbol: c with type float
-Correct type declaration
-ID found: func
-ID func
-ID2 func
-check
-Primary expression func
-ID found: a
-ID a
-ID2 a
-check
-Primary expression a
-Postfix expression a
-Unary expression a
-cond expression = 
-cond expression2 = a
-$1 ka name a
-Ass exp int
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 cond expression = int
 cond expression2 = 
-$3 ka name 
-is a number int
-ID found: c
-ID c
-ID2 c
-check
-Primary expression c
-Postfix expression c
-Unary expression c
-cond expression = 
-cond expression2 = c
-$3 ka name c
-Ass exp222 float
-Ass exp111 int
-Function type int
-Postfix expression func
-Unary expression func
-cond expression = 
-cond expression2 = func
+con
+Primary expression found: int
+Postfix expression 
+Unary expression 
+cond expression = int
+cond expression2 = 
+con
+Primary expression found: int
+Postfix expression 
+Unary expression 
+cond expression = int
+cond expression2 = 
+con
+Primary expression found: int
+Postfix expression 
+Unary expression 
+cond expression = int
+cond expression2 = 
+declaratoreiii a
+Yes int found
+declarator equals initializer a
+init_d a
+parsing stack top = a
+Declaration specifiers = int
+Init declarator list = 0.000000
+dollar 3 type = pgú“ÿ
+top ka type = int
+Correct type declaration
 Parsing stack size = 0
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | int                  | 4       | N/A        |
-| b               | int                  | 4       | N/A        |
-| c               | float                | 4       | N/A        |
-| func            | int                  | 4       | N/A        |
+| a               | int                  | 4       | 1          |
 -----------------------------------------------------------------

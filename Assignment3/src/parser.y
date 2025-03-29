@@ -73,21 +73,17 @@
 constant: 
     DECIMAL_LITERAL      
 	{ 
-		$$=$1;
-		printf("I am in int\n");
+		$$= new symbol_info();$$->type="int";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;
 	}
-    | FLOAT_LITERAL      
-	{ $$=$1;
-	printf("I am in float\n");
-	}
-    | EXP_LITERAL        {$$=$1;} 
-    | HEXA_LITERAL       {$$=$1;}
-    | REAL_LITERAL      {$$=$1;}
-    | STRING_LITERAL     {$$=$1;}
-    | OCTAL_LITERAL      {$$=$1;}
+    | FLOAT_LITERAL      {$$= new symbol_info();$$->type="float";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;}
+    | EXP_LITERAL        {$$= new symbol_info();$$->type="exp";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;} 
+    | HEXA_LITERAL       {$$= new symbol_info();$$->type="hexa";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;}
+    | REAL_LITERAL       {$$= new symbol_info();$$->type="real";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;}
+    | STRING_LITERAL     {$$= new symbol_info();$$->type="string";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;}
+    | OCTAL_LITERAL      {$$= new symbol_info();$$->type="octal";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;}
     | CHARACTER_LITERAL  
-	{$$=$1;
-	printf("I am in char %s\n",$1->str_val.c_str());
+	{
+		$$= new symbol_info();$$->type="char";$$->ptr=$1->ptr;$$->symbol_size=$1->symbol_size;
 	}
 
 
@@ -102,7 +98,7 @@ primary_expression
             cerr<<"check"<<endl;
             
         }
-	| constant		{$$ = $1;}
+	| constant		{cerr << "con\n";$$ = $1;}
 	| STRING_LITERAL 
         {
             // printf("This is a string literal: %s",$1);
@@ -114,7 +110,7 @@ postfix_expression
 	: primary_expression 
         {
             $$=$1;
-            printf("Primary expression %s\n",$$->name.c_str());
+            cerr << "Primary expression found: " << $1->type << endl;
         }
 	| postfix_expression LBRACKET expression RBRACKET
 	| postfix_expression LPARENTHESES RPARENTHESES					//{printf("Brackets found\n");}

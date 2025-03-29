@@ -5,13 +5,13 @@ ID roll_no
 Direct declarator roll_no
 subject_marks
 ID subject_marks
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 Array length = 4
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 Array length = 5
@@ -22,8 +22,8 @@ Direct declarator main
 x
 ID x
 Direct declarator x
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 cond expression = int
@@ -35,43 +35,43 @@ init_d x
 parsing stack top = x
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = d?ÿý
+dollar 3 type = 
 top ka type = int
 Correct type declaration
 ID found: x
 ID x
 ID2 x
 check
-Primary expression x
+Primary expression found: 
 Postfix expression x
 Unary expression x
 cond expression = 
 cond expression2 = x
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 ID found: x
 ID x
 ID2 x
 check
-Primary expression x
+Primary expression found: 
 Postfix expression x
 Unary expression x
 cond expression = 
 cond expression2 = x
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 ID found: x
 ID x
 ID2 x
 check
-Primary expression x
+Primary expression found: 
 Postfix expression x
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 cond expression = int
@@ -79,21 +79,21 @@ cond expression2 =
 unary inside assignment = x
 Assignment expression = int
 Correct type assignment
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 ID found: x
 ID x
 ID2 x
 check
-Primary expression x
+Primary expression found: 
 Postfix expression x
 ID found: x
 ID x
 ID2 x
 check
-Primary expression x
+Primary expression found: 
 Postfix expression x
 Unary expression x
 cond expression = 
@@ -103,49 +103,49 @@ Assignment expression =
 Error: Type mismatch in assignment
 arr
 ID arr
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 Array length = 3
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 Array length = 2
 Direct declarator arr
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 cond expression = int
 cond expression2 = 
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 cond expression = int
 cond expression2 = 
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 cond expression = int
 cond expression2 = 
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 cond expression = int
 cond expression2 = 
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 cond expression = int
 cond expression2 = 
-I am in int
-Primary expression 
+con
+Primary expression found: int
 Postfix expression 
 Unary expression 
 cond expression = int
@@ -158,7 +158,7 @@ init_d arr
 parsing stack top = arr
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = d?ÿý
+dollar 3 type = 
 top ka type = int
 Correct type declaration
 c
@@ -170,7 +170,7 @@ init_d c
 parsing stack top = c
 Declaration specifiers = char
 Init declarator list = 0.000000
-dollar 3 type = d?ÿý
+dollar 3 type = 
 Created new symbol: c with type char
 Correct type declaration
 char_ptr
@@ -179,3 +179,4 @@ ID found: c
 ID c
 ID2 c
 check
+Primary expression found: 
