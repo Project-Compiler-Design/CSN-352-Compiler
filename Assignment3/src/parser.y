@@ -22,7 +22,8 @@
 	stack<string> parsing_stack;
 
     scoped_symtab* curr_scope = new scoped_symtab();
-    vector<scoped_symtab*> all_scopes;
+    vector<scoped_symtab*> all_scopes={curr_scope};
+	
 
 
 	struct ArgList {
@@ -55,8 +56,8 @@
 
 %type <symbol_info> init_declarator init_declarator_list
 
-%type <symbol_info> struct_or_union struct_declaration_list struct_declaration 
-%type <symbol_info> specifier_qualifier_list struct_declarator_list struct_declarator 
+%type <symbol_info> struct_declaration_list struct_declaration 
+%type <symbol_info> struct_declarator_list struct_declarator 
 %type <symbol_info> enumerator_list enumerator declarator 
 %type <symbol_info> direct_declarator pointer type_qualifier_list parameter_type_list 
 %type <symbol_info> parameter_list parameter_declaration identifier_list type_name 
@@ -66,7 +67,8 @@
 %type <symbol_info> selection_statement iteration_statement jump_statement 
 %type <symbol_info> translation_unit external_declaration function_definition
 
-%type <str> declaration_specifiers storage_class_specifier type_qualifier type_specifier struct_or_union_specifier enum_specifier
+%type <str> declaration_specifiers storage_class_specifier type_qualifier type_specifier enum_specifier specifier_qualifier_list
+%type <str> struct_or_union struct_or_union_specifier 
 
 %start translation_unit
 
@@ -197,7 +199,7 @@ unary_expression
 	: postfix_expression 
 	{
 		$$=$1;
-		printf("Postfix expression %s\n",$$->name.c_str());
+		cerr << "postfix expression found: " << $1->type << endl;
 		}
 	| INCREMENT unary_expression
 	| DECREMENT unary_expression
@@ -295,6 +297,7 @@ assignment_expression
 		$$=$1;
 		printf("cond expression = %s\n",$1->type.c_str());
 		printf("cond expression2 = %s\n",$1->name.c_str());
+		cerr << "condi expression found: " << $1->type << endl;
 	}
 	| unary_expression assignment_operator assignment_expression 
 	{
@@ -472,23 +475,42 @@ type_specifier
 	| DOUBLE			{$$=strdup("double");}
 	| SIGNED			{$$=strdup("signed");}
 	| UNSIGNED			{$$=strdup("unsigned");}
-	| struct_or_union_specifier
+	| struct_or_union_specifier {$$=$1;}
 	| enum_specifier
 	;
 
 struct_or_union_specifier
 	: struct_or_union ID LBRACE struct_declaration_list RBRACE 
+	{
+		symbol_info* new_symbol=new symbol_info();
+		new_symbol->type = $1;
+		curr_scope->symbol_map[$2]=new_symbol;
+	}
 	| struct_or_union LBRACE struct_declaration_list RBRACE
-	| struct_or_union ID 
+	| struct_or_union ID
+	{
+		symbol_info* find_symbol = lookup_symbol_global($2, curr_scope);
+        if(find_symbol != nullptr) {
+            if(find_symbol->type == "struct") {
+                $$=$2;
+            } else {
+                cerr<<"Error: Variable not of type struct"<<endl;
+            }
+            
+        }
+		else{
+			cerr<<"Error: Struct not declared"<<endl;
+		}
+	} 
 	;
 
 struct_or_union
-	: STRUCT
-	| UNION
+	: STRUCT {$$=strdup("struct");}
+	| UNION {$$=strdup("union");}
 	;
 
 struct_declaration_list
-	: struct_declaration
+	: struct_declaration {$$=$1;}
 	| struct_declaration_list struct_declaration
 	;
 
@@ -496,6 +518,15 @@ struct_declaration
 	: specifier_qualifier_list struct_declarator_list SEMICOLON      
 	{ 
 		//printf("Struct declaration %s = %s\n",$1,$2);
+		for(auto it: $2->param_types)
+					{
+						cerr<<it<<endl;
+						symbol_info* x=new symbol_info();
+						x->type = $1;
+						curr_scope->symbol_map[it]=x;
+					}
+		$$=$2;
+
 	}
 	;
 
@@ -507,12 +538,20 @@ specifier_qualifier_list
 	;
 
 struct_declarator_list
-	: struct_declarator
+	: struct_declarator 
+	{
+		$$=$1;
+		$$->param_types.push_back($1->name);
+	}
 	| struct_declarator_list COMMA struct_declarator
+	{
+		$$=$1;
+		$$->param_types.push_back($3->name);
+	}
 	;
 
 struct_declarator
-	: declarator        //{printf("Struct declarator = %s\n",$1);}
+	: declarator     {$$=$1;}   //{printf("Struct declarator = %s\n",$1);}
 	| COLON constant_expression
 	| declarator COLON constant_expression
 	;
@@ -802,11 +841,16 @@ void yyerror(const char *s) {
 }
 
 void print_scope_table() {
+	cerr<<"Printing scope table"<<endl;
+	int count=0;
+	for(auto scope : all_scopes) {count++;}
+	cerr<<"Count of scopes "<<count<<endl;
+	// cerr<<"Curr scope "<<curr_scope->symbol_map.size()<<endl;
     for(auto scope : all_scopes) {
     printf("-----------------------------------------------------------------\n");
     printf("| %-15s | %-20s | %-7s | %-10s |\n", "Identifier", "Type", "Size", "Value");
     printf("-----------------------------------------------------------------\n");
-
+	
     for (const auto& it : scope->symbol_map) {
         if (!it.second) {  // Check if symbol_info* is null (shouldn't happen after your fix)
             printf("| %-15s | %-20s | %-7s | %-10s |\n",
@@ -842,7 +886,7 @@ void print_scope_table() {
     }
 
     printf("-----------------------------------------------------------------\n");
-
+	cerr<<"Scope is here"<<endl;
     }
 }
 

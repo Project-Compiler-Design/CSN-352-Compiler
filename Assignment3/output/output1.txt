@@ -1,56 +1,78 @@
+roll
+ID roll
+Direct declarator roll
+marks
+ID marks
+Direct declarator marks
+roll
+marks
 main
 ID main
 Direct declarator main
 a
 ID a
 Direct declarator a
-declarator11 a
-declarator a
-init_d a
-b
-ID b
-Direct declarator b
 con
 Primary expression found: int
-Postfix expression 
+postfix expression found: int
 Unary expression 
 cond expression = int
 cond expression2 = 
-declaratoreiii b
+condi expression found: int
+declaratoreiii a
 Yes int found
-declarator equals initializer b
-init_D b
-parsing stack top = b
+declarator equals initializer a
+init_d a
+parsing stack top = a
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = À¬Œlü
+dollar 3 type =  Mÿ
 top ka type = int
-Created new symbol: a with type int
 Correct type declaration
-c
-ID c
-Direct declarator c
+s1
+ID s1
+Direct declarator s1
+declarator11 s1
+declarator s1
+init_d s1
+parsing stack top = s1
+Declaration specifiers = Student
+Init declarator list = 0.000000
+dollar 3 type =  Mÿ
+Created new symbol: s1 with type Student
+Correct type declaration
+ID found: s1
+ID s1
+ID2 s1
+check
+Primary expression found: 
+postfix expression found: 
 con
 Primary expression found: int
-Postfix expression 
+postfix expression found: int
 Unary expression 
 cond expression = int
 cond expression2 = 
-declaratoreiii c
-Yes int found
-declarator equals initializer c
-init_d c
-parsing stack top = c
-Declaration specifiers = float
-Init declarator list = 0.000000
-dollar 3 type = À¬Œlü
-top ka type = int
-Error: Type mismatch in declaration
+condi expression found: int
+unary inside assignment = s1
+Assignment expression = int
+Error: Type mismatch in assignment
 Parsing stack size = 0
+Printing scope table
+Count of scopes 2
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | int                  | 4       | N/A        |
-| b               | int                  | 4       | 5          |
-| c               | int                  | 4       | 6          |
+| Student         | struct               | 0       | N/A        |
+| marks           | int                  | 4       | N/A        |
+| roll            | int                  | 4       | N/A        |
 -----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| Student         | uninitialized        | N/A     | N/A        |
+| a               | int                  | 4       | 4          |
+| s1              | Student              | 0       | N/A        |
+-----------------------------------------------------------------
+Scope is here
