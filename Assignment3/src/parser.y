@@ -137,6 +137,45 @@ postfix_expression
             //printf("Function call= %s\n",$1);
         }
 	| postfix_expression DOT ID
+	{
+		symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
+		if(find_symbol == nullptr) {
+			cerr<<"Error: Undeclared variable "<<$1->name<<endl;
+		}
+		else{
+			if((find_symbol->type).substr(0,6)=="struct"){
+				cout<<"Struct found "<<find_symbol->type<<endl;
+				symbol_info* find_struct=lookup_symbol_global((find_symbol->type).substr(7), curr_scope);
+				int flag=0;
+				string var_type="";
+				cerr<<"Struct name "<<find_struct->type<<endl;
+				for(int i=0;i<find_struct->param_list.size();i++){
+					cerr<<"Param list "<<find_struct->param_list[i]<<endl;
+					if(find_struct->param_list[i]==$3){
+						cerr<<"Found "<<$3<<" with type "<<find_struct->param_types[i]<<endl;
+						var_type=find_struct->param_types[i];
+						flag=1;
+						break;
+					}
+				}
+				if(flag==0){
+					cerr<<"Error: no such attribute found in struct"<<endl;
+				}
+				else{
+					parsing_stack.push($1->name);
+					parsing_stack.push($3);
+					parsing_stack.push(var_type);
+					find_symbol->name=$1->name;
+					$$=find_symbol;
+				}
+				
+			}
+			else{
+				cerr<<"Error: Not a struct"<<endl;
+			}
+			
+		}
+	}
 	| postfix_expression LAMBDA_ARROW ID
 	| postfix_expression INCREMENT
 	| postfix_expression DECREMENT
@@ -305,29 +344,43 @@ assignment_expression
 		printf("Assignment expression = %s\n",$3->type.c_str());
         symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
         if(find_symbol != nullptr) {
-            if(find_symbol->type != $3->type) {
-                printf("Error: Type mismatch in assignment\n");
-            } else {
-                printf("Correct type assignment\n");
-                set_pointer_data(find_symbol, find_symbol->type, $3->ptr);  
-            }
+			cerr<<"find symbol type: "<<(find_symbol->type).substr(0,6)<<endl;
+			if((find_symbol->type).substr(0,6)=="struct"){
+				if(parsing_stack.top()==$3->type){
+					parsing_stack.pop();
+					string attr=parsing_stack.top();
+					parsing_stack.pop();
+					string struct_inst_name=parsing_stack.top();
+					parsing_stack.pop();
+					symbol_info* find_struct=lookup_symbol_global(struct_inst_name, curr_scope);
+					find_struct->param_list.push_back(attr);
+					find_struct->struct_attr_values.push_back($3);
+					cerr<<"Error in struct attr values"<<endl;
+				}
+				else{
+					printf("Error: Type mismatch in assignment of struct attributes\n");
+				}
+			}
+			else{
+				if(find_symbol->type != $3->type) {
+					printf("Error: Type mismatch in assignment\n");
+				} else {
+					printf("Correct type assignment\n");
+					set_pointer_data(find_symbol, find_symbol->type, $3->ptr);  
+				}
+			}
+			
+		}
+			
+           else{
+			printf("Symbol not found\n");
+		} 
             
         }
 
-		// if(curr_scope->symbol_map[$1->name]!=nullptr){
-		// 	printf("Symbol found\n");
-		// 	if(curr_scope->symbol_map[$1->name]->type!=$3->type){
-		// 		printf("Error: Type mismatch in assignment\n");
-		// 	}
-		// 	else{
-		// 		printf("Correct type assignment\n");
-		// 		curr_scope->symbol_map[$1->name]=$3;
-		// 	}
-		// }
-		else{
-			printf("Symbol not found\n");
-		}
-	}
+	
+		
+	
 	;
 
 assignment_operator
@@ -482,24 +535,29 @@ type_specifier
 struct_or_union_specifier
 	: struct_or_union ID LBRACE struct_declaration_list RBRACE 
 	{
+		
 		symbol_info* new_symbol=new symbol_info();
 		new_symbol->type = $1;
+		new_symbol->param_list = $4->param_list;
+		new_symbol->param_types = $4->param_types;
 		curr_scope->symbol_map[$2]=new_symbol;
+		for(int i=0;i<curr_scope->symbol_map[$2]->param_list.size();i++){
+			printf("Struct declaration %s = %s\n",curr_scope->symbol_map[$2]->param_types[i].c_str(),curr_scope->symbol_map[$2]->param_list[i].c_str());
+		}
 	}
 	| struct_or_union LBRACE struct_declaration_list RBRACE
 	| struct_or_union ID
 	{
 		symbol_info* find_symbol = lookup_symbol_global($2, curr_scope);
-        if(find_symbol != nullptr) {
-            if(find_symbol->type == "struct") {
-                $$=$2;
-            } else {
-                cerr<<"Error: Variable not of type struct"<<endl;
-            }
-            
-        }
-		else{
-			cerr<<"Error: Struct not declared"<<endl;
+		if (find_symbol != nullptr) {
+			if (find_symbol->type == "struct") {
+				std::string temp = std::string($1) + " " + std::string($2);
+				$$ = strdup(temp.c_str());  // strdup allocates new memory for the concatenated string
+			} else {
+				std::cerr << "Error: Variable not of type struct" << std::endl;
+			}
+		} else {
+			std::cerr << "Error: Struct not declared" << std::endl;
 		}
 	} 
 	;
@@ -512,20 +570,32 @@ struct_or_union
 struct_declaration_list
 	: struct_declaration {$$=$1;}
 	| struct_declaration_list struct_declaration
+	{
+		$$=$1;
+		for(int i=0;i<$2->param_list.size();i++){
+			$$->param_list.push_back($2->param_list[i]);
+			$$->param_types.push_back($2->param_types[i]);
+		}
+		
+	}
 	;
 
 struct_declaration
 	: specifier_qualifier_list struct_declarator_list SEMICOLON      
 	{ 
 		//printf("Struct declaration %s = %s\n",$1,$2);
-		for(auto it: $2->param_types)
+		$$=$2;
+		for(auto it: $2->param_list)
 					{
 						cerr<<it<<endl;
 						symbol_info* x=new symbol_info();
 						x->type = $1;
+						
 						curr_scope->symbol_map[it]=x;
+						$$->param_types.push_back($1);
 					}
-		$$=$2;
+		
+		
 
 	}
 	;
@@ -541,12 +611,12 @@ struct_declarator_list
 	: struct_declarator 
 	{
 		$$=$1;
-		$$->param_types.push_back($1->name);
+		$$->param_list.push_back($1->name);
 	}
 	| struct_declarator_list COMMA struct_declarator
 	{
 		$$=$1;
-		$$->param_types.push_back($3->name);
+		$$->param_list.push_back($3->name);
 	}
 	;
 
@@ -883,6 +953,16 @@ void print_scope_table() {
                it.second->type.c_str(),   // Type
                size,                      // Size
                valueStr.c_str());         // Value
+
+		if((it.second->type).substr(0,6)=="struct"){
+			for(int i=0;i<it.second->struct_attr_values.size();i++){
+				printf("| %-15s | %-20s | %-7d | %-10s |\n",
+               (it.first+"."+it.second->param_list[i]).c_str(),          // Identifier
+               it.second->struct_attr_values[i]->type.c_str(),   // Type
+               4,                      // Size
+               std::to_string(*(int*)(it.second->struct_attr_values[i]->ptr)).c_str());         // Value
+			}
+		}
     }
 
     printf("-----------------------------------------------------------------\n");

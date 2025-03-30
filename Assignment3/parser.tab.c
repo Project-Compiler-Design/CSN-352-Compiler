@@ -699,29 +699,29 @@ static const yytype_int8 yytranslate[] =
 static const yytype_int16 yyrline[] =
 {
        0,    78,    78,    79,    80,    81,    82,    83,    84,    85,
-      89,    99,   100,   101,   105,   110,   111,   112,   139,   140,
-     141,   142,   146,   169,   199,   204,   205,   206,   207,   208,
-     212,   213,   214,   215,   216,   217,   221,   226,   230,   231,
-     232,   233,   237,   238,   239,   243,   244,   245,   249,   250,
-     251,   252,   253,   257,   258,   259,   263,   264,   268,   269,
-     273,   274,   278,   279,   283,   284,   288,   289,   293,   302,
-     334,   335,   336,   337,   338,   339,   340,   341,   342,   343,
-     344,   348,   349,   353,   357,   358,   399,   400,   401,   402,
-     403,   404,   408,   412,   419,   433,   461,   462,   463,   464,
-     465,   469,   470,   471,   472,   473,   474,   475,   476,   477,
-     478,   479,   483,   489,   490,   508,   509,   513,   514,   518,
-     533,   534,   535,   536,   540,   545,   553,   554,   555,   559,
-     560,   564,   568,   569,   573,   574,   578,   579,   583,   586,
-     593,   602,   606,   615,   616,   626,   627,   631,   632,   633,
-     634,   638,   639,   644,   653,   657,   661,   672,   680,   686,
-     695,   696,   700,   701,   705,   706,   707,   711,   712,   713,
-     714,   715,   716,   717,   718,   719,   723,   727,   728,   732,
-     733,   745,   746,   747,   748,   749,   750,   754,   755,   756,
-     760,   761,   761,   762,   762,   763,   763,   764,   764,   768,
-     769,   770,   771,   775,   776,   777,   781,   782,   783,   787,
-     788,   792,   793,   794,   798,   799,   800,   801,   805,   809,
-     810,   811,   812,   816,   817,   818,   822,   823,   827,   828,
-     832,   833
+      89,    99,   100,   101,   105,   110,   111,   112,   139,   179,
+     180,   181,   185,   208,   238,   243,   244,   245,   246,   247,
+     251,   252,   253,   254,   255,   256,   260,   265,   269,   270,
+     271,   272,   276,   277,   278,   282,   283,   284,   288,   289,
+     290,   291,   292,   296,   297,   298,   302,   303,   307,   308,
+     312,   313,   317,   318,   322,   323,   327,   328,   332,   341,
+     387,   388,   389,   390,   391,   392,   393,   394,   395,   396,
+     397,   401,   402,   406,   410,   411,   452,   453,   454,   455,
+     456,   457,   461,   465,   472,   486,   514,   515,   516,   517,
+     518,   522,   523,   524,   525,   526,   527,   528,   529,   530,
+     531,   532,   536,   548,   549,   566,   567,   571,   572,   584,
+     604,   605,   606,   607,   611,   616,   624,   625,   626,   630,
+     631,   635,   639,   640,   644,   645,   649,   650,   654,   657,
+     664,   673,   677,   686,   687,   697,   698,   702,   703,   704,
+     705,   709,   710,   715,   724,   728,   732,   743,   751,   757,
+     766,   767,   771,   772,   776,   777,   778,   782,   783,   784,
+     785,   786,   787,   788,   789,   790,   794,   798,   799,   803,
+     804,   816,   817,   818,   819,   820,   821,   825,   826,   827,
+     831,   832,   832,   833,   833,   834,   834,   835,   835,   839,
+     840,   841,   842,   846,   847,   848,   852,   853,   854,   858,
+     859,   863,   864,   865,   869,   870,   871,   872,   876,   880,
+     881,   882,   883,   887,   888,   889,   893,   894,   898,   899,
+     903,   904
 };
 #endif
 
@@ -2003,8 +2003,52 @@ yyreduce:
 #line 2004 "parser.tab.c"
     break;
 
+  case 18: /* postfix_expression: postfix_expression DOT ID  */
+#line 140 "src/parser.y"
+        {
+		symbol_info* find_symbol = lookup_symbol_global((yyvsp[-2].symbol_info)->name, curr_scope);
+		if(find_symbol == nullptr) {
+			cerr<<"Error: Undeclared variable "<<(yyvsp[-2].symbol_info)->name<<endl;
+		}
+		else{
+			if((find_symbol->type).substr(0,6)=="struct"){
+				cout<<"Struct found "<<find_symbol->type<<endl;
+				symbol_info* find_struct=lookup_symbol_global((find_symbol->type).substr(7), curr_scope);
+				int flag=0;
+				string var_type="";
+				cerr<<"Struct name "<<find_struct->type<<endl;
+				for(int i=0;i<find_struct->param_list.size();i++){
+					cerr<<"Param list "<<find_struct->param_list[i]<<endl;
+					if(find_struct->param_list[i]==(yyvsp[0].str)){
+						cerr<<"Found "<<(yyvsp[0].str)<<" with type "<<find_struct->param_types[i]<<endl;
+						var_type=find_struct->param_types[i];
+						flag=1;
+						break;
+					}
+				}
+				if(flag==0){
+					cerr<<"Error: no such attribute found in struct"<<endl;
+				}
+				else{
+					parsing_stack.push((yyvsp[-2].symbol_info)->name);
+					parsing_stack.push((yyvsp[0].str));
+					parsing_stack.push(var_type);
+					find_symbol->name=(yyvsp[-2].symbol_info)->name;
+					(yyval.symbol_info)=find_symbol;
+				}
+				
+			}
+			else{
+				cerr<<"Error: Not a struct"<<endl;
+			}
+			
+		}
+	}
+#line 2048 "parser.tab.c"
+    break;
+
   case 22: /* argument_expression_list: assignment_expression  */
-#line 147 "src/parser.y"
+#line 186 "src/parser.y"
       { 
 			cout<<"$1 ka name "<<(yyvsp[0].symbol_info)->name<<endl;
 		  if((yyvsp[0].symbol_info)->name==""){
@@ -2027,11 +2071,11 @@ yyreduce:
 		  
           
       }
-#line 2031 "parser.tab.c"
+#line 2075 "parser.tab.c"
     break;
 
   case 23: /* argument_expression_list: argument_expression_list COMMA assignment_expression  */
-#line 171 "src/parser.y"
+#line 210 "src/parser.y"
        { 
 			cout<<"$3 ka name "<<(yyvsp[0].symbol_info)->name<<endl;
 		  if((yyvsp[0].symbol_info)->name==""){
@@ -2057,95 +2101,95 @@ yyreduce:
 			
            
        }
-#line 2061 "parser.tab.c"
+#line 2105 "parser.tab.c"
     break;
 
   case 24: /* unary_expression: postfix_expression  */
-#line 200 "src/parser.y"
+#line 239 "src/parser.y"
         {
 		(yyval.symbol_info)=(yyvsp[0].symbol_info);
 		cerr << "postfix expression found: " << (yyvsp[0].symbol_info)->type << endl;
 		}
-#line 2070 "parser.tab.c"
+#line 2114 "parser.tab.c"
     break;
 
   case 36: /* cast_expression: unary_expression  */
-#line 222 "src/parser.y"
+#line 261 "src/parser.y"
         {
 		(yyval.symbol_info)=(yyvsp[0].symbol_info);
 		printf("Unary expression %s\n",(yyval.symbol_info)->name.c_str());
 		}
-#line 2079 "parser.tab.c"
+#line 2123 "parser.tab.c"
     break;
 
   case 38: /* multiplicative_expression: cast_expression  */
-#line 230 "src/parser.y"
+#line 269 "src/parser.y"
                           {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
-#line 2085 "parser.tab.c"
+#line 2129 "parser.tab.c"
     break;
 
   case 42: /* additive_expression: multiplicative_expression  */
-#line 237 "src/parser.y"
+#line 276 "src/parser.y"
                                     {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
-#line 2091 "parser.tab.c"
+#line 2135 "parser.tab.c"
     break;
 
   case 45: /* shift_expression: additive_expression  */
-#line 243 "src/parser.y"
+#line 282 "src/parser.y"
                               {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
-#line 2097 "parser.tab.c"
+#line 2141 "parser.tab.c"
     break;
 
   case 48: /* relational_expression: shift_expression  */
-#line 249 "src/parser.y"
+#line 288 "src/parser.y"
                                         {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
-#line 2103 "parser.tab.c"
+#line 2147 "parser.tab.c"
     break;
 
   case 53: /* equality_expression: relational_expression  */
-#line 257 "src/parser.y"
+#line 296 "src/parser.y"
                                 {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
-#line 2109 "parser.tab.c"
+#line 2153 "parser.tab.c"
     break;
 
   case 56: /* and_expression: equality_expression  */
-#line 263 "src/parser.y"
+#line 302 "src/parser.y"
                               {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
-#line 2115 "parser.tab.c"
+#line 2159 "parser.tab.c"
     break;
 
   case 58: /* exclusive_or_expression: and_expression  */
-#line 268 "src/parser.y"
+#line 307 "src/parser.y"
                                                 {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
-#line 2121 "parser.tab.c"
+#line 2165 "parser.tab.c"
     break;
 
   case 60: /* inclusive_or_expression: exclusive_or_expression  */
-#line 273 "src/parser.y"
+#line 312 "src/parser.y"
                                                 {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
-#line 2127 "parser.tab.c"
+#line 2171 "parser.tab.c"
     break;
 
   case 62: /* logical_and_expression: inclusive_or_expression  */
-#line 278 "src/parser.y"
+#line 317 "src/parser.y"
                                                         {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
-#line 2133 "parser.tab.c"
+#line 2177 "parser.tab.c"
     break;
 
   case 64: /* logical_or_expression: logical_and_expression  */
-#line 283 "src/parser.y"
+#line 322 "src/parser.y"
                                                 {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
-#line 2139 "parser.tab.c"
+#line 2183 "parser.tab.c"
     break;
 
   case 66: /* conditional_expression: logical_or_expression  */
-#line 288 "src/parser.y"
+#line 327 "src/parser.y"
                                                         {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
-#line 2145 "parser.tab.c"
+#line 2189 "parser.tab.c"
     break;
 
   case 68: /* assignment_expression: conditional_expression  */
-#line 294 "src/parser.y"
+#line 333 "src/parser.y"
         { 
 		//printf("conditional inside assignment = %s\n",$$);
 		// $$ = strdup($1);
@@ -2154,44 +2198,54 @@ yyreduce:
 		printf("cond expression2 = %s\n",(yyvsp[0].symbol_info)->name.c_str());
 		cerr << "condi expression found: " << (yyvsp[0].symbol_info)->type << endl;
 	}
-#line 2158 "parser.tab.c"
+#line 2202 "parser.tab.c"
     break;
 
   case 69: /* assignment_expression: unary_expression assignment_operator assignment_expression  */
-#line 303 "src/parser.y"
+#line 342 "src/parser.y"
         {
 		printf("unary inside assignment = %s\n",(yyvsp[-2].symbol_info)->name.c_str());
 		printf("Assignment expression = %s\n",(yyvsp[0].symbol_info)->type.c_str());
         symbol_info* find_symbol = lookup_symbol_global((yyvsp[-2].symbol_info)->name, curr_scope);
         if(find_symbol != nullptr) {
-            if(find_symbol->type != (yyvsp[0].symbol_info)->type) {
-                printf("Error: Type mismatch in assignment\n");
-            } else {
-                printf("Correct type assignment\n");
-                set_pointer_data(find_symbol, find_symbol->type, (yyvsp[0].symbol_info)->ptr);  
-            }
+			cerr<<"find symbol type: "<<(find_symbol->type).substr(0,6)<<endl;
+			if((find_symbol->type).substr(0,6)=="struct"){
+				if(parsing_stack.top()==(yyvsp[0].symbol_info)->type){
+					parsing_stack.pop();
+					string attr=parsing_stack.top();
+					parsing_stack.pop();
+					string struct_inst_name=parsing_stack.top();
+					parsing_stack.pop();
+					symbol_info* find_struct=lookup_symbol_global(struct_inst_name, curr_scope);
+					find_struct->param_list.push_back(attr);
+					find_struct->struct_attr_values.push_back((yyvsp[0].symbol_info));
+					cerr<<"Error in struct attr values"<<endl;
+				}
+				else{
+					printf("Error: Type mismatch in assignment of struct attributes\n");
+				}
+			}
+			else{
+				if(find_symbol->type != (yyvsp[0].symbol_info)->type) {
+					printf("Error: Type mismatch in assignment\n");
+				} else {
+					printf("Correct type assignment\n");
+					set_pointer_data(find_symbol, find_symbol->type, (yyvsp[0].symbol_info)->ptr);  
+				}
+			}
+			
+		}
+			
+           else{
+			printf("Symbol not found\n");
+		} 
             
         }
-
-		// if(curr_scope->symbol_map[$1->name]!=nullptr){
-		// 	printf("Symbol found\n");
-		// 	if(curr_scope->symbol_map[$1->name]->type!=$3->type){
-		// 		printf("Error: Type mismatch in assignment\n");
-		// 	}
-		// 	else{
-		// 		printf("Correct type assignment\n");
-		// 		curr_scope->symbol_map[$1->name]=$3;
-		// 	}
-		// }
-		else{
-			printf("Symbol not found\n");
-		}
-	}
-#line 2191 "parser.tab.c"
+#line 2245 "parser.tab.c"
     break;
 
   case 85: /* declaration: declaration_specifiers init_declarator_list SEMICOLON  */
-#line 359 "src/parser.y"
+#line 412 "src/parser.y"
     {
 		
 		printf("parsing stack top = %s\n",parsing_stack.top().c_str());
@@ -2228,35 +2282,35 @@ yyreduce:
 		
 		if(flag==0) printf("Correct type declaration\n");
     }
-#line 2232 "parser.tab.c"
+#line 2286 "parser.tab.c"
     break;
 
   case 88: /* declaration_specifiers: type_specifier  */
-#line 401 "src/parser.y"
+#line 454 "src/parser.y"
                          {(yyval.str)=(yyvsp[0].str);}
-#line 2238 "parser.tab.c"
+#line 2292 "parser.tab.c"
     break;
 
   case 92: /* init_declarator_list: init_declarator  */
-#line 408 "src/parser.y"
+#line 461 "src/parser.y"
                       { 
         (yyval.symbol_info) = (yyvsp[0].symbol_info); 
 		printf("init_d %s\n",(yyval.symbol_info)->name.c_str());  
     }
-#line 2247 "parser.tab.c"
+#line 2301 "parser.tab.c"
     break;
 
   case 93: /* init_declarator_list: init_declarator_list COMMA init_declarator  */
-#line 412 "src/parser.y"
+#line 465 "src/parser.y"
                                                  { 
 		(yyval.symbol_info)=(yyvsp[0].symbol_info);
 		printf("init_D %s\n",(yyval.symbol_info)->name.c_str()); 
     }
-#line 2256 "parser.tab.c"
+#line 2310 "parser.tab.c"
     break;
 
   case 94: /* init_declarator: declarator  */
-#line 419 "src/parser.y"
+#line 472 "src/parser.y"
                  { 
 		printf("declarator11 %s\n",(yyvsp[0].symbol_info)->name.c_str());
 		if(curr_scope->symbol_map[(yyvsp[0].symbol_info)->name]!=nullptr){
@@ -2271,11 +2325,11 @@ yyreduce:
 		printf("declarator %s\n",(yyval.symbol_info)->name.c_str()); 
 		parsing_stack.push((yyvsp[0].symbol_info)->name.c_str());
     }
-#line 2275 "parser.tab.c"
+#line 2329 "parser.tab.c"
     break;
 
   case 95: /* init_declarator: declarator EQUALS initializer  */
-#line 433 "src/parser.y"
+#line 486 "src/parser.y"
                                     { 
 		printf("declaratoreiii %s\n",(yyvsp[-2].symbol_info)->name.c_str());
 		if(curr_scope->symbol_map[(yyvsp[-2].symbol_info)->name]!=nullptr){
@@ -2301,177 +2355,206 @@ yyreduce:
 		printf("declarator equals initializer %s\n",(yyval.symbol_info)->name.c_str()); 
 		
     }
-#line 2305 "parser.tab.c"
-    break;
-
-  case 101: /* type_specifier: VOID  */
-#line 469 "src/parser.y"
-                                        {(yyval.str)=strdup("void");}
-#line 2311 "parser.tab.c"
-    break;
-
-  case 102: /* type_specifier: CHAR  */
-#line 470 "src/parser.y"
-                                        {(yyval.str)=strdup("char");}
-#line 2317 "parser.tab.c"
-    break;
-
-  case 103: /* type_specifier: SHORT  */
-#line 471 "src/parser.y"
-                                        {(yyval.str)=strdup("short");}
-#line 2323 "parser.tab.c"
-    break;
-
-  case 104: /* type_specifier: INT  */
-#line 472 "src/parser.y"
-                                        {(yyval.str)=strdup("int");}
-#line 2329 "parser.tab.c"
-    break;
-
-  case 105: /* type_specifier: LONG  */
-#line 473 "src/parser.y"
-                                        {(yyval.str)=strdup("long");}
-#line 2335 "parser.tab.c"
-    break;
-
-  case 106: /* type_specifier: FLOAT  */
-#line 474 "src/parser.y"
-                                        {(yyval.str)=strdup("float");}
-#line 2341 "parser.tab.c"
-    break;
-
-  case 107: /* type_specifier: DOUBLE  */
-#line 475 "src/parser.y"
-                                        {(yyval.str)=strdup("double");}
-#line 2347 "parser.tab.c"
-    break;
-
-  case 108: /* type_specifier: SIGNED  */
-#line 476 "src/parser.y"
-                                        {(yyval.str)=strdup("signed");}
-#line 2353 "parser.tab.c"
-    break;
-
-  case 109: /* type_specifier: UNSIGNED  */
-#line 477 "src/parser.y"
-                                        {(yyval.str)=strdup("unsigned");}
 #line 2359 "parser.tab.c"
     break;
 
-  case 110: /* type_specifier: struct_or_union_specifier  */
-#line 478 "src/parser.y"
-                                    {(yyval.str)=(yyvsp[0].str);}
+  case 101: /* type_specifier: VOID  */
+#line 522 "src/parser.y"
+                                        {(yyval.str)=strdup("void");}
 #line 2365 "parser.tab.c"
     break;
 
+  case 102: /* type_specifier: CHAR  */
+#line 523 "src/parser.y"
+                                        {(yyval.str)=strdup("char");}
+#line 2371 "parser.tab.c"
+    break;
+
+  case 103: /* type_specifier: SHORT  */
+#line 524 "src/parser.y"
+                                        {(yyval.str)=strdup("short");}
+#line 2377 "parser.tab.c"
+    break;
+
+  case 104: /* type_specifier: INT  */
+#line 525 "src/parser.y"
+                                        {(yyval.str)=strdup("int");}
+#line 2383 "parser.tab.c"
+    break;
+
+  case 105: /* type_specifier: LONG  */
+#line 526 "src/parser.y"
+                                        {(yyval.str)=strdup("long");}
+#line 2389 "parser.tab.c"
+    break;
+
+  case 106: /* type_specifier: FLOAT  */
+#line 527 "src/parser.y"
+                                        {(yyval.str)=strdup("float");}
+#line 2395 "parser.tab.c"
+    break;
+
+  case 107: /* type_specifier: DOUBLE  */
+#line 528 "src/parser.y"
+                                        {(yyval.str)=strdup("double");}
+#line 2401 "parser.tab.c"
+    break;
+
+  case 108: /* type_specifier: SIGNED  */
+#line 529 "src/parser.y"
+                                        {(yyval.str)=strdup("signed");}
+#line 2407 "parser.tab.c"
+    break;
+
+  case 109: /* type_specifier: UNSIGNED  */
+#line 530 "src/parser.y"
+                                        {(yyval.str)=strdup("unsigned");}
+#line 2413 "parser.tab.c"
+    break;
+
+  case 110: /* type_specifier: struct_or_union_specifier  */
+#line 531 "src/parser.y"
+                                    {(yyval.str)=(yyvsp[0].str);}
+#line 2419 "parser.tab.c"
+    break;
+
   case 112: /* struct_or_union_specifier: struct_or_union ID LBRACE struct_declaration_list RBRACE  */
-#line 484 "src/parser.y"
+#line 537 "src/parser.y"
         {
+		
 		symbol_info* new_symbol=new symbol_info();
 		new_symbol->type = (yyvsp[-4].str);
+		new_symbol->param_list = (yyvsp[-1].symbol_info)->param_list;
+		new_symbol->param_types = (yyvsp[-1].symbol_info)->param_types;
 		curr_scope->symbol_map[(yyvsp[-3].str)]=new_symbol;
+		for(int i=0;i<curr_scope->symbol_map[(yyvsp[-3].str)]->param_list.size();i++){
+			printf("Struct declaration %s = %s\n",curr_scope->symbol_map[(yyvsp[-3].str)]->param_types[i].c_str(),curr_scope->symbol_map[(yyvsp[-3].str)]->param_list[i].c_str());
+		}
 	}
-#line 2375 "parser.tab.c"
+#line 2435 "parser.tab.c"
     break;
 
   case 114: /* struct_or_union_specifier: struct_or_union ID  */
-#line 491 "src/parser.y"
+#line 550 "src/parser.y"
         {
 		symbol_info* find_symbol = lookup_symbol_global((yyvsp[0].str), curr_scope);
-        if(find_symbol != nullptr) {
-            if(find_symbol->type == "struct") {
-                (yyval.str)=(yyvsp[0].str);
-            } else {
-                cerr<<"Error: Variable not of type struct"<<endl;
-            }
-            
-        }
-		else{
-			cerr<<"Error: Struct not declared"<<endl;
+		if (find_symbol != nullptr) {
+			if (find_symbol->type == "struct") {
+				std::string temp = std::string((yyvsp[-1].str)) + " " + std::string((yyvsp[0].str));
+				(yyval.str) = strdup(temp.c_str());  // strdup allocates new memory for the concatenated string
+			} else {
+				std::cerr << "Error: Variable not of type struct" << std::endl;
+			}
+		} else {
+			std::cerr << "Error: Struct not declared" << std::endl;
 		}
 	}
-#line 2394 "parser.tab.c"
+#line 2453 "parser.tab.c"
     break;
 
   case 115: /* struct_or_union: STRUCT  */
-#line 508 "src/parser.y"
+#line 566 "src/parser.y"
                  {(yyval.str)=strdup("struct");}
-#line 2400 "parser.tab.c"
+#line 2459 "parser.tab.c"
     break;
 
   case 116: /* struct_or_union: UNION  */
-#line 509 "src/parser.y"
+#line 567 "src/parser.y"
                 {(yyval.str)=strdup("union");}
-#line 2406 "parser.tab.c"
+#line 2465 "parser.tab.c"
+    break;
+
+  case 117: /* struct_declaration_list: struct_declaration  */
+#line 571 "src/parser.y"
+                             {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
+#line 2471 "parser.tab.c"
+    break;
+
+  case 118: /* struct_declaration_list: struct_declaration_list struct_declaration  */
+#line 573 "src/parser.y"
+        {
+		(yyval.symbol_info)=(yyvsp[-1].symbol_info);
+		for(int i=0;i<(yyvsp[0].symbol_info)->param_list.size();i++){
+			(yyval.symbol_info)->param_list.push_back((yyvsp[0].symbol_info)->param_list[i]);
+			(yyval.symbol_info)->param_types.push_back((yyvsp[0].symbol_info)->param_types[i]);
+		}
+		
+	}
+#line 2484 "parser.tab.c"
     break;
 
   case 119: /* struct_declaration: specifier_qualifier_list struct_declarator_list SEMICOLON  */
-#line 519 "src/parser.y"
+#line 585 "src/parser.y"
         { 
 		//printf("Struct declaration %s = %s\n",$1,$2);
-		for(auto it: (yyvsp[-1].symbol_info)->param_types)
+		(yyval.symbol_info)=(yyvsp[-1].symbol_info);
+		for(auto it: (yyvsp[-1].symbol_info)->param_list)
 					{
 						cerr<<it<<endl;
 						symbol_info* x=new symbol_info();
 						x->type = (yyvsp[-2].str);
+						
 						curr_scope->symbol_map[it]=x;
+						(yyval.symbol_info)->param_types.push_back((yyvsp[-2].str));
 					}
+		
+		
 
 	}
-#line 2422 "parser.tab.c"
+#line 2505 "parser.tab.c"
     break;
 
   case 124: /* struct_declarator_list: struct_declarator  */
-#line 541 "src/parser.y"
+#line 612 "src/parser.y"
         {
 		(yyval.symbol_info)=(yyvsp[0].symbol_info);
-		(yyval.symbol_info)->param_types.push_back((yyvsp[0].symbol_info)->name);
+		(yyval.symbol_info)->param_list.push_back((yyvsp[0].symbol_info)->name);
 	}
-#line 2431 "parser.tab.c"
+#line 2514 "parser.tab.c"
     break;
 
   case 125: /* struct_declarator_list: struct_declarator_list COMMA struct_declarator  */
-#line 546 "src/parser.y"
+#line 617 "src/parser.y"
         {
 		(yyval.symbol_info)=(yyvsp[-2].symbol_info);
-		(yyval.symbol_info)->param_types.push_back((yyvsp[0].symbol_info)->name);
+		(yyval.symbol_info)->param_list.push_back((yyvsp[0].symbol_info)->name);
 	}
-#line 2440 "parser.tab.c"
+#line 2523 "parser.tab.c"
     break;
 
   case 126: /* struct_declarator: declarator  */
-#line 553 "src/parser.y"
+#line 624 "src/parser.y"
                          {(yyval.symbol_info)=(yyvsp[0].symbol_info);}
-#line 2446 "parser.tab.c"
+#line 2529 "parser.tab.c"
     break;
 
   case 130: /* enum_specifier: ENUM ID LBRACE enumerator_list RBRACE  */
-#line 561 "src/parser.y"
+#line 632 "src/parser.y"
         {
 		//printf("enum is here = %s\n",$$);
 	}
-#line 2454 "parser.tab.c"
+#line 2537 "parser.tab.c"
     break;
 
   case 138: /* declarator: pointer direct_declarator  */
-#line 583 "src/parser.y"
+#line 654 "src/parser.y"
                                 { 
 		//printf("Pointer direct declarator\n");
     }
-#line 2462 "parser.tab.c"
+#line 2545 "parser.tab.c"
     break;
 
   case 139: /* declarator: direct_declarator  */
-#line 586 "src/parser.y"
+#line 657 "src/parser.y"
                         { 
 		(yyval.symbol_info)=(yyvsp[0].symbol_info); 
 		printf("Direct declarator %s\n",(yyval.symbol_info)->name.c_str());
     }
-#line 2471 "parser.tab.c"
+#line 2554 "parser.tab.c"
     break;
 
   case 140: /* direct_declarator: ID  */
-#line 594 "src/parser.y"
+#line 665 "src/parser.y"
         {
 		printf("%s\n",(yyvsp[0].str));
 		symbol_info* x=new symbol_info();
@@ -2480,19 +2563,19 @@ yyreduce:
 		(yyval.symbol_info)=x;
 		printf("ID %s\n",(yyval.symbol_info)->name.c_str());
 	}
-#line 2484 "parser.tab.c"
+#line 2567 "parser.tab.c"
     break;
 
   case 141: /* direct_declarator: LPARENTHESES declarator RPARENTHESES  */
-#line 603 "src/parser.y"
+#line 674 "src/parser.y"
         { 
 		//printf("LPar declarator RPar= %s\n",$2);
 	}
-#line 2492 "parser.tab.c"
+#line 2575 "parser.tab.c"
     break;
 
   case 142: /* direct_declarator: direct_declarator LBRACKET constant_expression RBRACKET  */
-#line 606 "src/parser.y"
+#line 677 "src/parser.y"
                                                                                         {(yyval.symbol_info)->is_array = true;
 																		if((yyvsp[-1].symbol_info)->type=="int"){
 																			(yyval.symbol_info)->array_length = *(int*)((yyvsp[-1].symbol_info)->ptr);
@@ -2502,17 +2585,17 @@ yyreduce:
 																			printf("Error: Array size not an integer\n");
 																			(yyval.symbol_info)->array_length=100;
 																		}}
-#line 2506 "parser.tab.c"
+#line 2589 "parser.tab.c"
     break;
 
   case 143: /* direct_declarator: direct_declarator LBRACKET RBRACKET  */
-#line 615 "src/parser.y"
+#line 686 "src/parser.y"
                                                                                                         {printf("Array Size not declared\n"), (yyval.symbol_info)->is_array = true, (yyval.symbol_info)->array_length = 100;}
-#line 2512 "parser.tab.c"
+#line 2595 "parser.tab.c"
     break;
 
   case 144: /* direct_declarator: direct_declarator LPARENTHESES parameter_type_list RPARENTHESES  */
-#line 617 "src/parser.y"
+#line 688 "src/parser.y"
         {
 		printf("Brackets found with parameter= %s\n",(yyvsp[-3].symbol_info)->name.c_str());
 		printf("Par list %d\n",(yyvsp[-1].symbol_info)->parameter_no);
@@ -2522,11 +2605,11 @@ yyreduce:
 					}
 		curr_scope->symbol_map[(yyvsp[-3].symbol_info)->name]=(yyvsp[-1].symbol_info);
 	}
-#line 2526 "parser.tab.c"
+#line 2609 "parser.tab.c"
     break;
 
   case 153: /* parameter_type_list: parameter_list  */
-#line 644 "src/parser.y"
+#line 715 "src/parser.y"
                         {
 		(yyval.symbol_info)=(yyvsp[0].symbol_info);
 		for(auto it: (yyvsp[0].symbol_info)->param_types)
@@ -2535,20 +2618,20 @@ yyreduce:
 					}
 		cout<<"par num"<<(yyval.symbol_info)->parameter_no<<endl;
 				}
-#line 2539 "parser.tab.c"
+#line 2622 "parser.tab.c"
     break;
 
   case 155: /* parameter_list: parameter_declaration  */
-#line 657 "src/parser.y"
+#line 728 "src/parser.y"
                                {(yyval.symbol_info)->is_param_list=true;
 	   						(yyval.symbol_info)->parameter_no=1;
 							
 	   						(yyval.symbol_info)->param_types.push_back((yyvsp[0].symbol_info)->type);}
-#line 2548 "parser.tab.c"
+#line 2631 "parser.tab.c"
     break;
 
   case 156: /* parameter_list: parameter_list COMMA parameter_declaration  */
-#line 661 "src/parser.y"
+#line 732 "src/parser.y"
                                                      {(yyval.symbol_info)->is_param_list=true;
 							cout<<"par num $1 "<<(yyvsp[-2].symbol_info)->parameter_no<<endl;
 							cout<<"par num $3 "<<(yyvsp[0].symbol_info)->parameter_no<<endl;
@@ -2556,11 +2639,11 @@ yyreduce:
 	   						(yyval.symbol_info)->param_types.push_back((yyvsp[0].symbol_info)->type);
 							
 												}
-#line 2560 "parser.tab.c"
+#line 2643 "parser.tab.c"
     break;
 
   case 157: /* parameter_declaration: declaration_specifiers declarator  */
-#line 673 "src/parser.y"
+#line 744 "src/parser.y"
         {
 		symbol_info* new_symbol=new symbol_info();
 		(yyval.symbol_info)=new_symbol;
@@ -2568,60 +2651,60 @@ yyreduce:
 		(yyval.symbol_info)->parameter_no=1;
 		// printf("%s",$$->type);
 	}
-#line 2572 "parser.tab.c"
+#line 2655 "parser.tab.c"
     break;
 
   case 158: /* parameter_declaration: declaration_specifiers abstract_declarator  */
-#line 680 "src/parser.y"
+#line 751 "src/parser.y"
                                                     {
 		symbol_info* new_symbol=new symbol_info();
 		(yyval.symbol_info)=new_symbol;
 		(yyval.symbol_info)->type=(yyvsp[-1].str);
 		// printf("%s",$$->type);
 	}
-#line 2583 "parser.tab.c"
+#line 2666 "parser.tab.c"
     break;
 
   case 159: /* parameter_declaration: declaration_specifiers  */
-#line 686 "src/parser.y"
+#line 757 "src/parser.y"
                                 {
 		symbol_info* new_symbol=new symbol_info();
 		(yyval.symbol_info)=new_symbol;
 		(yyval.symbol_info)->type=(yyvsp[0].str);
 		// printf("%s",$$->type);
 	}
-#line 2594 "parser.tab.c"
+#line 2677 "parser.tab.c"
     break;
 
   case 176: /* initializer: assignment_expression  */
-#line 723 "src/parser.y"
+#line 794 "src/parser.y"
                                 {
 		(yyvsp[0].symbol_info)->int_array.push_back((yyvsp[0].symbol_info));
 		(yyval.symbol_info)=(yyvsp[0].symbol_info);
 	}
-#line 2603 "parser.tab.c"
+#line 2686 "parser.tab.c"
     break;
 
   case 177: /* initializer: LBRACE initializer_list RBRACE  */
-#line 727 "src/parser.y"
+#line 798 "src/parser.y"
                                          {(yyval.symbol_info) = (yyvsp[-1].symbol_info);}
-#line 2609 "parser.tab.c"
+#line 2692 "parser.tab.c"
     break;
 
   case 178: /* initializer: LBRACE initializer_list COMMA RBRACE  */
-#line 728 "src/parser.y"
+#line 799 "src/parser.y"
                                                {(yyval.symbol_info) = (yyvsp[-2].symbol_info);}
-#line 2615 "parser.tab.c"
+#line 2698 "parser.tab.c"
     break;
 
   case 179: /* initializer_list: initializer  */
-#line 732 "src/parser.y"
+#line 803 "src/parser.y"
                       {(yyval.symbol_info) = (yyvsp[0].symbol_info);}
-#line 2621 "parser.tab.c"
+#line 2704 "parser.tab.c"
     break;
 
   case 180: /* initializer_list: initializer_list COMMA initializer  */
-#line 733 "src/parser.y"
+#line 804 "src/parser.y"
                                              {
 		if((yyvsp[-2].symbol_info)->type != (yyvsp[0].symbol_info)->type){
 			printf("Error: Type mismatch in initializer list\n");
@@ -2631,87 +2714,87 @@ yyreduce:
 		}
 		(yyval.symbol_info) = (yyvsp[-2].symbol_info);
 	}
-#line 2635 "parser.tab.c"
+#line 2718 "parser.tab.c"
     break;
 
   case 191: /* $@1: %empty  */
-#line 761 "src/parser.y"
+#line 832 "src/parser.y"
                  {curr_scope = new scoped_symtab(curr_scope);}
-#line 2641 "parser.tab.c"
+#line 2724 "parser.tab.c"
     break;
 
   case 192: /* compound_statement: LBRACE $@1 statement_declaration_list RBRACE  */
-#line 761 "src/parser.y"
+#line 832 "src/parser.y"
                                                                                                  {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
-#line 2647 "parser.tab.c"
+#line 2730 "parser.tab.c"
     break;
 
   case 193: /* $@2: %empty  */
-#line 762 "src/parser.y"
+#line 833 "src/parser.y"
                  {curr_scope = new scoped_symtab(curr_scope);}
-#line 2653 "parser.tab.c"
+#line 2736 "parser.tab.c"
     break;
 
   case 194: /* compound_statement: LBRACE $@2 statement_list RBRACE  */
-#line 762 "src/parser.y"
+#line 833 "src/parser.y"
                                                                                      {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
-#line 2659 "parser.tab.c"
+#line 2742 "parser.tab.c"
     break;
 
   case 195: /* $@3: %empty  */
-#line 763 "src/parser.y"
+#line 834 "src/parser.y"
                  {curr_scope = new scoped_symtab(curr_scope);}
-#line 2665 "parser.tab.c"
+#line 2748 "parser.tab.c"
     break;
 
   case 196: /* compound_statement: LBRACE $@3 declaration_list RBRACE  */
-#line 763 "src/parser.y"
+#line 834 "src/parser.y"
                                                                                        {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
-#line 2671 "parser.tab.c"
+#line 2754 "parser.tab.c"
     break;
 
   case 197: /* $@4: %empty  */
-#line 764 "src/parser.y"
+#line 835 "src/parser.y"
                  {curr_scope = new scoped_symtab(curr_scope);}
-#line 2677 "parser.tab.c"
+#line 2760 "parser.tab.c"
     break;
 
   case 198: /* compound_statement: LBRACE $@4 declaration_list statement_list RBRACE  */
-#line 764 "src/parser.y"
+#line 835 "src/parser.y"
                                                                                                       {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
-#line 2683 "parser.tab.c"
+#line 2766 "parser.tab.c"
     break;
 
   case 205: /* declaration_list: error SEMICOLON  */
-#line 777 "src/parser.y"
+#line 848 "src/parser.y"
                           {yyerrok;}
-#line 2689 "parser.tab.c"
+#line 2772 "parser.tab.c"
     break;
 
   case 208: /* statement_list: error SEMICOLON  */
-#line 783 "src/parser.y"
+#line 854 "src/parser.y"
                           {yyerrok;}
-#line 2695 "parser.tab.c"
+#line 2778 "parser.tab.c"
     break;
 
   case 218: /* jump_statement: GOTO ID SEMICOLON  */
-#line 806 "src/parser.y"
+#line 877 "src/parser.y"
         { 
 		//printf("Goto statement: %s\n",$2);
 	}
-#line 2703 "parser.tab.c"
+#line 2786 "parser.tab.c"
     break;
 
   case 229: /* function_definition: declaration_specifiers declarator compound_statement  */
-#line 829 "src/parser.y"
+#line 900 "src/parser.y"
         {   //printf("Function is there: %s %s\n",$1,$2);
 		
 	}
-#line 2711 "parser.tab.c"
+#line 2794 "parser.tab.c"
     break;
 
 
-#line 2715 "parser.tab.c"
+#line 2798 "parser.tab.c"
 
       default: break;
     }
@@ -2904,7 +2987,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 835 "src/parser.y"
+#line 906 "src/parser.y"
 
 
 void yyerror(const char *s) {
@@ -2955,6 +3038,16 @@ void print_scope_table() {
                it.second->type.c_str(),   // Type
                size,                      // Size
                valueStr.c_str());         // Value
+
+		if((it.second->type).substr(0,6)=="struct"){
+			for(int i=0;i<it.second->struct_attr_values.size();i++){
+				printf("| %-15s | %-20s | %-7d | %-10s |\n",
+               (it.first+"."+it.second->param_list[i]).c_str(),          // Identifier
+               it.second->struct_attr_values[i]->type.c_str(),   // Type
+               4,                      // Size
+               std::to_string(*(int*)(it.second->struct_attr_values[i]->ptr)).c_str());         // Value
+			}
+		}
     }
 
     printf("-----------------------------------------------------------------\n");

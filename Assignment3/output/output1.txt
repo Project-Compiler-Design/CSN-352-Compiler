@@ -6,29 +6,26 @@ ID marks
 Direct declarator marks
 roll
 marks
+section
+ID section
+Direct declarator section
+grade
+ID grade
+Direct declarator grade
+section
+grade
+Struct declaration int = roll
+Struct declaration int = marks
+Struct declaration char = section
+Struct declaration char = grade
+cd
+ID cd
+Direct declarator cd
+cd
+Struct declaration int = cd
 main
 ID main
 Direct declarator main
-a
-ID a
-Direct declarator a
-con
-Primary expression found: int
-postfix expression found: int
-Unary expression 
-cond expression = int
-cond expression2 = 
-condi expression found: int
-declaratoreiii a
-Yes int found
-declarator equals initializer a
-init_d a
-parsing stack top = a
-Declaration specifiers = int
-Init declarator list = 0.000000
-dollar 3 type =  Mÿ
-top ka type = int
-Correct type declaration
 s1
 ID s1
 Direct declarator s1
@@ -36,17 +33,21 @@ declarator11 s1
 declarator s1
 init_d s1
 parsing stack top = s1
-Declaration specifiers = Student
+Declaration specifiers = struct Student
 Init declarator list = 0.000000
-dollar 3 type =  Mÿ
-Created new symbol: s1 with type Student
+dollar 3 type = ลิ0þ
+Created new symbol: s1 with type struct Student
 Correct type declaration
 ID found: s1
 ID s1
 ID2 s1
 check
 Primary expression found: 
-postfix expression found: 
+Struct found struct Student
+Struct name struct
+Param list roll
+Found roll with type int
+postfix expression found: struct Student
 con
 Primary expression found: int
 postfix expression found: int
@@ -56,23 +57,100 @@ cond expression2 =
 condi expression found: int
 unary inside assignment = s1
 Assignment expression = int
-Error: Type mismatch in assignment
+find symbol type: struct
+Error in struct attr values
+s2
+ID s2
+Direct declarator s2
+declarator11 s2
+declarator s2
+init_d s2
+parsing stack top = s2
+Declaration specifiers = struct Student
+Init declarator list = 0.000000
+dollar 3 type = ลิ0þ
+Created new symbol: s2 with type struct Student
+Correct type declaration
+ID found: s2
+ID s2
+ID2 s2
+check
+Primary expression found: 
+Struct found struct Student
+Struct name struct
+Param list roll
+Param list marks
+Found marks with type int
+postfix expression found: struct Student
+con
+Primary expression found: int
+postfix expression found: int
+Unary expression 
+cond expression = int
+cond expression2 = 
+condi expression found: int
+unary inside assignment = s2
+Assignment expression = int
+find symbol type: struct
+Error in struct attr values
+all
+ID all
+Direct declarator all
+declarator11 all
+declarator all
+init_d all
+parsing stack top = all
+Declaration specifiers = struct A
+Init declarator list = 0.000000
+dollar 3 type = ลิ0þ
+Created new symbol: all with type struct A
+Correct type declaration
+ID found: all
+ID all
+ID2 all
+check
+Primary expression found: 
+Struct found struct A
+Struct name struct
+Param list cd
+Found cd with type int
+postfix expression found: struct A
+con
+Primary expression found: int
+postfix expression found: int
+Unary expression 
+cond expression = int
+cond expression2 = 
+condi expression found: int
+unary inside assignment = all
+Assignment expression = int
+find symbol type: struct
+Error in struct attr values
 Parsing stack size = 0
 Printing scope table
 Count of scopes 2
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+| A               | struct               | 0       | N/A        |
 | Student         | struct               | 0       | N/A        |
+| cd              | int                  | 4       | N/A        |
+| grade           | char                 | 2       |            |
 | marks           | int                  | 4       | N/A        |
 | roll            | int                  | 4       | N/A        |
+| section         | char                 | 2       |            |
 -----------------------------------------------------------------
 Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+| A               | uninitialized        | N/A     | N/A        |
 | Student         | uninitialized        | N/A     | N/A        |
-| a               | int                  | 4       | 4          |
-| s1              | Student              | 0       | N/A        |
+| all             | struct A             | 0       | N/A        |
+| all.cd          | int                  | 4       | 4          |
+| s1              | struct Student       | 0       | N/A        |
+| s1.roll         | int                  | 4       | 1          |
+| s2              | struct Student       | 0       | N/A        |
+| s2.marks        | int                  | 4       | 3          |
 -----------------------------------------------------------------
 Scope is here

@@ -33,8 +33,9 @@ struct symbol_info {
     int parameter_no=0;
     std::vector<std::string> param_types;
     std::vector<std::string> param_list;
+    std::vector<symbol_info*> struct_attr_values;
 
-    symbol_info(std::string name="", std::string type="", void* ptr=nullptr, int symbol_size=0, bool is_array=false, int array_length=0, std::vector<int> int_array={},bool is_param_list=false,std::vector<std::string> param_types={},int parameter_no=0)
+    symbol_info(std::string name="", std::string type="", void* ptr=nullptr, int symbol_size=0, bool is_array=false, int array_length=0, std::vector<int> int_array={},bool is_param_list=false,std::vector<std::string> param_types={},std::vector<std::string> param_list={},int parameter_no=0)
         : name(name), type(type), ptr(ptr), symbol_size(symbol_size){}
 };
 
