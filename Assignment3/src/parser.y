@@ -143,12 +143,14 @@ postfix_expression
 			cerr<<"Error: Undeclared variable "<<$1->name<<endl;
 		}
 		else{
-			if((find_symbol->type).substr(0,6)=="struct"){
-				cout<<"Struct found "<<find_symbol->type<<endl;
-				symbol_info* find_struct=lookup_symbol_global((find_symbol->type).substr(7), curr_scope);
+			if((find_symbol->type).substr(0,6)=="struct" || (find_symbol->type).substr(0,5)=="union"){
+				cout<<"Struct or union found "<<find_symbol->type<<endl;
+				symbol_info* find_struct;
+				if((find_symbol->type).substr(0,6)=="struct") find_struct=lookup_symbol_global((find_symbol->type).substr(7), curr_scope);
+				else find_struct=lookup_symbol_global((find_symbol->type).substr(6), curr_scope);
 				int flag=0;
 				string var_type="";
-				cerr<<"Struct name "<<find_struct->type<<endl;
+				cerr<<"Struct or union name "<<find_struct->type<<endl;
 				for(int i=0;i<find_struct->param_list.size();i++){
 					cerr<<"Param list "<<find_struct->param_list[i]<<endl;
 					if(find_struct->param_list[i]==$3){
@@ -159,7 +161,7 @@ postfix_expression
 					}
 				}
 				if(flag==0){
-					cerr<<"Error: no such attribute found in struct"<<endl;
+					cerr<<"Error: no such attribute found in struct or union"<<endl;
 				}
 				else{
 					parsing_stack.push($1->name);
@@ -171,7 +173,7 @@ postfix_expression
 				
 			}
 			else{
-				cerr<<"Error: Not a struct"<<endl;
+				cerr<<"Error: Not a struct or union"<<endl;
 			}
 			
 		}
@@ -345,7 +347,7 @@ assignment_expression
         symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
         if(find_symbol != nullptr) {
 			cerr<<"find symbol type: "<<(find_symbol->type).substr(0,6)<<endl;
-			if((find_symbol->type).substr(0,6)=="struct"){
+			if((find_symbol->type).substr(0,6)=="struct" || (find_symbol->type).substr(0,5)=="union"){
 				if(parsing_stack.top()==$3->type){
 					parsing_stack.pop();
 					string attr=parsing_stack.top();
@@ -355,10 +357,10 @@ assignment_expression
 					symbol_info* find_struct=lookup_symbol_global(struct_inst_name, curr_scope);
 					find_struct->param_list.push_back(attr);
 					find_struct->struct_attr_values.push_back($3);
-					cerr<<"Error in struct attr values"<<endl;
+					cerr<<"Error in struct or union attr values"<<endl;
 				}
 				else{
-					printf("Error: Type mismatch in assignment of struct attributes\n");
+					printf("Error: Type mismatch in assignment of struct or union attributes\n");
 				}
 			}
 			else{
@@ -542,7 +544,7 @@ struct_or_union_specifier
 		new_symbol->param_types = $4->param_types;
 		curr_scope->symbol_map[$2]=new_symbol;
 		for(int i=0;i<curr_scope->symbol_map[$2]->param_list.size();i++){
-			printf("Struct declaration %s = %s\n",curr_scope->symbol_map[$2]->param_types[i].c_str(),curr_scope->symbol_map[$2]->param_list[i].c_str());
+			printf("Struct or union declaration %s = %s\n",curr_scope->symbol_map[$2]->param_types[i].c_str(),curr_scope->symbol_map[$2]->param_list[i].c_str());
 		}
 	}
 	| struct_or_union LBRACE struct_declaration_list RBRACE
@@ -550,14 +552,14 @@ struct_or_union_specifier
 	{
 		symbol_info* find_symbol = lookup_symbol_global($2, curr_scope);
 		if (find_symbol != nullptr) {
-			if (find_symbol->type == "struct") {
+			if (find_symbol->type == "struct" || find_symbol->type == "union") {
 				std::string temp = std::string($1) + " " + std::string($2);
 				$$ = strdup(temp.c_str());  // strdup allocates new memory for the concatenated string
 			} else {
-				std::cerr << "Error: Variable not of type struct" << std::endl;
+				std::cerr << "Error: Variable not of type struct or union" << std::endl;
 			}
 		} else {
-			std::cerr << "Error: Struct not declared" << std::endl;
+			std::cerr << "Error: Struct or Union not declared" << std::endl;
 		}
 	} 
 	;
@@ -955,6 +957,15 @@ void print_scope_table() {
                valueStr.c_str());         // Value
 
 		if((it.second->type).substr(0,6)=="struct"){
+			for(int i=0;i<it.second->struct_attr_values.size();i++){
+				printf("| %-15s | %-20s | %-7d | %-10s |\n",
+               (it.first+"."+it.second->param_list[i]).c_str(),          // Identifier
+               it.second->struct_attr_values[i]->type.c_str(),   // Type
+               4,                      // Size
+               std::to_string(*(int*)(it.second->struct_attr_values[i]->ptr)).c_str());         // Value
+			}
+		}
+		if((it.second->type).substr(0,5)=="union"){
 			for(int i=0;i<it.second->struct_attr_values.size();i++){
 				printf("| %-15s | %-20s | %-7d | %-10s |\n",
                (it.first+"."+it.second->param_list[i]).c_str(),          // Identifier

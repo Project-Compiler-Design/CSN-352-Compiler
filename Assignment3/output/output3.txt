@@ -44,7 +44,7 @@ init_d x
 parsing stack top = x
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = `fþ
+dollar 3 type = €:Òwþ
 top ka type = int
 Correct type declaration
 y
@@ -77,7 +77,7 @@ init_d y
 parsing stack top = y
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = `fþ
+dollar 3 type = €:Òwþ
 Created new symbol: y with type int
 Correct type declaration
 ID found: x
@@ -126,7 +126,7 @@ init_d i
 parsing stack top = i
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = `fþ
+dollar 3 type = €:Òwþ
 Created new symbol: i with type int
 Correct type declaration
 ID found: i

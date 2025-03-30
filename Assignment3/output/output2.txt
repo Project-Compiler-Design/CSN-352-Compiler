@@ -7,7 +7,7 @@ init_d Integer
 parsing stack top = Integer
 Declaration specifiers = typedef
 Init declarator list = 0.000000
-dollar 3 type = PnL²ý
+dollar 3 type = °×%®ÿ
 Created new symbol: Integer with type typedef
 Correct type declaration
 subtract
