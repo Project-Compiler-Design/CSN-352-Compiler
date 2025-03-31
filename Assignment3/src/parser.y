@@ -3,11 +3,11 @@
     #include <stdlib.h>
     #include <string.h>
     #include<iostream>
+	#include<fstream>
     #include<map>
     #include<vector>
 	#include<stack>
 
-	// #include "symbol_table.h"
 	#include "functions.h"
     using namespace std;
 
@@ -24,6 +24,10 @@
     scoped_symtab* curr_scope = new scoped_symtab();
     vector<scoped_symtab*> all_scopes={curr_scope};
 	
+	std::ofstream file("output.txt");
+
+    
+    
 
 
 	struct ArgList {
@@ -75,14 +79,29 @@
 %%
 
 constant: 
-    DECIMAL_LITERAL      {$$= new symbol_info("", "int", $1->ptr, $1->symbol_size);}
-    | FLOAT_LITERAL      {$$= new symbol_info("", "float", $1->ptr, $1->symbol_size);}
+    DECIMAL_LITERAL      
+	{
+		$$= new symbol_info("", "int", $1->ptr, $1->symbol_size);
+		$$->place=qid(std::to_string(*(int*)($1->ptr)),nullptr);
+		$$->code=std::to_string(*(int*)($1->ptr));
+	}
+    | FLOAT_LITERAL      
+	{
+		$$= new symbol_info("", "float", $1->ptr, $1->symbol_size);
+		$$->place=qid(std::to_string(*(float*)($1->ptr)),nullptr);
+		$$->code=std::to_string(*(float*)($1->ptr));
+	}
     | EXP_LITERAL        {$$ = new symbol_info("", "exp", $1->ptr, $1->symbol_size);} 
     | HEXA_LITERAL       {$$ = new symbol_info("", "hexa", $1->ptr, $1->symbol_size);}
     | REAL_LITERAL       {$$ = new symbol_info("", "real", $1->ptr, $1->symbol_size);}
     | STRING_LITERAL     {$$ = new symbol_info("", "string", $1->ptr, $1->symbol_size);}
     | OCTAL_LITERAL      {$$ = new symbol_info("", "octal", $1->ptr, $1->symbol_size);}
-    | CHARACTER_LITERAL  {$$ = new symbol_info("", "char", $1->ptr, $1->symbol_size);}
+    | CHARACTER_LITERAL  
+	{
+		$$ = new symbol_info("", "char", $1->ptr, $1->symbol_size);
+		$$->place=qid(std::to_string(*(char*)($1->ptr)),nullptr);
+		$$->code=std::to_string(*(char*)($1->ptr));
+	}
 
 
 primary_expression
@@ -95,8 +114,23 @@ primary_expression
             printf("ID2 %s\n",$$->name.c_str());
             cerr<<"check"<<endl;
             
+			//3AC code
+			symbol_info* find_symbol = lookup_symbol_global($1, curr_scope);
+			if(find_symbol==nullptr){
+				cerr<<"Error: Undeclared variable "<<$1<<endl;
+			}
+			else{
+				$$->place=qid($1,find_symbol);
+				$$->code=$1;
+				cerr<<"Symbol found "<<$$->place.second->name<<endl;
+				cerr<<"Code "<<$$->code<<endl;
+			}
         }
-	| constant		{cerr << "con\n";$$ = $1;}
+	| constant		
+	{
+		cerr << "con\n";$$ = $1;
+		
+	}
 	| STRING_LITERAL 
 	| LPARENTHESES expression RPARENTHESES
 	;
@@ -349,6 +383,7 @@ assignment_expression
 			cerr<<"find symbol type: "<<(find_symbol->type).substr(0,6)<<endl;
 			if((find_symbol->type).substr(0,6)=="struct" || (find_symbol->type).substr(0,5)=="union"){
 				if(parsing_stack.top()==$3->type){
+					//Semantic Analysis
 					parsing_stack.pop();
 					string attr=parsing_stack.top();
 					parsing_stack.pop();
@@ -358,6 +393,10 @@ assignment_expression
 					find_struct->param_list.push_back(attr);
 					find_struct->struct_attr_values.push_back($3);
 					cerr<<"Error in struct or union attr values"<<endl;
+
+					//3AC code
+					
+
 				}
 				else{
 					printf("Error: Type mismatch in assignment of struct or union attributes\n");
@@ -369,6 +408,11 @@ assignment_expression
 				} else {
 					printf("Correct type assignment\n");
 					set_pointer_data(find_symbol, find_symbol->type, $3->ptr);  
+
+					//3AC code
+					cout<<"3AC code for assignment"<<endl;
+					$$->code=$1->code+$2->code+$3->code;
+					file<<$$->code<<endl;
 				}
 			}
 			
@@ -386,17 +430,17 @@ assignment_expression
 	;
 
 assignment_operator
-	: EQUALS
-	| ASSIGN_STAR
-	| ASSIGN_DIV
-	| ASSIGN_MOD
-	| ASSIGN_PLUS
-	| ASSIGN_MINUS
-	| LEFT_SHIFT_EQ
-	| RIGHT_SHIFT_EQ
-	| ASSIGN_AND
-	| ASSIGN_XOR
-	| ASSIGN_OR
+	: EQUALS {$$=new symbol_info("","equals",nullptr,0); $$->code="=";}
+	| ASSIGN_STAR {$$=new symbol_info("","assign_star",nullptr,0); $$->code="*=";}
+	| ASSIGN_DIV {$$=new symbol_info("","assign_div",nullptr,0); $$->code="/=";}
+	| ASSIGN_MOD {$$=new symbol_info("","assign_mod",nullptr,0); $$->code="%=";}
+	| ASSIGN_PLUS {$$=new symbol_info("","assign_plus",nullptr,0); $$->code="+=";}
+	| ASSIGN_MINUS {$$=new symbol_info("","assign_minus",nullptr,0); $$->code="-=";}
+	| LEFT_SHIFT_EQ {$$=new symbol_info("","left_shift_eq",nullptr,0); $$->code="<<=";}
+	| RIGHT_SHIFT_EQ {$$=new symbol_info("","right_shift_eq",nullptr,0); $$->code=">>=";}
+	| ASSIGN_AND {$$=new symbol_info("","assign_and",nullptr,0); $$->code="&=";}
+	| ASSIGN_XOR {$$=new symbol_info("","assign_xor",nullptr,0); $$->code="^=";}
+	| ASSIGN_OR {$$=new symbol_info("","assign_or",nullptr,0); $$->code="|=";}
 	;
 
 expression
@@ -632,6 +676,7 @@ enum_specifier
 	: ENUM LBRACE enumerator_list RBRACE
 	| ENUM ID LBRACE enumerator_list RBRACE 
 	{
+		
 		//printf("enum is here = %s\n",$$);
 	}
 	| ENUM ID
@@ -986,6 +1031,8 @@ void print_scope_table() {
 
 
 int main() {
+	
+    
 
     yyparse();
 
@@ -996,5 +1043,5 @@ int main() {
 		parsing_stack.pop();
 	}
 	print_scope_table();
-
+	file.close();
 }

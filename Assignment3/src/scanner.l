@@ -1,7 +1,7 @@
 %option noyywrap
 %{
     #include "parser.tab.h"
-    #include "symbol_table.h"
+    #include "utility.h"
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>

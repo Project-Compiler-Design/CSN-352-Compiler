@@ -1,7 +1,7 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-#include "symbol_table.h"
+#include "utility.h"
 
 //set_pointer_data function
 // This function sets the value of a pointer in the symbol_info struct based on the type provided.

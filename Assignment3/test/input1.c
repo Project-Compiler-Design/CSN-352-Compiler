@@ -1,22 +1,12 @@
-struct Student{
-    int roll,marks;
-    char section,grade;
-};
 
-union A{
-    int cd;
-};
 
 int main(){
+    int a=4;
+    a=3;
 
-    struct Student s1;
-    s1.roll=1;
-    struct Student s2;
-    s2.marks=3;
-    union A all;
-    all.cd=4;
-
-
+    for(a=2;a<5;a++){
+        a=3;
+    }
     
     
     

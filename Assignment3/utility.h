@@ -1,10 +1,10 @@
-#ifndef SYMBOL_TABLE_H
-#define SYMBOL_TABLE_H
+#ifndef UTILITY_H
+#define UTILITY_H
 
 #include <string>
 #include <vector>
 #include<map>
-
+#include<bits/stdc++.h>
 struct scoped_symtab;
 struct symbol_info;
 static symbol_info* lookup_symbol_local(const std::string& name, scoped_symtab* curr_scope);
@@ -20,6 +20,15 @@ struct scoped_symtab{
     }
 };
 
+typedef std::pair <std::string, symbol_info*> qid;
+
+typedef struct quadruple{
+    qid op;
+    qid arg1;
+    qid arg2;
+    qid res;
+    int idx;
+} quad;
 struct symbol_info {
     std::string name;
     std::string type;  // Use std::string instead of char* for safety
@@ -35,7 +44,12 @@ struct symbol_info {
     std::vector<std::string> param_list;
     std::vector<symbol_info*> struct_attr_values;
 
-    symbol_info(std::string name="", std::string type="", void* ptr=nullptr, int symbol_size=0, bool is_array=false, int array_length=0, std::vector<int> int_array={},bool is_param_list=false,std::vector<std::string> param_types={},std::vector<std::string> param_list={},int parameter_no=0)
+    qid place;
+    std::string code;
+
+
+    symbol_info(std::string name="", std::string type="", void* ptr=nullptr, int symbol_size=0, bool is_array=false, int array_length=0, std::vector<int> int_array={},bool is_param_list=false,std::vector<std::string> param_types={},std::vector<std::string> param_list={},int parameter_no=0,qid place = {"", nullptr}, std::string code = "",
+                std::vector<symbol_info*> struct_attr_values = {})
         : name(name), type(type), ptr(ptr), symbol_size(symbol_size){}
 };
 
