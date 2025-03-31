@@ -1,10 +1,12 @@
 
 
 int main(){
-    int a;
-    int b;
+    int d;
+    int a,b;
     int c;
-    c=a+b;
-    
+    if(a<b)
+    {
+        
+    }
     
 }

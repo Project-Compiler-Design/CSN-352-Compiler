@@ -306,7 +306,7 @@ multiplicative_expression
 	| multiplicative_expression STAR cast_expression 
 	{
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+"="+$1->place.first+"*"+$3->place.first;
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"*"+$3->place.first;
 		$$->place=var;
 		
 
@@ -320,30 +320,79 @@ additive_expression
 	| additive_expression PLUS multiplicative_expression 
 	{
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+"="+$1->place.first+"+"+$3->place.first;
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"+"+$3->place.first;
 		$$->place=var;
 	}
 	| additive_expression MINUS multiplicative_expression
+	{
+		qid var=newtemp($1->type,curr_scope);
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"-"+$3->place.first;
+		$$->place=var;
+	}
 	;
 
 shift_expression
 	: additive_expression {$$=$1;}
 	| shift_expression LEFT_SHIFT additive_expression
+	{
+		qid var=newtemp($1->type,curr_scope);
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"<<"+$3->place.first;
+		$$->place=var;
+	}
 	| shift_expression RIGHT_SHIFT additive_expression
+	{
+		qid var=newtemp($1->type,curr_scope);
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+">>"+$3->place.first;
+		$$->place=var;
+	}
 	;
 
 relational_expression
 	: shift_expression 		{$$=$1;}
 	| relational_expression LESS_THAN shift_expression
+	{
+		qid var=newtemp($1->type,curr_scope);
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"<"+$3->place.first;
+		$$->place=var;
+	}
 	| relational_expression GREATER_THAN shift_expression
+	{
+		qid var=newtemp($1->type,curr_scope);
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+">"+$3->place.first;
+		$$->place=var;
+	}
 	| relational_expression LESS_EQUALS shift_expression
+	{
+		qid var=newtemp($1->type,curr_scope);
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"<="+$3->place.first;
+		$$->place=var;
+	
+	}
 	| relational_expression GREATER_EQUALS shift_expression
+	{
+		
+		qid var=newtemp($1->type,curr_scope);
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+">="+$3->place.first;
+		$$->place=var;
+	}
 	;
 
 equality_expression
 	: relational_expression	{$$=$1;}
 	| equality_expression REL_EQUALS relational_expression
+	{
+		qid var=newtemp($1->type,curr_scope);
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"=="+$3->place.first;
+		$$->place=var;
+		// file<<$$->code<<endl;
+	}
 	| equality_expression REL_NOT_EQ relational_expression
+	{
+		qid var=newtemp($1->type,curr_scope);
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"!="+$3->place.first;
+		$$->place=var;
+	}
+
 	;
 
 and_expression
@@ -382,7 +431,6 @@ assignment_expression
 		//printf("conditional inside assignment = %s\n",$$);
 		// $$ = strdup($1);
 		$$=$1;
-		
 		printf("cond expression = %s\n",$1->type.c_str());
 		printf("cond expression2 = %s\n",$1->name.c_str());
 		cerr << "condi expression found: " << $1->code << endl;
@@ -416,18 +464,18 @@ assignment_expression
 				}
 			}
 			else{
-				if(find_symbol->type != $3->type) {
-					printf("Error: Type mismatch in assignment\n"); }
-				 else {
+				// if(find_symbol->type != $3->type) {
+				// 	printf("Error: Type mismatch in assignment\n"); }
+				//  else {
 					cerr<<"Correct type assignment"<<endl;
-					set_pointer_data(find_symbol, find_symbol->type, $3->ptr);  
+					// set_pointer_data(find_symbol, find_symbol->type, $3->ptr);  
 
 					//3AC code
 					cerr<<"3AC code for assignment"<<endl;
-					$$->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + "=" + $3->place.first;
+					$$->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
 					$$->place=$1->place;
 					file<<$$->code<<endl;
-				 }
+				//   }
 			}
 			
 		}
@@ -460,8 +508,9 @@ assignment_operator
 expression
 	: assignment_expression 	
 	{
-		cout<<"Assignment expression = "<<$1->code<<endl;
+		// cout<<"Assignment expression = "<<$1->code<<endl;
 		// file<<$1->code<<endl;
+		$$=$1;
 	}	
 	| expression COMMA assignment_expression
 	;
@@ -570,7 +619,13 @@ init_declarator
 		}
 		
 		$$ = $1;
-		// $$->code=$1->code+$2->code+$3->code;
+		if($3->place.first[0]!='t')
+		{
+			$3->code="";
+		}
+		$$->code=$3->code+"\n"+$1->place.first+":= "+$3->place.first;
+		$$->place=$1->place;
+		file<<$$->code<<endl;
 		printf("declarator equals initializer %s\n",$$->name.c_str()); 
 		
     }
@@ -733,7 +788,7 @@ direct_declarator
 		printf("%s\n",$1);
 		symbol_info* x=new symbol_info();
 		x->name = $1;
-
+		x->place.first=$1;
 		$$=x;
 		printf("ID %s\n",$$->name.c_str());
 	}        //{printf("Identifier in direct declaratorrr = %s\n",$1);}

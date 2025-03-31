@@ -1,29 +1,36 @@
 main
 ID main
 Direct declarator main
+d
+ID d
+Direct declarator d
+declarator11 d
+declarator d
+init_d d
+parsing stack top = d
+Declaration specifiers = int
+Init declarator list = 0.000000
+dollar 3 type =  È†<ý
+Created new symbol: d with type int
+Correct type declaration
 a
 ID a
 Direct declarator a
 declarator11 a
 declarator a
 init_d a
-parsing stack top = a
-Declaration specifiers = int
-Init declarator list = 0.000000
-dollar 3 type = Ðdø~ý
-Created new symbol: a with type int
-Correct type declaration
 b
 ID b
 Direct declarator b
 declarator11 b
 declarator b
-init_d b
+init_D b
 parsing stack top = b
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = Ðdø~ý
+dollar 3 type =  È†<ý
 Created new symbol: b with type int
+Created new symbol: a with type int
 Correct type declaration
 c
 ID c
@@ -34,17 +41,9 @@ init_d c
 parsing stack top = c
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = Ðdø~ý
+dollar 3 type =  È†<ý
 Created new symbol: c with type int
 Correct type declaration
-ID found: c
-ID c
-ID2 c
-check
-Symbol found c
-Code 
-Primary expression found: 
-postfix expression found: 
 ID found: a
 ID a
 ID2 a
@@ -67,12 +66,7 @@ cond expression =
 cond expression2 = a
 condi expression found: 
 
-t0=a+b
-unary inside assignment = c
-Assignment expression = 
-find symbol type: int
-Error: Type mismatch in assignment
-Assignment expression = 
+t0:=  a<b
 Parsing stack size = 0
 Printing scope table
 Count of scopes 2
@@ -87,6 +81,7 @@ Scope is here
 | a               | int                  | 4       | N/A        |
 | b               | int                  | 4       | N/A        |
 | c               | int                  | 4       | N/A        |
+| d               | int                  | 4       | N/A        |
 | t0              |                      | 0       | N/A        |
 -----------------------------------------------------------------
 Scope is here
