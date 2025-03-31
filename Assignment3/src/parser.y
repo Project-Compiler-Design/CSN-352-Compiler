@@ -121,7 +121,7 @@ primary_expression
 			}
 			else{
 				$$->place=qid($1,find_symbol);
-				$$->code=$1;
+				$$->code="";
 				cerr<<"Symbol found "<<$$->place.second->name<<endl;
 				cerr<<"Code "<<$$->code<<endl;
 			}
@@ -303,14 +303,26 @@ cast_expression
 
 multiplicative_expression
 	: cast_expression {$$=$1;}
-	| multiplicative_expression STAR cast_expression
+	| multiplicative_expression STAR cast_expression 
+	{
+		qid var=newtemp($1->type,curr_scope);
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+"="+$1->place.first+"*"+$3->place.first;
+		$$->place=var;
+		
+
+	}
 	| multiplicative_expression DIVIDE cast_expression
 	| multiplicative_expression MODULO cast_expression
 	;
 
 additive_expression
 	: multiplicative_expression {$$=$1;}
-	| additive_expression PLUS multiplicative_expression
+	| additive_expression PLUS multiplicative_expression 
+	{
+		qid var=newtemp($1->type,curr_scope);
+		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+"="+$1->place.first+"+"+$3->place.first;
+		$$->place=var;
+	}
 	| additive_expression MINUS multiplicative_expression
 	;
 
@@ -370,9 +382,10 @@ assignment_expression
 		//printf("conditional inside assignment = %s\n",$$);
 		// $$ = strdup($1);
 		$$=$1;
+		
 		printf("cond expression = %s\n",$1->type.c_str());
 		printf("cond expression2 = %s\n",$1->name.c_str());
-		cerr << "condi expression found: " << $1->type << endl;
+		cerr << "condi expression found: " << $1->code << endl;
 	}
 	| unary_expression assignment_operator assignment_expression 
 	{
@@ -404,16 +417,17 @@ assignment_expression
 			}
 			else{
 				if(find_symbol->type != $3->type) {
-					printf("Error: Type mismatch in assignment\n");
-				} else {
-					printf("Correct type assignment\n");
+					printf("Error: Type mismatch in assignment\n"); }
+				 else {
+					cerr<<"Correct type assignment"<<endl;
 					set_pointer_data(find_symbol, find_symbol->type, $3->ptr);  
 
 					//3AC code
-					cout<<"3AC code for assignment"<<endl;
-					$$->code=$1->code+$2->code+$3->code;
+					cerr<<"3AC code for assignment"<<endl;
+					$$->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + "=" + $3->place.first;
+					$$->place=$1->place;
 					file<<$$->code<<endl;
-				}
+				 }
 			}
 			
 		}
@@ -444,7 +458,11 @@ assignment_operator
 	;
 
 expression
-	: assignment_expression 			
+	: assignment_expression 	
+	{
+		cout<<"Assignment expression = "<<$1->code<<endl;
+		// file<<$1->code<<endl;
+	}	
 	| expression COMMA assignment_expression
 	;
 
@@ -550,7 +568,9 @@ init_declarator
 				$1->type = $3->type;
 			}
 		}
+		
 		$$ = $1;
+		// $$->code=$1->code+$2->code+$3->code;
 		printf("declarator equals initializer %s\n",$$->name.c_str()); 
 		
     }
