@@ -10,7 +10,7 @@ postfix expression found: int
 Unary expression 
 cond expression = int
 cond expression2 = 
-condi expression found: 10
+condi expression found: 6
 declaratoreiii a
 Yes int found
 declarator equals initializer a
@@ -24,7 +24,7 @@ postfix expression found: int
 Unary expression 
 cond expression = int
 cond expression2 = 
-condi expression found: 5
+condi expression found: 10
 declaratoreiii b
 Yes int found
 declarator equals initializer b
@@ -32,33 +32,40 @@ init_D b
 parsing stack top = b
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = @åºý
+dollar 3 type = 
 top ka type = int
 top ka type = int
+dollar 3 type = 
+bbbbbbbbbbbbbbbbbbb
+a:= 6
+
+b:= 10
+tttttttttttttttttttt 
 Correct type declaration
-c
-ID c
-Direct declarator c
+d
+ID d
+Direct declarator d
 con
 Primary expression found: int
 postfix expression found: int
 Unary expression 
 cond expression = int
 cond expression2 = 
-condi expression found: 5
-declaratoreiii c
+condi expression found: 0
+declaratoreiii d
 Yes int found
-declarator equals initializer c
-init_d c
-parsing stack top = c
+declarator equals initializer d
+init_d d
+parsing stack top = d
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type = @åºý
+dollar 3 type = 
 top ka type = int
+dollar 3 type = 
+bbbbbbbbbbbbbbbbbbb
+d:= 0
+tttttttttttttttttttt 
 Correct type declaration
-d
-ID d
-Direct declarator d
 ID found: a
 ID a
 ID2 a
@@ -77,75 +84,220 @@ Code
 Primary expression found: 
 postfix expression found: 
 Unary expression b
-ID found: c
-ID c
-ID2 c
-check
-Symbol found c
-Code 
-Primary expression found: 
-postfix expression found: 
-Unary expression c
 cond expression = char
 cond expression2 = a
 condi expression found: 
 
-t0:=  a*b
-
-t1:=  t0+c
-declaratoreiii d
-Yes char found 
-declarator equals initializer d
-init_d d
-parsing stack top = d
-Declaration specifiers = int
-Init declarator list = 0.000000
-dollar 3 type = @åºý
-top ka type = char
-Error: Type mismatch in declaration
-a
+t0:=  a>b
+ID found: d
+ID d
+ID2 d
+check
+Symbol found d
+Code 
+Primary expression found: 
+postfix expression found: 
+ID found: a
 ID a
-Direct declarator a
-con
-Primary expression found: int
-postfix expression found: int
-Unary expression 
-cond expression = int
-cond expression2 = 
-condi expression found: 5
-declaratoreiii a
-Yes int found
-declarator equals initializer a
-init_d a
-parsing stack top = a
-Declaration specifiers = int
-Init declarator list = 0.000000
-dollar 3 type = @åºý
-top ka type = int
-Correct type declaration
-b
+ID2 a
+check
+Symbol found a
+Code 
+Primary expression found: 
+postfix expression found: 
+Unary expression a
+ID found: b
 ID b
-Direct declarator b
+ID2 b
+check
+Symbol found b
+Code 
+Primary expression found: 
+postfix expression found: 
+Unary expression b
+cond expression = char
+cond expression2 = a
+condi expression found: 
+
+t1:=  a-b
+unary inside assignment = d
+Assignment expression = char
+find symbol type: int
+Correct type assignment
+Correct type assignment
+3AC code for assignment
+ID found: d
+ID d
+ID2 d
+check
+Symbol found d
+Code 
+Primary expression found: 
+postfix expression found: 
+Unary expression d
 con
 Primary expression found: int
 postfix expression found: int
 Unary expression 
 cond expression = int
-cond expression2 = 
-condi expression found: 10
-declaratoreiii b
-Yes int found
-declarator equals initializer b
-init_d b
-parsing stack top = b
-Declaration specifiers = int
-Init declarator list = 0.000000
-dollar 3 type = @åºý
-top ka type = int
-Correct type declaration
+cond expression2 = d
+condi expression found: 
+0
+t2:=  d>0
+ID found: d
+ID d
+ID2 d
+check
+Symbol found d
+Code 
+Primary expression found: 
+postfix expression found: 
+ID found: d
+ID d
+ID2 d
+check
+Symbol found d
+Code 
+Primary expression found: 
+postfix expression found: 
+Unary expression d
+con
+Primary expression found: int
+postfix expression found: int
+Unary expression 
+cond expression = int
+cond expression2 = d
+condi expression found: 
+1
+t3:=  d+1
+unary inside assignment = d
+Assignment expression = int
+find symbol type: int
+Correct type assignment
+Correct type assignment
+3AC code for assignment
+ID found: d
+ID d
+ID2 d
+check
+Symbol found d
+Code 
+Primary expression found: 
+postfix expression found: 
+ID found: d
+ID d
+ID2 d
+check
+Symbol found d
+Code 
+Primary expression found: 
+postfix expression found: 
+Unary expression d
+con
+Primary expression found: int
+postfix expression found: int
+Unary expression 
+cond expression = int
+cond expression2 = d
+condi expression found: 
+1
+t4:=  d-1
+unary inside assignment = d
+Assignment expression = int
+find symbol type: int
+Correct type assignment
+Correct type assignment
+3AC code for assignment
+ID found: d
+ID d
+ID2 d
+check
+Symbol found d
+Code 
+Primary expression found: 
+postfix expression found: 
+ID found: b
+ID b
+ID2 b
+check
+Symbol found b
+Code 
+Primary expression found: 
+postfix expression found: 
+Unary expression b
+ID found: a
+ID a
+ID2 a
+check
+Symbol found a
+Code 
+Primary expression found: 
+postfix expression found: 
+Unary expression a
+cond expression = char
+cond expression2 = b
+condi expression found: 
+
+t5:=  b-a
+unary inside assignment = d
+Assignment expression = char
+find symbol type: int
+Correct type assignment
+Correct type assignment
+3AC code for assignment
+ID found: d
+ID d
+ID2 d
+check
+Symbol found d
+Code 
+Primary expression found: 
+postfix expression found: 
+Unary expression d
+con
+Primary expression found: int
+postfix expression found: int
+Unary expression 
+cond expression = int
+cond expression2 = d
+condi expression found: 
+0
+t6:=  d>0
+ID found: d
+ID d
+ID2 d
+check
+Symbol found d
+Code 
+Primary expression found: 
+postfix expression found: 
+ID found: d
+ID d
+ID2 d
+check
+Symbol found d
+Code 
+Primary expression found: 
+postfix expression found: 
+Unary expression d
+con
+Primary expression found: int
+postfix expression found: int
+Unary expression 
+cond expression = int
+cond expression2 = d
+condi expression found: 
+2
+t7:=  d*2
+unary inside assignment = d
+Assignment expression = int
+find symbol type: int
+Correct type assignment
+Correct type assignment
+3AC code for assignment
 Parsing stack size = 0
 Printing scope table
-Count of scopes 3
+Count of scopes 7
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
@@ -154,18 +306,41 @@ Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | int                  | 4       | 5          |
-| b               | int                  | 4       | 10         |
+| t3              | int                  | 4       | N/A        |
 -----------------------------------------------------------------
 Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | int                  | 4       | 10         |
-| b               | int                  | 4       | 5          |
-| c               | int                  | 4       | 5          |
-| d               | char                 | 2       |            |
-| t0              | char                 | 2       |            |
+| t4              | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
 | t1              | char                 | 2       |            |
+| t2              | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| t7              | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| t5              | char                 | 2       |            |
+| t6              | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| a               | int                  | 4       | 6          |
+| b               | int                  | 4       | 10         |
+| d               | int                  | 4       | 0          |
+| t0              | char                 | 2       |            |
 -----------------------------------------------------------------
 Scope is here

@@ -574,6 +574,10 @@ assignment_expression
 
                 //3AC code
                 cerr<<"3AC code for assignment"<<endl;
+				if($3->place.first[0]!='t')
+				{
+					$3->code="";
+				}
                 $$->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
                 $$->place=$1->place;
                 //file<<$$->code<<endl;
@@ -649,17 +653,24 @@ declaration
 					flag = 1;
 				}
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
+				$$->code = $2->code;
 
 			} else {
 				// Create new symbol_info and assign type = $1
 				curr_scope->symbol_map[top_symbol]->type = $1;
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
 				printf("Created new symbol: %s with type %s\n", top_symbol.c_str(), ($1));
+				symbol_info* new_symbol = new symbol_info();
+				new_symbol = $2;
+				$$=new_symbol;
 			}
 		}
-		
-		$$->code = $2->code;
+		cerr<<"dollar 3 type = "<<$2->type<<endl;
+		cerr<<"bbbbbbbbbbbbbbbbbbb"<<$2->code<<endl;
+		// $$->code = $2->code;
+		cerr<<"tttttttttttttttttttt "<<$2->type<<endl;
 		if(flag==0) printf("Correct type declaration\n");
+		
 		
     }
     ;
@@ -689,6 +700,7 @@ init_declarator_list
 init_declarator
     : declarator { 
 		printf("declarator11 %s\n",$1->name.c_str());
+		cerr<<"declarator11 "<<$1->name<<endl;
 		if(curr_scope->symbol_map[$1->name]!=nullptr){
 			printf("Redeclaration error \n");
 			exit(1);
@@ -1040,16 +1052,16 @@ initializer_list
 	;
 
 statement
-	: labeled_statement
+	: labeled_statement{$$=$1;}
 	| compound_statement
 	{
 		$$=$1;
 		//file<<$$->code<<endl;
 	}
 	| expression_statement
-	| selection_statement
-	| iteration_statement
-	| jump_statement
+	| selection_statement{$$=$1;}
+	| iteration_statement{$$=$1;}
+	| jump_statement{$$=$1;}
 	;
 
 labeled_statement
@@ -1067,20 +1079,34 @@ compound_statement
 		all_scopes.push_back(curr_scope);curr_scope = curr_scope->parent;
 		//file<<$$->code<<endl; 
 	}
-	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} statement_list RBRACE {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
-	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} declaration_list RBRACE {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
-	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} declaration_list statement_list RBRACE {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
+	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} statement_list RBRACE {symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->code=$3->code;
+		all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
+	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} declaration_list RBRACE {symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->code=$3->code;
+		all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
+	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} declaration_list statement_list RBRACE {symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->code=$3->code+"\n"+$4->code;all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
 	;
 
 statement_declaration_list
 	: statement_list statement_declaration_list
+	{
+		$$->code=$1->code + "\n" + $2->code;
+	}
 	| declaration_list statement_declaration_list
 	{
 
 		$$->code=$1->code + "\n" + $2->code;
 		//file<<"heloo"<<$$->code<<endl;
 	}
-	| statement_list
+	| statement_list{
+		$$=$1;
+		//file<<$$->code<<endl;
+	}
 	| declaration_list
 	{
 		$$=$1;
@@ -1121,7 +1147,20 @@ expression_statement
 
 selection_statement
 	: IF LPARENTHESES expression RPARENTHESES statement
-	| IF LPARENTHESES expression RPARENTHESES statement ELSE statement      //{printf("It is in if-else block\n");}
+	{
+		string truelabel=newlabel();	
+		string falselabel=newlabel();
+		$$->code=$3->code+"\n"+"if("+ $3->place.first +") goto "+truelabel+"\n"+"goto "+falselabel+"\n"+truelabel+":\n"+$5->code+"\n"+falselabel+":\n";
+		//file<<$$->code<<endl;
+	}
+	| IF LPARENTHESES expression RPARENTHESES statement ELSE statement
+	{
+		string truelabel=newlabel();	
+		string falselabel=newlabel();
+		string endlabel=newlabel();
+		$$->code=$3->code+"\n"+"if("+ $3->place.first +") goto "+truelabel+"\n"+"goto "+falselabel+"\n"+truelabel+":\n"+$5->code+"\n"+"goto "+endlabel+"\n"+falselabel+":\n"+$7->code+"\n"+endlabel+":\n";
+		//file<<$$->code<<endl;
+	}      //{printf("It is in if-else block\n");}
 	| SWITCH LPARENTHESES expression RPARENTHESES statement					//{printf("It is in switch block\n");}
 	;
 

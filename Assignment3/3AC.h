@@ -12,3 +12,4 @@ int assign_exp(string op, string type, string type1,string type2, qid arg1, qid 
 void casepatch(vector<int>& bplist, qid target);
 void print3AC_code();
 void backpatch_rem();
+string newlabel();

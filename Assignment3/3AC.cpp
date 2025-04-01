@@ -1,5 +1,6 @@
 #include "3AC.h"
 int counter=0;
+int counter_lab=0;
 vector<quad*> quad_list;
 
 qid newtemp(string type,scoped_symtab* curr_scope){
@@ -21,5 +22,8 @@ void emit(qid op, qid arg1, qid arg2, qid res, int idx){
     quad_list.push_back(new_quad);
 }
 
-
-
+string newlabel(){
+    string label = "LABEL" + to_string(counter_lab);
+    counter_lab++;
+    return label;
+}
