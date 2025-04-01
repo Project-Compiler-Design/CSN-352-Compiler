@@ -641,14 +641,15 @@ declaration
 			parsing_stack.pop();  // Pop before using it in the map (avoids multiple lookups)
 
 			// Check if the symbol exists in the current scope
-			if (curr_scope->symbol_map[top_symbol]->type!= "") {
+			if (curr_scope->symbol_map[top_symbol]->type!= ""){
 				printf("top ka type = %s\n", curr_scope->symbol_map[top_symbol]->type.c_str());
 
-				if ($1 != curr_scope->symbol_map[top_symbol]->type) {
+				if (type_priority[$1] < type_priority[curr_scope->symbol_map[top_symbol]->type]) {
 					printf("Error: Type mismatch in declaration\n");
 					flag = 1;
 				}
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
+                curr_scope->symbol_map[top_symbol]->type = priority_to_type[max(type_priority[$1], type_priority[curr_scope->symbol_map[top_symbol]->type])];
 
 			} else {
 				// Create new symbol_info and assign type = $1
@@ -689,7 +690,7 @@ init_declarator_list
 init_declarator
     : declarator { 
 		printf("declarator11 %s\n",$1->name.c_str());
-		if(curr_scope->symbol_map[$1->name]!=nullptr){
+		if(lookup_symbol_global($1->name, curr_scope)!=nullptr){
 			printf("Redeclaration error \n");
 			exit(1);
 		}
@@ -703,7 +704,7 @@ init_declarator
     }
     | declarator EQUALS initializer { 
 		printf("declaratoreiii %s\n",$1->name.c_str());
-		if(curr_scope->symbol_map[$1->name]!=nullptr){
+		if(lookup_symbol_global($1->name, curr_scope)!=nullptr){
 			printf("Redeclaration error \n");
 			exit(1);
 		}
@@ -901,15 +902,18 @@ direct_declarator
 	{ 
 		//printf("LPar declarator RPar= %s\n",$2);
 	}
-	| direct_declarator LBRACKET constant_expression RBRACKET			{$$->is_array = true;
-																		if($3->type=="int"){
-																			$$->array_length = *(int*)($3->ptr);
-																			printf("Array length = %d\n",$$->array_length);
-																		}
-																		else{
-																			printf("Error: Array size not an integer\n");
-																			$$->array_length=100;
-																		}}
+	| direct_declarator LBRACKET constant_expression RBRACKET			
+    {
+        $$->is_array = true;
+        if($3->type=="int"){
+            $$->array_length = *(int*)($3->ptr);
+            printf("Array length = %d\n",$$->array_length);
+        }
+        else{
+            printf("Error: Array size not an integer\n");
+            $$->array_length=100;
+        }
+    }
 	| direct_declarator LBRACKET RBRACKET								{printf("Array Size not declared\n"), $$->is_array = true, $$->array_length = 100;}
 	| direct_declarator LPARENTHESES parameter_type_list RPARENTHESES     
 	{
@@ -952,17 +956,20 @@ parameter_type_list
 	;
 
 parameter_list
-	: parameter_declaration{$$->is_param_list=true;
-	   						$$->parameter_no=1;
-							
-	   						$$->param_types.push_back($1->type);}
-	| parameter_list COMMA parameter_declaration {$$->is_param_list=true;
-							cout<<"par num $1 "<<$1->parameter_no<<endl;
-							cout<<"par num $3 "<<$3->parameter_no<<endl;
-	   						$$->parameter_no=$1->parameter_no+$3->parameter_no;
-	   						$$->param_types.push_back($3->type);
-							
-												}
+	: parameter_declaration
+    {
+        $$->is_param_list=true;
+        $$->parameter_no=1;
+        $$->param_types.push_back($1->type);
+    }
+	| parameter_list COMMA parameter_declaration 
+    {
+        $$->is_param_list=true;
+        cout<<"par num $1 "<<$1->parameter_no<<endl;
+        cout<<"par num $3 "<<$3->parameter_no<<endl;
+        $$->parameter_no=$1->parameter_no+$3->parameter_no;
+        $$->param_types.push_back($3->type);
+    }
 	
 	;
 
