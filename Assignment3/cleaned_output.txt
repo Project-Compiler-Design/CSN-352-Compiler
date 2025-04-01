@@ -1,28 +1,10 @@
-    a:= 6
-    b:= 10
-    k:= 0
-    i:=  0
-LABEL4:
-    t0:=  i<5
-    if(t0) goto LABEL6
-    goto LABEL5
-LABEL6:
-    j:=  0
-LABEL0:
-    t1:=  j<5
-    if(t1) goto LABEL2
-    goto LABEL1
-LABEL2:
-    k:=  k+1
-    goto LABEL1
-    k:=  k-1
-    j:=  j+1
-    goto LABEL0
-LABEL1:
-    a:=  a+1
-    goto LABEL7
-    b:=  b-1
-LABEL7:
-    i:=  i+1
-    goto LABEL4
-LABEL5:
+    Assignment expression =
+    z:=  7
+    debugging starts here
+    z:=  7
+    compare now
+    z:=  7
+    z:=  7
+    debugging ends here
+    z:=  7
+    z:=  7

@@ -590,7 +590,7 @@ assignment_expression
 				}
                 $$->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
                 $$->place=$1->place;
-                //file<<$$->code<<endl;
+                cerr<<"hiiiiiiiiiiiii "<<$$->code<<endl;
 				
 			}
 			
@@ -624,6 +624,9 @@ assignment_operator
 expression
 	: assignment_expression 	
 	{
+        cerr<<"IDHAR HU MAIIII2"<<endl;
+        $$=$1;
+        file<<"Assignment expression = "<<$1->code<<endl;
 		// cout<<"Assignment expression = "<<$1->code<<endl;
 		// file<<$1->code<<endl;
 	}	
@@ -717,9 +720,12 @@ init_declarator
 			printf("Redeclaration error \n"); 
 			exit(1);
 		}
-		curr_scope->symbol_map[$1->name]=$1;
-        $$ =$1;
-		printf("declarator %s\n",$$->name.c_str()); 
+        cerr<<"hiiii"<<endl;
+        symbol_info* new_symbol = new symbol_info();
+        new_symbol=$1;
+		curr_scope->symbol_map[$1->name]=new_symbol;
+        $$ =new_symbol;
+		cerr<<"declarator "<<$$->name.c_str()<<endl; 
 		parsing_stack.push($1->name.c_str());
         pointer_info.push($1->pointer_depth);
     }
@@ -735,6 +741,7 @@ init_declarator
 		if($3->type=="int") printf("Yes int found\n");
 		if($3->type=="char") printf("Yes char found %s\n",$3->str_val.c_str());
 		parsing_stack.push($1->name.c_str());
+        pointer_info.push($1->pointer_depth);
 		if($1->is_array){
 			if($3->int_array.size() > $1->array_length){
 				printf("Error: Elements Greater than Declared\n");
@@ -1049,6 +1056,7 @@ direct_abstract_declarator
 
 initializer
 	: assignment_expression {
+        cerr<<"IDHAR HU MAIIII"<<endl;
 		$1->int_array.push_back($1);
 		$$=$1;
 	}
@@ -1096,6 +1104,7 @@ compound_statement
 		$$=new_symbol;
 		$$->code=$3->code;
 		all_scopes.push_back(curr_scope);curr_scope = curr_scope->parent;
+        
 		//file<<$$->code<<endl; 
 	}
 	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} statement_list RBRACE {symbol_info* new_symbol=new symbol_info();
@@ -1114,12 +1123,19 @@ compound_statement
 statement_declaration_list
 	: statement_list statement_declaration_list
 	{
+        
 		$$->code=$1->code + "\n" + $2->code;
+        
+
 	}
 	| declaration_list statement_declaration_list
 	{
-
+        file<<"debugging starts here"<<endl;
+        file<<$2->code<<endl;
+        file<<"compare now"<<endl;
 		$$->code=$1->code + "\n" + $2->code;
+        file<<$1->code<<endl;
+        file<<"debugging ends here"<<endl;
 		//file<<"heloo"<<$$->code<<endl;
 	}
 	| statement_list{
@@ -1282,6 +1298,7 @@ function_definition
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$3->code;
+        
 		// file<<$$->code<<endl;
 	}   
 	| declarator declaration_list compound_statement

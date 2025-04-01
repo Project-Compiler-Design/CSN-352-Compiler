@@ -3,10 +3,8 @@ using namespace std;
 
 
 int main(){
-    if('5'==53){
-        cout << "5==5.5f" << endl;
-    }
-    else{
-        cout << "5!=5.5f" << endl;
-    } 
+    string a="b";
+    string b ="\nb";
+    string c = a+ "\n"+b;
+    cout<<a<<endl;
 }
