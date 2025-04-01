@@ -20,6 +20,7 @@
     extern char *yytext;  
 
 	stack<string> parsing_stack;
+    stack<int> pointer_info;
 
     scoped_symtab* curr_scope = new scoped_symtab();
     vector<scoped_symtab*> all_scopes={curr_scope};
@@ -626,11 +627,11 @@ declaration
     : declaration_specifiers SEMICOLON
     | declaration_specifiers init_declarator_list SEMICOLON 
     {
-		
-		printf("parsing stack top = %s\n",parsing_stack.top().c_str());
-		printf("Declaration specifiers = %s\n", $1);
-		printf("Init declarator list = %f\n", $2->name.c_str());
-		printf("dollar 3 type = %s\n",$2->type);
+		cerr<<"hi"<<endl;
+		cerr<<"parsing stack top = "<<parsing_stack.top().c_str()<<endl;
+		cerr<<"Declaration specifiers = "<<$1<<endl;
+		cerr<<"Init declarator list = "<<$2->name.c_str()<<endl;
+		cerr<<"dollar 3 type = "<<$2->type<<endl;
 		// while(!parsing_stack.empty()){
 		// 	printf("top= %s\n",parsing_stack.top().c_str());
 		// 	parsing_stack.pop();
@@ -638,11 +639,12 @@ declaration
 		int flag=0;
 		while (!parsing_stack.empty()) {
 			std::string top_symbol = parsing_stack.top();  // Store the top of the stack
+            int depth = pointer_info.top();
 			parsing_stack.pop();  // Pop before using it in the map (avoids multiple lookups)
-
+            pointer_info.pop();
 			// Check if the symbol exists in the current scope
 			if (curr_scope->symbol_map[top_symbol]->type!= ""){
-				printf("top ka type = %s\n", curr_scope->symbol_map[top_symbol]->type.c_str());
+				cerr<<("top ka type = %s\n", curr_scope->symbol_map[top_symbol]->type.c_str())<<endl;
 
 				if (type_priority[$1] < type_priority[curr_scope->symbol_map[top_symbol]->type]) {
 					printf("Error: Type mismatch in declaration\n");
@@ -654,12 +656,16 @@ declaration
 			} else {
 				// Create new symbol_info and assign type = $1
 				curr_scope->symbol_map[top_symbol]->type = $1;
+                for(int i=0;i<depth;i++){
+                    curr_scope->symbol_map[top_symbol]->type+="*";
+                }
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
-				printf("Created new symbol: %s with type %s\n", top_symbol.c_str(), ($1));
+                curr_scope->symbol_map[top_symbol]->pointer_depth = depth;
+				cerr<<"Created new symbol: "<<top_symbol.c_str()<<" with type "<<($1)<<endl;
 			}
 		}
 		
-		$$->code = $2->code;
+		// $$->code = $2->code;
 		if(flag==0) printf("Correct type declaration\n");
 		
     }
@@ -678,7 +684,7 @@ declaration_specifiers
 init_declarator_list
     : init_declarator { 
         $$ = $1; 
-		printf("init_d %s\n",$$->name.c_str());  
+		cerr<<("init_d %s\n",$$->name.c_str())<<endl;  
     }
     | init_declarator_list COMMA init_declarator { 
 		$$=$3;
@@ -689,18 +695,16 @@ init_declarator_list
 
 init_declarator
     : declarator { 
-		printf("declarator11 %s\n",$1->name.c_str());
+		cerr<<("declarator11 %s\n",$1->name.c_str())<<endl;
 		if(lookup_symbol_global($1->name, curr_scope)!=nullptr){
-			printf("Redeclaration error \n");
+			printf("Redeclaration error \n"); 
 			exit(1);
 		}
-		
-		symbol_info* new_symbol=new symbol_info();
-
-		curr_scope->symbol_map[$1->name]=new_symbol;
+		curr_scope->symbol_map[$1->name]=$1;
         $$ =$1;
 		printf("declarator %s\n",$$->name.c_str()); 
 		parsing_stack.push($1->name.c_str());
+        pointer_info.push($1->pointer_depth);
     }
     | declarator EQUALS initializer { 
 		printf("declaratoreiii %s\n",$1->name.c_str());
@@ -880,7 +884,9 @@ type_qualifier
 
 declarator
     : pointer direct_declarator { 
-		//printf("Pointer direct declarator\n");
+        $$=$2;
+        $$->pointer_depth=$1->pointer_depth;
+		cerr<<"Pointer direct declarator with depth "<<$$->pointer_depth<<endl;
     }
     | direct_declarator { 
 		$$=$1; 
@@ -930,9 +936,9 @@ direct_declarator
 	;
 
 pointer
-	: STAR //{ $$ = strdup("*"); }
-	| STAR type_qualifier_list
-	| STAR pointer   
+	: STAR {$$=new symbol_info(); $$->pointer_depth=1;}
+	| STAR type_qualifier_list 
+	| STAR pointer {$$=$2; $$->pointer_depth++;}   
 	| STAR type_qualifier_list pointer
 	;
 

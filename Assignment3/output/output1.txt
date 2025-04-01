@@ -1,43 +1,30 @@
 main
 ID main
 Direct declarator main
-a
-ID a
-Direct declarator a
-con
-Primary expression found: int
-postfix expression found: int
-Unary expression 
-cond expression = int
-cond expression2 = 
-condi expression found: 10
-declaratoreiii a
-Yes int found
-declarator equals initializer a
-init_d a
-b
-ID b
-Direct declarator b
-con
-Primary expression found: int
-postfix expression found: int
-Unary expression 
-cond expression = int
-cond expression2 = 
-condi expression found: 5
-declaratoreiii b
-Yes int found
-declarator equals initializer b
-init_D b
-parsing stack top = b
+c
+ID c
+Pointer direct declarator with depth 2
+c
+declarator c
+c
+hi
+parsing stack top = c
 Declaration specifiers = int
-Init declarator list = 0.000000
-dollar 3 type = `Íb”ÿ
-top ka type = int
-top ka type = int
+Init declarator list = c
+dollar 3 type = 
+Created new symbol: c with type int
 Correct type declaration
-a
-ID a
-Direct declarator a
-declarator11 a
-Redeclaration error 
+Parsing stack size = 0
+Printing scope table
+Count of scopes 2
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| c               | int**                | 0       | N/A        |
+-----------------------------------------------------------------
+Scope is here
