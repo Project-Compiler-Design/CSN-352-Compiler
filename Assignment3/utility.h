@@ -29,6 +29,7 @@ typedef struct quadruple{
     qid res;
     int idx;
 } quad;
+
 struct symbol_info {
     std::string name;
     std::string type;  // Use std::string instead of char* for safety
@@ -43,7 +44,7 @@ struct symbol_info {
     std::vector<std::string> param_types;
     std::vector<std::string> param_list;
     std::vector<symbol_info*> struct_attr_values;
-
+    int pointer_depth=0;
     qid place;
     std::string code;
 
@@ -51,8 +52,8 @@ struct symbol_info {
     bool is_break=false;
 
 
-    symbol_info(std::string name="", std::string type="", void* ptr=nullptr, int symbol_size=0, bool is_array=false, int array_length=0, std::vector<int> int_array={},bool is_param_list=false,std::vector<std::string> param_types={},std::vector<std::string> param_list={},int parameter_no=0,qid place = {"", nullptr}, std::string code = "",
-                std::vector<symbol_info*> struct_attr_values = {},bool is_continue=false,bool is_break=false)
+    symbol_info(std::string name="", std::string type="", void* ptr=nullptr, int symbol_size=0, bool is_array=false, int array_length=0, std::vector<int> int_array={},bool is_param_list=false,std::vector<std::string> param_types={},std::vector<std::string> param_list={},int parameter_no=0,int pointer_depth=0, qid place = {"", nullptr}, std::string code = "",
+                std::vector<symbol_info*> struct_attr_values = {})
         : name(name), type(type), ptr(ptr), symbol_size(symbol_size){}
 };
 

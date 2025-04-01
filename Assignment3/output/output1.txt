@@ -1,6 +1,7 @@
 main
 ID main
 Direct declarator main
+<<<<<<< HEAD
 a
 ID a
 Direct declarator a
@@ -263,6 +264,24 @@ b:=  b-1
 Parsing stack size = 0
 Printing scope table
 Count of scopes 4
+=======
+c
+ID c
+Pointer direct declarator with depth 2
+c
+declarator c
+c
+hi
+parsing stack top = c
+Declaration specifiers = int
+Init declarator list = c
+dollar 3 type = 
+Created new symbol: c with type int
+Correct type declaration
+Parsing stack size = 0
+Printing scope table
+Count of scopes 2
+>>>>>>> type-cast
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
@@ -271,6 +290,7 @@ Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+<<<<<<< HEAD
 -----------------------------------------------------------------
 Scope is here
 -----------------------------------------------------------------
@@ -291,3 +311,8 @@ Scope is here
 -----------------------------------------------------------------
 Scope is here
 Cleaning complete! Check cleaned_output.txt
+=======
+| c               | int**                | 0       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+>>>>>>> type-cast
