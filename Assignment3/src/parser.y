@@ -67,7 +67,7 @@
 %type <symbol_info> parameter_list parameter_declaration identifier_list type_name 
 %type <symbol_info> abstract_declarator direct_abstract_declarator initializer 
 %type <symbol_info> initializer_list statement labeled_statement compound_statement 
-%type <symbol_info> declaration_list statement_list expression_statement 
+%type <symbol_info> declaration_list statement_list expression_statement statement_declaration_list
 %type <symbol_info> selection_statement iteration_statement jump_statement 
 %type <symbol_info> translation_unit external_declaration function_definition
 
@@ -568,7 +568,7 @@ assignment_expression
                 find_symbol->name=$1->name;
                 find_symbol->place=$1->place;
                 find_symbol->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
-                file<<find_symbol->code<<endl;
+                //file<<find_symbol->code<<endl;
                 
                 cerr<<"Correct type assignment"<<endl;
 
@@ -576,7 +576,7 @@ assignment_expression
                 cerr<<"3AC code for assignment"<<endl;
                 $$->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
                 $$->place=$1->place;
-                file<<$$->code<<endl;
+                //file<<$$->code<<endl;
 				
 			}
 			
@@ -658,8 +658,9 @@ declaration
 			}
 		}
 		
-		
+		$$->code = $2->code;
 		if(flag==0) printf("Correct type declaration\n");
+		
     }
     ;
 
@@ -680,6 +681,7 @@ init_declarator_list
     }
     | init_declarator_list COMMA init_declarator { 
 		$$=$3;
+		$$->code = $1->code + "\n" + $3->code;
 		printf("init_D %s\n",$$->name.c_str()); 
     }
     ;
@@ -728,7 +730,7 @@ init_declarator
 		}
 		$$->code=$3->code+"\n"+$1->place.first+":= "+$3->place.first;
 		$$->place=$1->place;
-		file<<$$->code<<endl;
+		// file<<$$->code<<endl;
 		printf("declarator equals initializer %s\n",$$->name.c_str()); 
 		
     }
@@ -1040,6 +1042,10 @@ initializer_list
 statement
 	: labeled_statement
 	| compound_statement
+	{
+		$$=$1;
+		//file<<$$->code<<endl;
+	}
 	| expression_statement
 	| selection_statement
 	| iteration_statement
@@ -1054,7 +1060,13 @@ labeled_statement
 
 compound_statement
 	: LBRACE RBRACE
-	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} statement_declaration_list RBRACE {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
+	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} statement_declaration_list RBRACE {
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->code=$3->code;
+		all_scopes.push_back(curr_scope);curr_scope = curr_scope->parent;
+		//file<<$$->code<<endl; 
+	}
 	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} statement_list RBRACE {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
 	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} declaration_list RBRACE {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
 	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} declaration_list statement_list RBRACE {all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
@@ -1063,19 +1075,42 @@ compound_statement
 statement_declaration_list
 	: statement_list statement_declaration_list
 	| declaration_list statement_declaration_list
+	{
+
+		$$->code=$1->code + "\n" + $2->code;
+		//file<<"heloo"<<$$->code<<endl;
+	}
 	| statement_list
 	| declaration_list
+	{
+		$$=$1;
+		//file<<$$->code<<endl;
+	}
 	;
 
 declaration_list
 	: declaration
+	{
+		$$=$1;
+		//file<<$$->code<<endl;
+	}
 	| declaration_list declaration
+	{
+		cout<<"Maaaai yaha honnnn"<<endl;
+		$$->code=$1->code + "\n" + $2->code;
+		//file<<$$->code<<endl;
+	}
 	| error SEMICOLON {yyerrok;}
 	;
 
 statement_list
-	: statement
+	: statement { 
+		$$=$1;
+	}
 	| statement_list statement
+	{
+		$$->code=$1->code + "\n" + $2->code;
+	}
 	| error SEMICOLON {yyerrok;}
 	;
 
@@ -1109,22 +1144,34 @@ jump_statement
 	;
 
 translation_unit
-	: external_declaration 				    //{printf("Reached the root node.\n");}
+	: external_declaration 				 
+	{
+		$$=$1;
+		file<<$$->code<<endl;
+	}   //{printf("Reached the root node.\n");}
 	| translation_unit external_declaration //{printf("Reached the root node.\n");}
 	| 
 	;
 
 external_declaration
-	: function_definition
+	: function_definition 
+	{
+		$$=$1;
+		//file<<$$->code<<endl;
+	}
 	| declaration
 	;
 
 function_definition
 	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement    
-	{   //printf("Function is there: %s %s\n",$1,$2);
-		
-	}
+	| declaration_specifiers declarator compound_statement 
+	{
+		//abhi ke liye
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->code=$3->code;
+		// file<<$$->code<<endl;
+	}   
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
 	;
