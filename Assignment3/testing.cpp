@@ -3,5 +3,10 @@ using namespace std;
 
 
 int main(){
-    int a = 5, b = 6, c = 7;
+    if('5'==53){
+        cout << "5==5.5f" << endl;
+    }
+    else{
+        cout << "5!=5.5f" << endl;
+    } 
 }

@@ -1,48 +1,17 @@
 main
 ID main
 Direct declarator main
-d
-ID d
-Direct declarator d
-declarator11 d
-declarator d
-init_d d
-parsing stack top = d
-Declaration specifiers = int
-Init declarator list = 0.000000
-dollar 3 type =  È†<ý
-Created new symbol: d with type int
-Correct type declaration
 a
 ID a
 Direct declarator a
 declarator11 a
 declarator a
 init_d a
-b
-ID b
-Direct declarator b
-declarator11 b
-declarator b
-init_D b
-parsing stack top = b
+parsing stack top = a
 Declaration specifiers = int
 Init declarator list = 0.000000
-dollar 3 type =  È†<ý
-Created new symbol: b with type int
+dollar 3 type = 0í8>ü
 Created new symbol: a with type int
-Correct type declaration
-c
-ID c
-Direct declarator c
-declarator11 c
-declarator c
-init_d c
-parsing stack top = c
-Declaration specifiers = int
-Init declarator list = 0.000000
-dollar 3 type =  È†<ý
-Created new symbol: c with type int
 Correct type declaration
 ID found: a
 ID a
@@ -52,21 +21,19 @@ Symbol found a
 Code 
 Primary expression found: 
 postfix expression found: 
-Unary expression a
-ID found: b
-ID b
-ID2 b
-check
-Symbol found b
-Code 
-Primary expression found: 
-postfix expression found: 
-Unary expression b
-cond expression = 
-cond expression2 = a
-condi expression found: 
-
-t0:=  a<b
+con
+Primary expression found: float
+postfix expression found: float
+Unary expression 
+cond expression = float
+cond expression2 = 
+condi expression found: 5.500000
+unary inside assignment = a
+Assignment expression = float
+find symbol type: int
+Error: Type mismatch in assignment
+Correct type assignment
+3AC code for assignment
 Parsing stack size = 0
 Printing scope table
 Count of scopes 2
@@ -78,10 +45,6 @@ Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | int                  | 4       | N/A        |
-| b               | int                  | 4       | N/A        |
-| c               | int                  | 4       | N/A        |
-| d               | int                  | 4       | N/A        |
-| t0              |                      | 0       | N/A        |
+| a               | float                | 4       | N/A        |
 -----------------------------------------------------------------
 Scope is here

@@ -99,8 +99,11 @@ constant:
     | CHARACTER_LITERAL  
 	{
 		$$ = new symbol_info("", "char", $1->ptr, $1->symbol_size);
-		$$->place=qid(std::to_string(*(char*)($1->ptr)),nullptr);
-		$$->code=std::to_string(*(char*)($1->ptr));
+        string tempp = "'";
+        tempp+=(*(char*)($1->ptr));
+        tempp+='\'';
+		$$->place=qid(tempp,nullptr);
+		$$->code=tempp;
 	}
 
 
@@ -159,7 +162,7 @@ postfix_expression
 				}
 				else{
 					for(int i=0;i<original_list.size();i++){
-						if(original_list[i]!=new_list[i]){
+						if(type_priority[original_list[i]]<type_priority[new_list[i]]){
 							cout<<"Error: Type of actual and formal parameter does not match"<<endl;
 							break;
 						}
@@ -275,7 +278,7 @@ unary_expression
 	{
 		$$=$1;
 		cerr << "postfix expression found: " << $1->type << endl;
-		}
+	}
 	| INCREMENT unary_expression
 	| DECREMENT unary_expression
 	| unary_operator cast_expression
@@ -297,14 +300,21 @@ cast_expression
 	{
 		$$=$1;
 		printf("Unary expression %s\n",$$->name.c_str());
-		}
+	}
 	| LPARENTHESES type_name RPARENTHESES cast_expression
+    {
+        cout<<"casting"<<endl;
+        $$ = $4;
+        $$->type = $2->type;
+    }
 	;
 
 multiplicative_expression
 	: cast_expression {$$=$1;}
 	| multiplicative_expression STAR cast_expression 
 	{
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
 		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"*"+$3->place.first;
 		$$->place=var;
@@ -312,19 +322,40 @@ multiplicative_expression
 
 	}
 	| multiplicative_expression DIVIDE cast_expression
+    {
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
+        qid var=newtemp($1->type,curr_scope);
+        $$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"/"+$3->place.first;
+        $$->place=var;
+    }
 	| multiplicative_expression MODULO cast_expression
+    {
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
+        if($$->type!="int"){
+            printf("ERROR!!!!!!: Modulo operator can only be used with int type\n");
+        }
+        qid var=newtemp($1->type,curr_scope);
+        $$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"%"+$3->place.first;
+        $$->place=var;
+    }
 	;
 
 additive_expression
 	: multiplicative_expression {$$=$1;}
 	| additive_expression PLUS multiplicative_expression 
 	{
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
 		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"+"+$3->place.first;
 		$$->place=var;
 	}
 	| additive_expression MINUS multiplicative_expression
 	{
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
 		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"-"+$3->place.first;
 		$$->place=var;
@@ -335,12 +366,22 @@ shift_expression
 	: additive_expression {$$=$1;}
 	| shift_expression LEFT_SHIFT additive_expression
 	{
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
+        if($$->type!="int"){
+            printf("ERROR!!!!!!: Left shift operator can only be used with int type\n");
+        }
 		qid var=newtemp($1->type,curr_scope);
 		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"<<"+$3->place.first;
 		$$->place=var;
 	}
 	| shift_expression RIGHT_SHIFT additive_expression
 	{
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
+        if($$->type!="int"){
+            printf("ERROR!!!!!!: Right shift operator can only be used with int type\n");
+        }
 		qid var=newtemp($1->type,curr_scope);
 		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+">>"+$3->place.first;
 		$$->place=var;
@@ -351,18 +392,24 @@ relational_expression
 	: shift_expression 		{$$=$1;}
 	| relational_expression LESS_THAN shift_expression
 	{
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
 		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"<"+$3->place.first;
 		$$->place=var;
 	}
 	| relational_expression GREATER_THAN shift_expression
 	{
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];        
 		qid var=newtemp($1->type,curr_scope);
 		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+">"+$3->place.first;
 		$$->place=var;
 	}
 	| relational_expression LESS_EQUALS shift_expression
 	{
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
 		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"<="+$3->place.first;
 		$$->place=var;
@@ -370,7 +417,8 @@ relational_expression
 	}
 	| relational_expression GREATER_EQUALS shift_expression
 	{
-		
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
 		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+">="+$3->place.first;
 		$$->place=var;
@@ -381,6 +429,8 @@ equality_expression
 	: relational_expression	{$$=$1;}
 	| equality_expression REL_EQUALS relational_expression
 	{
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
 		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"=="+$3->place.first;
 		$$->place=var;
@@ -388,6 +438,8 @@ equality_expression
 	}
 	| equality_expression REL_NOT_EQ relational_expression
 	{
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
 		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"!="+$3->place.first;
 		$$->place=var;
@@ -398,26 +450,68 @@ equality_expression
 and_expression
 	: equality_expression {$$=$1;}
 	| and_expression AMPERSAND equality_expression
+    {
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
+        if($$->type!="int"){
+            printf("ERROR!!!!!!: And operator can only be used with int type\n");
+        }
+    }
 	;
 
 exclusive_or_expression
 	: and_expression 			{$$=$1;}
 	| exclusive_or_expression XOR and_expression
+    {
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
+        if($$->type!="int"){
+            printf("ERROR!!!!!!: XOR operator can only be used with int type\n");
+        }
+        qid var=newtemp($1->type,curr_scope);
+        $$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"^"+$3->place.first;
+        $$->place=var;
+    }
 	;
 
 inclusive_or_expression
 	: exclusive_or_expression 		{$$=$1;}
 	| inclusive_or_expression OR exclusive_or_expression
+    {
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
+        if($$->type!="int"){
+            printf("ERROR!!!!!!: OR operator can only be used with int type\n");
+        }
+        qid var=newtemp($1->type,curr_scope);
+        $$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"|"+$3->place.first;
+        $$->place=var;
+    }
 	;
 
 logical_and_expression
 	: inclusive_or_expression 			{$$=$1;}
 	| logical_and_expression REL_AND inclusive_or_expression
+    {
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
+        if($$->type!="int"){
+            printf("ERROR!!!!!!: AND operator can only be used with int type\n");
+        }
+        
+    }
 	;
 
 logical_or_expression
 	: logical_and_expression		{$$=$1;}
 	| logical_or_expression REL_OR logical_and_expression
+    {
+        $$ = $1;
+        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
+        if($$->type!="int"){
+            printf("ERROR!!!!!!: OR operator can only be used with int type\n");
+        }
+    }
 	;
 
 conditional_expression
@@ -464,18 +558,26 @@ assignment_expression
 				}
 			}
 			else{
-				// if(find_symbol->type != $3->type) {
-				// 	printf("Error: Type mismatch in assignment\n"); }
-				//  else {
-					cerr<<"Correct type assignment"<<endl;
-					// set_pointer_data(find_symbol, find_symbol->type, $3->ptr);  
+                if(type_priority[find_symbol->type]<type_priority[$3->type]){
+                    printf("ERROR!!!!!!: Type mismatch in assignment\n");
+                }else{
+                    printf("Correct type assignment\n");
+                }
+                
+                find_symbol->type=priority_to_type[max(type_priority[find_symbol->type],type_priority[$3->type])];
+                find_symbol->name=$1->name;
+                find_symbol->place=$1->place;
+                find_symbol->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
+                file<<find_symbol->code<<endl;
+                
+                cerr<<"Correct type assignment"<<endl;
 
-					//3AC code
-					cerr<<"3AC code for assignment"<<endl;
-					$$->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
-					$$->place=$1->place;
-					file<<$$->code<<endl;
-				//   }
+                //3AC code
+                cerr<<"3AC code for assignment"<<endl;
+                $$->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
+                $$->place=$1->place;
+                file<<$$->code<<endl;
+				
 			}
 			
 		}
@@ -513,6 +615,7 @@ expression
 		$$=$1;
 	}	
 	| expression COMMA assignment_expression
+    //means?
 	;
 
 constant_expression

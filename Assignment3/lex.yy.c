@@ -1312,7 +1312,7 @@ YY_RULE_SETUP
 { yylval.symbol_info = new symbol_info();
     yylval.symbol_info->type = "char";
     char* temp = strdup(yytext);
-    temp[strlen(temp) - 1] = '\0'; 
+    yylval.symbol_info->ptr = new char(temp[1]);
     yylval.symbol_info->str_val = std::string(temp + 1); 
     yylval.symbol_info->symbol_size=1; return CHARACTER_LITERAL; free(temp);}
 	YY_BREAK

@@ -54,13 +54,17 @@ struct symbol_info {
 };
 
 symbol_info* lookup_symbol_local(const std::string& name, scoped_symtab* curr_scope){
-    return curr_scope->symbol_map[name];
+    auto ptr = curr_scope->symbol_map.find(name);
+    if (ptr != curr_scope->symbol_map.end()) {
+        return ptr->second;
+    }
+    return nullptr;
 }
 
 symbol_info* lookup_symbol_global(const std::string& name, scoped_symtab* curr_scope){
     scoped_symtab* scope = curr_scope;
     while (scope != nullptr) {
-        if(scope->symbol_map[name] != nullptr){
+        if(scope->symbol_map.find(name) != scope->symbol_map.end()){
             return scope->symbol_map[name];
         }
         scope = scope->parent;
