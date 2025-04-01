@@ -1052,10 +1052,11 @@ initializer_list
 	;
 
 statement
-	: labeled_statement{$$=$1;}
+	: labeled_statement{$$=$1;cerr<<"label\n";}
 	| compound_statement
 	{
 		$$=$1;
+
 		//file<<$$->code<<endl;
 	}
 	| expression_statement
@@ -1065,7 +1066,11 @@ statement
 	;
 
 labeled_statement
-	: ID COLON statement
+	: ID COLON statement{cerr << "2HERE\n";}
+	| ID COLON declaration{
+		//check id for symtab here
+	}
+	| ID COLON
 	| CASE constant_expression COLON statement
 	| DEFAULT COLON statement
 	;
@@ -1095,6 +1100,7 @@ compound_statement
 statement_declaration_list
 	: statement_list statement_declaration_list
 	{
+		// cerr<<"idhar to nahi hona chahiye\n";
 		$$->code=$1->code + "\n" + $2->code;
 	}
 	| declaration_list statement_declaration_list
@@ -1105,11 +1111,13 @@ statement_declaration_list
 	}
 	| statement_list{
 		$$=$1;
+		cerr<<"statement list"<<endl;
 		//file<<$$->code<<endl;
 	}
 	| declaration_list
 	{
 		$$=$1;
+		cerr<<"Hello?\n";
 		//file<<$$->code<<endl;
 	}
 	;
@@ -1132,10 +1140,12 @@ declaration_list
 statement_list
 	: statement { 
 		$$=$1;
+		cerr<<"Statement\n";
 	}
 	| statement_list statement
 	{
 		$$->code=$1->code + "\n" + $2->code;
+		
 	}
 	| error SEMICOLON {yyerrok;}
 	;
@@ -1175,6 +1185,8 @@ jump_statement
 	: GOTO ID SEMICOLON				
 	{ 
 		//printf("Goto statement: %s\n",$2);
+		//idhar ID ko symtab me insert karna he
+		cerr << "goto\n";
 	}
 	| CONTINUE SEMICOLON
 	| BREAK SEMICOLON

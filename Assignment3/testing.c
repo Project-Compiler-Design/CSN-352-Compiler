@@ -1,7 +1,5 @@
 int main(){
-    
     hello:
-    int a = 0;
     
     goto hello;
 }
