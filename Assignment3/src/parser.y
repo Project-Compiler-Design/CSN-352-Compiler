@@ -217,7 +217,16 @@ postfix_expression
 	}
 	| postfix_expression LAMBDA_ARROW ID
 	| postfix_expression INCREMENT
+	{
+		$$=$1;
+		$$->code=$1->code + "\n" + $1->place.first+":=  "+$1->place.first+"+1";
+		
+	}
 	| postfix_expression DECREMENT
+	{
+		$$=$1;
+		$$->code=$1->code + "\n" + $1->place.first+":=  "+$1->place.first+"-1";
+	}
 	;
 
 argument_expression_list
@@ -616,7 +625,6 @@ expression
 	{
 		// cout<<"Assignment expression = "<<$1->code<<endl;
 		// file<<$1->code<<endl;
-		$$=$1;
 	}	
 	| expression COMMA assignment_expression
     //means?
@@ -1061,7 +1069,8 @@ statement
 	| expression_statement
 	| selection_statement{$$=$1;}
 	| iteration_statement{$$=$1;}
-	| jump_statement{$$=$1;}
+	| jump_statement{$$=$1;
+	cout<<$$->is_break<<"break check in statement"<<endl;}
 	;
 
 labeled_statement
@@ -1166,9 +1175,51 @@ selection_statement
 
 iteration_statement
 	: WHILE LPARENTHESES expression RPARENTHESES statement
+	{
+		string startlabel=newlabel();
+		string endlabel=newlabel();
+		string truelabel=newlabel();
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->code=startlabel+":\n"+$3->code+"\n"+"if("+$3->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+$5->code+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
+		$$->code=replace_break_continue($$->code,endlabel,startlabel,1);
+	}
 	| DO statement WHILE LPARENTHESES expression RPARENTHESES SEMICOLON
+	{
+		string startlabel=newlabel();
+		string endlabel=newlabel();
+		string truelabel=newlabel();
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->code=startlabel+":\n"+$2->code+"\n"+truelabel+":\n"+$5->code+"\n"+"\n"+"if("+$5->place.first+") goto "+startlabel+"\n"+"goto "+endlabel+"\n"+endlabel+":\n";
+		$$->code=replace_break_continue($$->code,endlabel,startlabel,1);
+	}
 	| FOR LPARENTHESES expression_statement expression_statement RPARENTHESES statement
-	| FOR LPARENTHESES expression_statement expression_statement expression RPARENTHESES statement    //{printf("For loop\n");}
+	{
+		string startlabel=newlabel();
+		string endlabel=newlabel();
+		string truelabel=newlabel();
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->code=$3->code+"\n"+startlabel+":\n"+$4->code+"\n"+"if("+$4->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+$6->code+"\n"+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
+			$$->code=replace_break_continue($$->code,endlabel,startlabel,1);
+		// file<<$$->code<<endl;
+	}
+	| FOR LPARENTHESES expression_statement expression_statement expression RPARENTHESES statement   
+	{
+		string startlabel=newlabel();
+		string endlabel=newlabel();
+		string truelabel=newlabel();
+		string updatelabel=newlabel();
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		
+		$$->code=$3->code+"\n"+startlabel+":\n"+$4->code+"\n"+"if("+$4->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+$7->code+"\n"+updatelabel+":\n"+$5->code+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
+
+			$$->code=replace_break_continue($$->code,endlabel,updatelabel,0);
+		
+		// file<<$$->code<<endl;
+		}
 	;
 
 jump_statement
@@ -1177,7 +1228,19 @@ jump_statement
 		//printf("Goto statement: %s\n",$2);
 	}
 	| CONTINUE SEMICOLON
+	{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->is_continue=true;
+		$$->code="\n continue \n";
+	}
 	| BREAK SEMICOLON
+	{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->is_break=true;
+		$$->code="\n break \n";
+	}
 	| RETURN SEMICOLON
 	| RETURN expression SEMICOLON
 	;
@@ -1307,5 +1370,6 @@ int main() {
 		parsing_stack.pop();
 	}
 	print_scope_table();
+	cleanTAC("output.txt", "cleaned_output.txt");
 	file.close();
 }

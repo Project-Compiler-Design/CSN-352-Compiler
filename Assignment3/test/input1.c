@@ -1,23 +1,18 @@
-
-
 int main(){
     int a=6,b=10;
-    int d=0;
-    if(a>b){
-        d=a-b;
-        if(d>0)
+    int k=0;
+    int i;
+    for(i=0;i<5;i++)
+    {
+        int j;
+        for(j=0;j<5;j++)
         {
-            d=d+1;
+           k++;
+           break;
+           k--;
         }
-        else{
-            d=d-1;
-        }
-    }
-    else{
-       d= b-a;
-       if(d>0)
-        {
-            d=d*2;
-        }
+        a++;
+        continue;
+        b--;
     }
 }

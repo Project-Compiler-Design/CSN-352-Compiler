@@ -120,5 +120,72 @@ void convert_type(symbol_info* &sym, std::string new_type){
     }
 }
 
+bool isSingleNumber(const string &line) {
+    for (char ch : line) {
+        if (!isdigit(ch)) return false;  // If any non-digit character is found, return false
+    }
+    return !line.empty();  // Ensure it's not an empty string
+}
 
+// Function to clean Three-Address Code from input file and write to output file
+void cleanTAC(const string &inputFileName, const string &outputFileName) {
+    ifstream inputFile(inputFileName);
+    ofstream outputFile(outputFileName);
+
+    if (!inputFile.is_open()) {
+        cerr << "Error: Could not open " << inputFileName << endl;
+        return;
+    }
+    if (!outputFile.is_open()) {
+        cerr << "Error: Could not open " << outputFileName << endl;
+        return;
+    }
+
+    string line;
+    while (getline(inputFile, line)) {
+        // Trim leading and trailing spaces
+        while (!line.empty() && isspace(line.front())) line.erase(line.begin());
+        while (!line.empty() && isspace(line.back())) line.pop_back();
+
+        // Skip empty lines and lines with only a single number
+        if (line.empty() || isSingleNumber(line)) continue;
+
+        // Check if the line is a label (ends with ':') and write accordingly
+        if (!line.empty() && line.back() == ':') {
+            outputFile << line << endl;  // Labels should not be indented
+        } else {
+            outputFile << "    " << line << endl;  // Indent normal instructions
+        }
+    }
+
+    inputFile.close();
+    outputFile.close();
+    
+    cout << "Cleaning complete! Check " << outputFileName << endl;
+}
+
+
+string replace_break_continue(string original_code,string end_label,string update_label,int i){
+    string new_code = original_code;
+    int flag=0;
+    size_t pos = 0;
+    while ((pos = new_code.find("break")) != std::string::npos) {
+        new_code.replace(pos, 5, "goto " + end_label + "\n");
+    }
+
+    pos = 0;
+    while ((pos = new_code.find("continue")) != std::string::npos) {
+        new_code.replace(pos, 8, "goto " + update_label + "\n");
+        flag=1;
+    }
+    if(flag==0 && i==0)
+    {
+        pos=0;
+        while ((pos = new_code.find(update_label)) != std::string::npos) {
+        new_code.replace(pos, update_label.length()+1, "\n");
+        flag=1;
+    }
+    }
+    return new_code;
+}
 #endif

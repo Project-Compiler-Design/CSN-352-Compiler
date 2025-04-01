@@ -3,57 +3,55 @@ a:= 6
 
 b:= 10
 
-d:= 0
-
-
-t0:=  a>b
-if(t0) goto LABEL5
-goto LABEL6
-LABEL5:
+k:= 0
 
 
 
-t1:=  a-b
-d:=  t1
+i:=  0
+LABEL4:
 
-0
-t2:=  d>0
-if(t2) goto LABEL0
-goto LABEL1
-LABEL0:
-
-
-1
-t3:=  d+1
-d:=  t3
-goto LABEL2
-LABEL1:
-
-
-1
-t4:=  d-1
-d:=  t4
-LABEL2:
-
-goto LABEL7
+5
+t0:=  i<5
+if(t0) goto LABEL6
+goto LABEL5
 LABEL6:
 
 
 
-t5:=  b-a
-d:=  t5
+j:=  0
+LABEL0:
 
-0
-t6:=  d>0
-if(t6) goto LABEL3
-goto LABEL4
-LABEL3:
+5
+t1:=  j<5
+if(t1) goto LABEL2
+goto LABEL1
+LABEL2:
+
+k:=  k+1
+
+ goto LABEL1
+ 
 
 
-2
-t7:=  d*2
-d:=  t7
-LABEL4:
+k:=  k-1
 
+
+
+j:=  j+1
+goto LABEL0
+LABEL1:
+
+
+a:=  a+1
+
+ goto LABEL7
+ 
+
+
+b:=  b-1
 LABEL7:
+
+i:=  i+1
+goto LABEL4
+LABEL5:
 
