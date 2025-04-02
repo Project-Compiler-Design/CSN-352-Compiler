@@ -148,7 +148,10 @@ postfix_expression
             cerr << "Primary expression found: " << $1->type << endl;
         }
 	| postfix_expression LBRACKET expression RBRACKET
-	| postfix_expression LPARENTHESES RPARENTHESES					
+	| postfix_expression LPARENTHESES RPARENTHESES	
+	{
+		
+	}				
 	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES   
 	    {
 			symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
@@ -173,7 +176,14 @@ postfix_expression
 				}
 
 			}
-
+			qid temp=newtemp($1->type,curr_scope);
+			string middle="";
+			for(int i=0;i<$3->param_list.size();i++){
+				middle=middle+"PARAM "+$3->param_list[i]+"\n";
+			}
+			$$->code=$1->code + middle + temp.first+":= CALL "+$1->place.first;
+			$$->place=temp;
+			cerr<<"ppfffix exp"<<$$->code<<endl;
             //printf("Function call= %s\n",$1);
         }
 	| postfix_expression DOT ID
@@ -241,6 +251,7 @@ argument_expression_list
 			cout<<"is a number "<<$1->type<<endl;
 			$$=$1;
 			$$->param_types.push_back($1->type);
+			$$->param_list.push_back(std::to_string(*(int*)($1->ptr)));
 		  }
 		  else{
 			symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
@@ -251,6 +262,7 @@ argument_expression_list
 				cout<<"Ass exp "<<find_symbol->type<<endl;
 		  		$$=find_symbol;
 		  		$$->param_types.push_back(find_symbol->type);
+				$$->param_list.push_back(find_symbol->name);
 			}
 		  }
 		  
@@ -265,6 +277,7 @@ argument_expression_list
 			cout<<"is a number "<<$3->type<<endl;
 			$$=$1;
 			$$->param_types.push_back($3->type);
+			$$->param_list.push_back(std::to_string(*(int*)($1->ptr)));
 		  }
 		  else{
 			symbol_info* find_symbol = lookup_symbol_global($3->name, curr_scope);
@@ -276,6 +289,7 @@ argument_expression_list
 				cout<<"Ass exp222 "<<find_symbol->type<<endl;
 		  		$$=$1;
 		  		$$->param_types.push_back(find_symbol->type);
+				$$->param_list.push_back(find_symbol->name);
 			}
 			
 			cout<<"Ass exp111 "<<$1->type<<endl;
@@ -962,6 +976,7 @@ direct_declarator
 		new_symbol->param_types=$3->param_types;
 		new_symbol->param_list=$3->param_list;
 		new_symbol->is_param_list=$3->is_param_list;
+		new_symbol->name=$1->name;
 		curr_scope->symbol_map[$1->name]=new_symbol;
 
 		$$=new_symbol;
@@ -1334,6 +1349,7 @@ jump_statement
 		$$=new_symbol;
 		$$->is_return=true;
 		$$->return_type="void";
+		$$->code="RETURN\n";
 	}
 	| RETURN expression SEMICOLON
 	{
@@ -1341,6 +1357,7 @@ jump_statement
 		$$=new_symbol;
 		$$->is_return=true;
 		$$->return_type=$2->type;
+		$$->code=$2->code + "RETURN "+$2->place.first+"\n";
 	}
 	;
 
@@ -1348,9 +1365,13 @@ translation_unit
 	: external_declaration 				 
 	{
 		$$=$1;
-		file<<$$->code<<endl;
+		// file<<$$->code<<endl;
 	}   //{printf("Reached the root node.\n");}
 	| translation_unit external_declaration //{printf("Reached the root node.\n");}
+	{
+		$$->code=$1->code+$2->code;
+		file<<$$->code<<endl;
+	}
 	| 
 	;
 
@@ -1358,7 +1379,6 @@ external_declaration
 	: function_definition 
 	{
 		$$=$1;
-		//file<<$$->code<<endl;
 	}
 	| declaration
 	;
@@ -1372,17 +1392,15 @@ function_definition
 	} 
 	compound_statement 
 	{
-		// cerr<<"function definition ke right "<<$2->is_param_list<<endl;
+		cerr<<"function definition ke right "<<$2->is_param_list<<endl;
 		// for(auto it:$2->param_list){
 		// 	cerr<<it<<endl;
 		// }
 		// cerr<<"function def endddd"<<endl;
 		//abhi ke liye
-		cerr<<"decl spee "<<$1<<endl;
-		symbol_info* new_symbol=new symbol_info();
-		$$=new_symbol;
-		$$->code=$4->code;
-		cerr<<"decl spee "<<$1<<"mmmm"<<endl;
+		// cerr<<"decl spee "<<$1<<endl;
+		
+		// cerr<<"decl spee "<<$1<<"mmmm"<<endl;
         if(strcmp($1,"void")==0){
 		
 			if($4->return_type=="void"){
@@ -1406,6 +1424,17 @@ function_definition
 				}
 			}
 		}
+		cout<<"ffffnnnnname"<<$2->name<<"fffffnnnnnn"<<endl;
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->code="FUNC_BEGIN "+$2->name+"\n";
+		for(int i=0;i<$2->param_list.size();i++){
+			$$->code=$$->code+"param"+std::to_string(i)+" := PARAM\n";
+		}
+		for(int i=0;i<$2->param_list.size();i++){
+			$$->code=$$->code+$2->param_list[i]+" := param"+std::to_string(i)+"\n";
+		}
+		$$->code=$$->code+$4->code+"FUNC_END "+$2->name+"\n";
 
 
 		// file<<$$->code<<endl;
@@ -1416,7 +1445,6 @@ function_definition
 %%
 
 void yyerror(const char *s) {
-    
     fprintf(stderr, "Error at line %d: %s\n", yylineno, s);
 }
 
@@ -1483,23 +1511,14 @@ void print_scope_table() {
 			}
 		}
     }
-
     printf("-----------------------------------------------------------------\n");
 	cerr<<"Scope is here"<<endl;
     }
 }
 
-
-
-
-
 int main() {
-	
-    
+	yyparse();
 
-    yyparse();
-
-    
 	printf("Parsing stack size = %d\n",parsing_stack.size());
 	while(!parsing_stack.empty()){
 		printf("Parsing stack%s\n",parsing_stack.top().c_str());

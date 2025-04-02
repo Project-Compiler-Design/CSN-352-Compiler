@@ -151,7 +151,7 @@ void cleanTAC(const string &inputFileName, const string &outputFileName) {
         if (line.empty() || isSingleNumber(line)) continue;
 
         // Check if the line is a label (ends with ':') and write accordingly
-        if (!line.empty() && line.back() == ':') {
+        if (!line.empty() && line.back() == ':' || !line.empty() && line.substr(0,4)=="FUNC") {
             outputFile << line << endl;  // Labels should not be indented
         } else {
             outputFile << "    " << line << endl;  // Indent normal instructions

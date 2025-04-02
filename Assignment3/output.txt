@@ -1,28 +1,23 @@
-4
-5
-t0:=  4*5
-d:= t0
-
-c:= 3.400000
-
+FUNC_BEGIN sum
+param0 := PARAM
+param1 := PARAM
+a := param0
+b := param1
 
 
-i:=  0
-LABEL0:
+t0:=  a+b
+c:= t0
+RETURN c
+FUNC_END sum
+FUNC_BEGIN main
 
-4
-t1:=  i<4
-if(t1) goto LABEL2
-goto LABEL1
-LABEL2:
+a:= 4
 
-
-a:=  3
-
-
-
-i:=  i+1
-goto LABEL0
-LABEL1:
-
+c:= 3
+PARAM a
+PARAM c
+t1:= CALL sum
+result:= t1
+RETURN result
+FUNC_END main
 
