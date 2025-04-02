@@ -1,21 +1,61 @@
-Assignment expression = 
 
-z:=  7
-debugging starts here
 
 
 z:=  7
-compare now
 
-7
-z:=  7
+a:= 6
 
-
-z:=  7
-debugging ends here
-
-7
-z:=  7
+b:= 10
 
 
-z:=  7
+
+i:=  0
+LABEL4:
+
+5
+t0:=  i<5
+if(t0) goto LABEL6
+goto LABEL5
+LABEL6:
+
+
+
+j:=  0
+LABEL0:
+
+5
+t1:=  j<5
+if(t1) goto LABEL2
+goto LABEL1
+LABEL2:
+
+
+1
+t2:=  z+1
+z:=  t2
+
+ goto LABEL1
+ 
+
+
+
+
+j:=  j+1
+goto LABEL0
+LABEL1:
+
+
+
+1
+t3:=  a+1
+a:=  t3
+
+ goto LABEL7
+ 
+
+LABEL7:
+
+i:=  i+1
+goto LABEL4
+LABEL5:
+

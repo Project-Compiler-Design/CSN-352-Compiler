@@ -723,10 +723,10 @@ static const yytype_int16 yyrline[] =
     1049,  1050,  1051,  1052,  1053,  1054,  1058,  1063,  1064,  1068,
     1069,  1081,  1082,  1087,  1088,  1089,  1090,  1095,  1096,  1097,
     1101,  1102,  1102,  1110,  1110,  1114,  1114,  1118,  1118,  1124,
-    1131,  1141,  1145,  1153,  1158,  1164,  1168,  1171,  1175,  1179,
-    1180,  1184,  1191,  1199,  1203,  1213,  1223,  1234,  1252,  1256,
-    1263,  1270,  1271,  1275,  1280,  1281,  1285,  1290,  1294,  1295,
-    1304,  1305
+    1131,  1138,  1145,  1153,  1160,  1166,  1170,  1173,  1177,  1181,
+    1182,  1186,  1193,  1201,  1205,  1215,  1225,  1236,  1254,  1258,
+    1265,  1272,  1273,  1277,  1282,  1283,  1287,  1292,  1296,  1297,
+    1306,  1307
 };
 #endif
 
@@ -2639,7 +2639,7 @@ yyreduce:
         {
         cerr<<"IDHAR HU MAIIII2"<<endl;
         (yyval.symbol_info)=(yyvsp[0].symbol_info);
-        file<<"Assignment expression = "<<(yyvsp[0].symbol_info)->code<<endl;
+        // file<<"Assignment expression = "<<$1->code<<endl;
 		// cout<<"Assignment expression = "<<$1->code<<endl;
 		// file<<$1->code<<endl;
 	}
@@ -3272,22 +3272,22 @@ yyreduce:
   case 200: /* statement_declaration_list: declaration_list statement_declaration_list  */
 #line 1132 "src/parser.y"
         {
-        file<<"debugging starts here"<<endl;
-        file<<(yyvsp[0].symbol_info)->code<<endl;
-        file<<"compare now"<<endl;
+        
 		(yyval.symbol_info)->code=(yyvsp[-1].symbol_info)->code + "\n" + (yyvsp[0].symbol_info)->code;
-        file<<(yyvsp[-1].symbol_info)->code<<endl;
-        file<<"debugging ends here"<<endl;
-		//file<<"heloo"<<$$->code<<endl;
+        
+		
 	}
-#line 3284 "parser.tab.c"
+#line 3281 "parser.tab.c"
     break;
 
   case 201: /* statement_declaration_list: statement_list  */
-#line 1141 "src/parser.y"
+#line 1138 "src/parser.y"
                         {
-		(yyval.symbol_info)=(yyvsp[0].symbol_info);
-		//file<<$$->code<<endl;
+		
+		symbol_info* new_symbol=new symbol_info();
+		(yyval.symbol_info)=new_symbol;
+		(yyval.symbol_info)->code=(yyvsp[0].symbol_info)->code;
+		
 	}
 #line 3293 "parser.tab.c"
     break;
@@ -3304,63 +3304,65 @@ yyreduce:
   case 203: /* declaration_list: declaration  */
 #line 1154 "src/parser.y"
         {
-		(yyval.symbol_info)=(yyvsp[0].symbol_info);
+		symbol_info* new_symbol=new symbol_info();
+		(yyval.symbol_info)=new_symbol;
+		(yyval.symbol_info)->code=(yyvsp[0].symbol_info)->code;
 		//file<<$$->code<<endl;
 	}
-#line 3311 "parser.tab.c"
+#line 3313 "parser.tab.c"
     break;
 
   case 204: /* declaration_list: declaration_list declaration  */
-#line 1159 "src/parser.y"
+#line 1161 "src/parser.y"
         {
 		cout<<"Maaaai yaha honnnn"<<endl;
 		(yyval.symbol_info)->code=(yyvsp[-1].symbol_info)->code + "\n" + (yyvsp[0].symbol_info)->code;
 		//file<<$$->code<<endl;
 	}
-#line 3321 "parser.tab.c"
+#line 3323 "parser.tab.c"
     break;
 
   case 205: /* declaration_list: error SEMICOLON  */
-#line 1164 "src/parser.y"
+#line 1166 "src/parser.y"
                           {yyerrok;}
-#line 3327 "parser.tab.c"
+#line 3329 "parser.tab.c"
     break;
 
   case 206: /* statement_list: statement  */
-#line 1168 "src/parser.y"
+#line 1170 "src/parser.y"
                     { 
 		(yyval.symbol_info)=(yyvsp[0].symbol_info);
 	}
-#line 3335 "parser.tab.c"
+#line 3337 "parser.tab.c"
     break;
 
   case 207: /* statement_list: statement_list statement  */
-#line 1172 "src/parser.y"
+#line 1174 "src/parser.y"
         {
 		(yyval.symbol_info)->code=(yyvsp[-1].symbol_info)->code + "\n" + (yyvsp[0].symbol_info)->code;
 	}
-#line 3343 "parser.tab.c"
+#line 3345 "parser.tab.c"
     break;
 
   case 208: /* statement_list: error SEMICOLON  */
-#line 1175 "src/parser.y"
+#line 1177 "src/parser.y"
                           {yyerrok;}
-#line 3349 "parser.tab.c"
+#line 3351 "parser.tab.c"
     break;
 
   case 211: /* selection_statement: IF LPARENTHESES expression RPARENTHESES statement  */
-#line 1185 "src/parser.y"
+#line 1187 "src/parser.y"
         {
 		string truelabel=newlabel();	
 		string falselabel=newlabel();
 		(yyval.symbol_info)->code=(yyvsp[-2].symbol_info)->code+"\n"+"if("+ (yyvsp[-2].symbol_info)->place.first +") goto "+truelabel+"\n"+"goto "+falselabel+"\n"+truelabel+":\n"+(yyvsp[0].symbol_info)->code+"\n"+falselabel+":\n";
 		//file<<$$->code<<endl;
 	}
-#line 3360 "parser.tab.c"
+#line 3362 "parser.tab.c"
     break;
 
   case 212: /* selection_statement: IF LPARENTHESES expression RPARENTHESES statement ELSE statement  */
-#line 1192 "src/parser.y"
+#line 1194 "src/parser.y"
         {
 		string truelabel=newlabel();	
 		string falselabel=newlabel();
@@ -3368,11 +3370,11 @@ yyreduce:
 		(yyval.symbol_info)->code=(yyvsp[-4].symbol_info)->code+"\n"+"if("+ (yyvsp[-4].symbol_info)->place.first +") goto "+truelabel+"\n"+"goto "+falselabel+"\n"+truelabel+":\n"+(yyvsp[-2].symbol_info)->code+"\n"+"goto "+endlabel+"\n"+falselabel+":\n"+(yyvsp[0].symbol_info)->code+"\n"+endlabel+":\n";
 		//file<<$$->code<<endl;
 	}
-#line 3372 "parser.tab.c"
+#line 3374 "parser.tab.c"
     break;
 
   case 214: /* iteration_statement: WHILE LPARENTHESES expression RPARENTHESES statement  */
-#line 1204 "src/parser.y"
+#line 1206 "src/parser.y"
         {
 		string startlabel=newlabel();
 		string endlabel=newlabel();
@@ -3382,11 +3384,11 @@ yyreduce:
 		(yyval.symbol_info)->code=startlabel+":\n"+(yyvsp[-2].symbol_info)->code+"\n"+"if("+(yyvsp[-2].symbol_info)->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+(yyvsp[0].symbol_info)->code+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
 		(yyval.symbol_info)->code=replace_break_continue((yyval.symbol_info)->code,endlabel,startlabel,1);
 	}
-#line 3386 "parser.tab.c"
+#line 3388 "parser.tab.c"
     break;
 
   case 215: /* iteration_statement: DO statement WHILE LPARENTHESES expression RPARENTHESES SEMICOLON  */
-#line 1214 "src/parser.y"
+#line 1216 "src/parser.y"
         {
 		string startlabel=newlabel();
 		string endlabel=newlabel();
@@ -3396,11 +3398,11 @@ yyreduce:
 		(yyval.symbol_info)->code=startlabel+":\n"+(yyvsp[-5].symbol_info)->code+"\n"+truelabel+":\n"+(yyvsp[-2].symbol_info)->code+"\n"+"\n"+"if("+(yyvsp[-2].symbol_info)->place.first+") goto "+startlabel+"\n"+"goto "+endlabel+"\n"+endlabel+":\n";
 		(yyval.symbol_info)->code=replace_break_continue((yyval.symbol_info)->code,endlabel,startlabel,1);
 	}
-#line 3400 "parser.tab.c"
+#line 3402 "parser.tab.c"
     break;
 
   case 216: /* iteration_statement: FOR LPARENTHESES expression_statement expression_statement RPARENTHESES statement  */
-#line 1224 "src/parser.y"
+#line 1226 "src/parser.y"
         {
 		string startlabel=newlabel();
 		string endlabel=newlabel();
@@ -3411,11 +3413,11 @@ yyreduce:
 			(yyval.symbol_info)->code=replace_break_continue((yyval.symbol_info)->code,endlabel,startlabel,1);
 		// file<<$$->code<<endl;
 	}
-#line 3415 "parser.tab.c"
+#line 3417 "parser.tab.c"
     break;
 
   case 217: /* iteration_statement: FOR LPARENTHESES expression_statement expression_statement expression RPARENTHESES statement  */
-#line 1235 "src/parser.y"
+#line 1237 "src/parser.y"
         {
 		string startlabel=newlabel();
 		string endlabel=newlabel();
@@ -3430,59 +3432,59 @@ yyreduce:
 		
 		// file<<$$->code<<endl;
 		}
-#line 3434 "parser.tab.c"
+#line 3436 "parser.tab.c"
     break;
 
   case 218: /* jump_statement: GOTO ID SEMICOLON  */
-#line 1253 "src/parser.y"
+#line 1255 "src/parser.y"
         { 
 		//printf("Goto statement: %s\n",$2);
 	}
-#line 3442 "parser.tab.c"
+#line 3444 "parser.tab.c"
     break;
 
   case 219: /* jump_statement: CONTINUE SEMICOLON  */
-#line 1257 "src/parser.y"
+#line 1259 "src/parser.y"
         {
 		symbol_info* new_symbol=new symbol_info();
 		(yyval.symbol_info)=new_symbol;
 		(yyval.symbol_info)->is_continue=true;
 		(yyval.symbol_info)->code="\n continue \n";
 	}
-#line 3453 "parser.tab.c"
+#line 3455 "parser.tab.c"
     break;
 
   case 220: /* jump_statement: BREAK SEMICOLON  */
-#line 1264 "src/parser.y"
+#line 1266 "src/parser.y"
         {
 		symbol_info* new_symbol=new symbol_info();
 		(yyval.symbol_info)=new_symbol;
 		(yyval.symbol_info)->is_break=true;
 		(yyval.symbol_info)->code="\n break \n";
 	}
-#line 3464 "parser.tab.c"
+#line 3466 "parser.tab.c"
     break;
 
   case 223: /* translation_unit: external_declaration  */
-#line 1276 "src/parser.y"
+#line 1278 "src/parser.y"
         {
 		(yyval.symbol_info)=(yyvsp[0].symbol_info);
 		file<<(yyval.symbol_info)->code<<endl;
 	}
-#line 3473 "parser.tab.c"
+#line 3475 "parser.tab.c"
     break;
 
   case 226: /* external_declaration: function_definition  */
-#line 1286 "src/parser.y"
+#line 1288 "src/parser.y"
         {
 		(yyval.symbol_info)=(yyvsp[0].symbol_info);
 		//file<<$$->code<<endl;
 	}
-#line 3482 "parser.tab.c"
+#line 3484 "parser.tab.c"
     break;
 
   case 229: /* function_definition: declaration_specifiers declarator compound_statement  */
-#line 1296 "src/parser.y"
+#line 1298 "src/parser.y"
         {
 		//abhi ke liye
 		symbol_info* new_symbol=new symbol_info();
@@ -3491,11 +3493,11 @@ yyreduce:
         
 		// file<<$$->code<<endl;
 	}
-#line 3495 "parser.tab.c"
+#line 3497 "parser.tab.c"
     break;
 
 
-#line 3499 "parser.tab.c"
+#line 3501 "parser.tab.c"
 
       default: break;
     }
@@ -3688,7 +3690,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 1307 "src/parser.y"
+#line 1309 "src/parser.y"
 
 
 void yyerror(const char *s) {

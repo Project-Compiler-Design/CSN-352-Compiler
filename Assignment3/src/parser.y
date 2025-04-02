@@ -626,7 +626,7 @@ expression
 	{
         cerr<<"IDHAR HU MAIIII2"<<endl;
         $$=$1;
-        file<<"Assignment expression = "<<$1->code<<endl;
+        // file<<"Assignment expression = "<<$1->code<<endl;
 		// cout<<"Assignment expression = "<<$1->code<<endl;
 		// file<<$1->code<<endl;
 	}	
@@ -1130,17 +1130,17 @@ statement_declaration_list
 	}
 	| declaration_list statement_declaration_list
 	{
-        file<<"debugging starts here"<<endl;
-        file<<$2->code<<endl;
-        file<<"compare now"<<endl;
+        
 		$$->code=$1->code + "\n" + $2->code;
-        file<<$1->code<<endl;
-        file<<"debugging ends here"<<endl;
-		//file<<"heloo"<<$$->code<<endl;
+        
+		
 	}
 	| statement_list{
-		$$=$1;
-		//file<<$$->code<<endl;
+		
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->code=$1->code;
+		
 	}
 	| declaration_list
 	{
@@ -1152,7 +1152,9 @@ statement_declaration_list
 declaration_list
 	: declaration
 	{
-		$$=$1;
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->code=$1->code;
 		//file<<$$->code<<endl;
 	}
 	| declaration_list declaration
