@@ -127,6 +127,7 @@ primary_expression
 			else{
 				$$->place=qid($1,find_symbol);
 				$$->code="";
+				$$->type=find_symbol->type;
 				cerr<<"Symbol found "<<$$->place.second->name<<endl;
 				cerr<<"Code "<<$$->code<<endl;
 			}
@@ -538,7 +539,7 @@ assignment_expression
 		$$=$1;
 		printf("cond expression = %s\n",$1->type.c_str());
 		printf("cond expression2 = %s\n",$1->name.c_str());
-		cerr << "condi expression found: " << $1->code << endl;
+		cerr << "condi expression found: " << $1->type << endl;
 	}
 	| unary_expression assignment_operator assignment_expression 
 	{
@@ -1131,6 +1132,7 @@ compound_statement
 		curr_scope = new scoped_symtab(curr_scope);
 		cerr<<"inside compound stt"<<endl;
 		for(int i=0;i<var_name.size();i++){
+			cerr<<"fffff"<<var_name[i]<<endl;
 			curr_scope->symbol_map[var_name[i]]=new symbol_info();
 			curr_scope->symbol_map[var_name[i]]->type=type_list[i];
 			curr_scope->symbol_map[var_name[i]]->name=var_name[i];
@@ -1144,6 +1146,8 @@ compound_statement
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$3->code;
+		$$->is_return=$3->is_return;
+		$$->return_type=$3->return_type;
 		
 		all_scopes.push_back(curr_scope);curr_scope = curr_scope->parent;
         
@@ -1167,6 +1171,9 @@ statement_declaration_list
 	{
         
 		$$->code=$1->code + "\n" + $2->code;
+		$$->is_return=($1->is_return)|($2->is_return);
+		if($1->return_type!="") $$->return_type=$1->return_type;
+		else $$->return_type=$2->return_type;
         
 
 	}
@@ -1174,6 +1181,8 @@ statement_declaration_list
 	{
         
 		$$->code=$1->code + "\n" + $2->code;
+		$$->is_return=$2->is_return;
+		$$->return_type=$2->return_type;
         
 		
 	}
@@ -1182,6 +1191,9 @@ statement_declaration_list
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$1->code;
+		$$->is_return=$1->is_return;
+		$$->return_type=$1->return_type;
+		
 		
 	}
 	| declaration_list
@@ -1211,9 +1223,14 @@ declaration_list
 statement_list
 	: statement { 
 		$$=$1;
+		
+
 	}
 	| statement_list statement
 	{
+		$$->is_return=($1->is_return)|($2->is_return);
+		if($1->return_type!="") $$->return_type=$1->return_type;
+		else $$->return_type=$2->return_type;
 		$$->code=$1->code + "\n" + $2->code;
 	}
 	| error SEMICOLON {yyerrok;}
@@ -1316,14 +1333,14 @@ jump_statement
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->is_return=true;
-		$$->type="void";
+		$$->return_type="void";
 	}
 	| RETURN expression SEMICOLON
 	{
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->is_return=true;
-		$$->type=$2->type;
+		$$->return_type=$2->type;
 	}
 	;
 
@@ -1361,10 +1378,36 @@ function_definition
 		// }
 		// cerr<<"function def endddd"<<endl;
 		//abhi ke liye
+		cerr<<"decl spee "<<$1<<endl;
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$4->code;
-        
+		cerr<<"decl spee "<<$1<<"mmmm"<<endl;
+        if(strcmp($1,"void")==0){
+		
+			if($4->return_type=="void"){
+				cerr<<"Return type matched"<<endl;
+			}
+			else{
+				cerr<<"Error: Return type not matched"<<endl;
+			}
+		}
+		else{
+			cerr<<"hellllo"<<endl;
+			if($4->is_return==0){
+				cerr<<"Error: Missing return statement"<<endl;
+			}
+			else{
+				if($4->return_type!=$1){
+					cerr<<"Error: Return type not matching"<<endl;
+				}
+				else{
+					cerr<<"Return type matched"<<endl;
+				}
+			}
+		}
+
+
 		// file<<$$->code<<endl;
 	}   
 	| declarator declaration_list compound_statement

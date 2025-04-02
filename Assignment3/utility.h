@@ -49,7 +49,7 @@ struct symbol_info {
     std::string code;
 
     bool is_return=false;
-
+    std::string return_type="";
     bool is_continue=false;
     bool is_break=false;
 

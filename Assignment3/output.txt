@@ -1,21 +1,28 @@
+4
+5
+t0:=  4*5
+d:= t0
 
-d:= 5
+c:= 3.400000
 
 
-d:=  0
+
+i:=  0
 LABEL0:
 
 4
-t0:=  d<4
-if(t0) goto LABEL2
+t1:=  i<4
+if(t1) goto LABEL2
 goto LABEL1
 LABEL2:
 
-d:=  d+1
+
+a:=  3
 
 
 
-d:=  d+1
+i:=  i+1
 goto LABEL0
 LABEL1:
+
 
