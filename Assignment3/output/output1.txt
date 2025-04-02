@@ -1,102 +1,59 @@
-main
-ID main
-Direct declarator main
-z
-ID z
-Direct declarator z
-z
-hiiii
-declarator z
-z
-hi
-parsing stack top = z
-Declaration specifiers = int
-Init declarator list = z
-dollar 3 type = 
-Created new symbol: z with type int
-Correct type declaration
-ID found: z
-ID z
-ID2 z
-check
-Symbol found z
-Code 
-Primary expression found: 
-postfix expression found: 
-con
-Primary expression found: int
-postfix expression found: int
-Unary expression 
-cond expression = int
-cond expression2 = 
-condi expression found: 7
-unary inside assignment = z
-Assignment expression = int
-find symbol type: int
-Correct type assignment
-Correct type assignment
-3AC code for assignment
-hiiiiiiiiiiiii 
-
-z:=  7
-IDHAR HU MAIIII2
+result
+ID result
 a
 ID a
 Direct declarator a
-con
-Primary expression found: int
-postfix expression found: int
-Unary expression 
-cond expression = int
-cond expression2 = 
-condi expression found: 6
-IDHAR HU MAIIII
-declaratoreiii a
-Yes int found
-declarator equals initializer a
-a
 b
 ID b
 Direct declarator b
+par num $1 1
+par num $3 1
+c
+ID c
+Direct declarator c
+par num $1 2
+par num $3 1
+int
+int
+float
+par num3
+Brackets found with parameter= result
+Par list 3
+param list size 3
+int
+int
+float
+has a parameter or not 3
+Direct declarator 
+inside compound stt
+inside compound stt
+d
+ID d
+Direct declarator d
 con
 Primary expression found: int
 postfix expression found: int
 Unary expression 
 cond expression = int
 cond expression2 = 
-condi expression found: 10
+condi expression found: 5
 IDHAR HU MAIIII
-declaratoreiii b
+declaratoreiii d
 Yes int found
-declarator equals initializer b
-init_D b
+declarator equals initializer d
+d
 hi
-parsing stack top = b
+parsing stack top = d
 Declaration specifiers = int
-Init declarator list = b
+Init declarator list = d
 dollar 3 type = 
 int
-int
 Correct type declaration
-i
-ID i
-Direct declarator i
-i
-hiiii
-declarator i
-i
-hi
-parsing stack top = i
-Declaration specifiers = int
-Init declarator list = i
-dollar 3 type = 
-Created new symbol: i with type int
-Correct type declaration
-ID found: i
-ID i
-ID2 i
+ID found: d
+ID d
+ID2 d
 check
-Symbol found i
+Symbol found d
 Code 
 Primary expression found: 
 postfix expression found: 
@@ -107,7 +64,7 @@ Unary expression
 cond expression = int
 cond expression2 = 
 condi expression found: 0
-unary inside assignment = i
+unary inside assignment = d
 Assignment expression = int
 find symbol type: int
 Correct type assignment
@@ -115,221 +72,114 @@ Correct type assignment
 3AC code for assignment
 hiiiiiiiiiiiii 
 
-i:=  0
+d:=  0
 IDHAR HU MAIIII2
-ID found: i
-ID i
-ID2 i
+ID found: d
+ID d
+ID2 d
 check
-Symbol found i
+Symbol found d
 Code 
 Primary expression found: 
 postfix expression found: 
-Unary expression i
+Unary expression d
 con
 Primary expression found: int
 postfix expression found: int
 Unary expression 
 cond expression = int
-cond expression2 = i
+cond expression2 = d
 condi expression found: 
-5
-t0:=  i<5
+4
+t0:=  d<4
 IDHAR HU MAIIII2
-ID found: i
-ID i
-ID2 i
+ID found: d
+ID d
+ID2 d
 check
-Symbol found i
+Symbol found d
 Code 
 Primary expression found: 
 postfix expression found: 
-Unary expression i
+Unary expression d
 cond expression = 
-cond expression2 = i
+cond expression2 = d
 condi expression found: 
-i:=  i+1
+d:=  d+1
 IDHAR HU MAIIII2
-j
-ID j
-Direct declarator j
-j
-hiiii
-declarator j
-j
-hi
-parsing stack top = j
-Declaration specifiers = int
-Init declarator list = j
-dollar 3 type = 
-Created new symbol: j with type int
-Correct type declaration
-ID found: j
-ID j
-ID2 j
+inside compound stt
+inside compound stt
+ID found: d
+ID d
+ID2 d
 check
-Symbol found j
+Symbol found d
 Code 
 Primary expression found: 
 postfix expression found: 
+Unary expression d
+cond expression = 
+cond expression2 = d
+condi expression found: 
+d:=  d+1
+IDHAR HU MAIIII2
+main
+ID main
+It is function without params 
+has a parameter or not 0
+Direct declarator main
+inside compound stt
+inside compound stt
+c
+ID c
+Direct declarator c
 con
 Primary expression found: int
 postfix expression found: int
 Unary expression 
 cond expression = int
 cond expression2 = 
-condi expression found: 0
-unary inside assignment = j
-Assignment expression = int
-find symbol type: int
-Correct type assignment
-Correct type assignment
-3AC code for assignment
-hiiiiiiiiiiiii 
-
-j:=  0
-IDHAR HU MAIIII2
-ID found: j
-ID j
-ID2 j
-check
-Symbol found j
-Code 
-Primary expression found: 
-postfix expression found: 
-Unary expression j
-con
-Primary expression found: int
-postfix expression found: int
-Unary expression 
-cond expression = int
-cond expression2 = j
-condi expression found: 
-5
-t1:=  j<5
-IDHAR HU MAIIII2
-ID found: j
-ID j
-ID2 j
-check
-Symbol found j
-Code 
-Primary expression found: 
-postfix expression found: 
-Unary expression j
-cond expression = 
-cond expression2 = j
-condi expression found: 
-j:=  j+1
-IDHAR HU MAIIII2
-ID found: z
-ID z
-ID2 z
-check
-Symbol found z
-Code 
-Primary expression found: 
-postfix expression found: 
-ID found: z
-ID z
-ID2 z
-check
-Symbol found z
-Code 
-Primary expression found: 
-postfix expression found: 
-Unary expression z
-con
-Primary expression found: int
-postfix expression found: int
-Unary expression 
-cond expression = int
-cond expression2 = z
-condi expression found: 
-1
-t2:=  z+1
-unary inside assignment = z
-Assignment expression = int
-find symbol type: int
-Correct type assignment
-Correct type assignment
-3AC code for assignment
-hiiiiiiiiiiiii 
-
-1
-t2:=  z+1
-z:=  t2
-IDHAR HU MAIIII2
-1break check in statement
-ID found: a
-ID a
-ID2 a
-check
-Symbol found a
-Code 
-Primary expression found: 
-postfix expression found: 
-ID found: a
-ID a
-ID2 a
-check
-Symbol found a
-Code 
-Primary expression found: 
-postfix expression found: 
-Unary expression a
-con
-Primary expression found: int
-postfix expression found: int
-Unary expression 
-cond expression = int
-cond expression2 = a
-condi expression found: 
-1
-t3:=  a+1
-unary inside assignment = a
-Assignment expression = int
-find symbol type: int
-Correct type assignment
-Correct type assignment
-3AC code for assignment
-hiiiiiiiiiiiii 
-
-1
-t3:=  a+1
-a:=  t3
-IDHAR HU MAIIII2
-0break check in statement
+condi expression found: 4
+IDHAR HU MAIIII
+declaratoreiii c
+Yes int found
+declarator equals initializer c
+c
+hi
+parsing stack top = c
+Declaration specifiers = int
+Init declarator list = c
+dollar 3 type = 
+int
+Correct type declaration
 Parsing stack size = 0
 Printing scope table
 Count of scopes 4
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+| result          |                      | 0       | N/A        |
 -----------------------------------------------------------------
 Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| t2              | int                  | 4       | N/A        |
 -----------------------------------------------------------------
 Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| j               | int                  | 4       | N/A        |
-| t1              | int                  | 4       | N/A        |
-| t3              | int                  | 4       | N/A        |
------------------------------------------------------------------
-Scope is here
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| a               | int                  | 4       | 6          |
-| b               | int                  | 4       | 10         |
-| i               | int                  | 4       | N/A        |
+| a               | int                  | 4       | N/A        |
+| b               | int                  | 4       | N/A        |
+| c               | float                | 4       | N/A        |
+| d               | int                  | 4       | 5          |
 | t0              | int                  | 4       | N/A        |
-| z               | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| c               | int                  | 4       | 4          |
 -----------------------------------------------------------------
 Scope is here
 Cleaning complete! Check cleaned_output.txt

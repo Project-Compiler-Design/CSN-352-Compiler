@@ -27,7 +27,8 @@
 	
 	std::ofstream file("output.txt");
 
-    
+    vector<string> type_list = {};
+	vector<string> var_name={};
     
 
 
@@ -949,14 +950,29 @@ direct_declarator
 	{
 		printf("Brackets found with parameter= %s\n",$1->name.c_str());
 		printf("Par list %d\n",$3->parameter_no);
+		cerr<<"param list size "<<$3->param_list.size()<<endl;
 		for(auto it: $3->param_types)
 					{
 						cout<<it<<endl;
 					}
-		curr_scope->symbol_map[$1->name]=$3;
+		symbol_info* new_symbol=new symbol_info();
+		new_symbol->type=$1->type;
+		new_symbol->parameter_no=$3->parameter_no;
+		new_symbol->param_types=$3->param_types;
+		new_symbol->param_list=$3->param_list;
+		new_symbol->is_param_list=$3->is_param_list;
+		curr_scope->symbol_map[$1->name]=new_symbol;
+
+		$$=new_symbol;
+		cerr<<"has a parameter or not "<<$$->param_list.size()<<endl;
 	}
 	| direct_declarator LPARENTHESES identifier_list RPARENTHESES          //{printf("Brackets found in function calllll\n");}
-	| direct_declarator LPARENTHESES RPARENTHESES 						//{printf("Brackets found\n");}
+	| direct_declarator LPARENTHESES RPARENTHESES
+	{
+		$$->is_param_list=false;
+		cerr<<"It is function without params "<<endl;
+		cerr<<"has a parameter or not "<<$$->is_param_list<<endl;
+	}
 	;
 
 pointer
@@ -974,12 +990,18 @@ type_qualifier_list
 
 parameter_type_list
 	: parameter_list{
+		symbol_info* new_symbol=new symbol_info();
+		$$->parameter_no=$1->parameter_no;
+		$$->is_param_list=$1->is_param_list;
+		$$->param_types=$1->param_types;
+		$$->param_list=$1->param_list;
 		$$=$1;
 		for(auto it: $1->param_types)
 					{
 						cout<<it<<endl;
 					}
 		cout<<"par num"<<$$->parameter_no<<endl;
+		
 				}
 
 	| parameter_list COMMA VARIABLE_ARGS
@@ -991,6 +1013,7 @@ parameter_list
         $$->is_param_list=true;
         $$->parameter_no=1;
         $$->param_types.push_back($1->type);
+		$$->param_list.push_back($1->name);
     }
 	| parameter_list COMMA parameter_declaration 
     {
@@ -999,6 +1022,7 @@ parameter_list
         cout<<"par num $3 "<<$3->parameter_no<<endl;
         $$->parameter_no=$1->parameter_no+$3->parameter_no;
         $$->param_types.push_back($3->type);
+		$$->param_list.push_back($3->name);
     }
 	
 	;
@@ -1009,6 +1033,7 @@ parameter_declaration
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->type=$1;
+		$$->name=$2->name;
 		$$->parameter_no=1;
 		// printf("%s",$$->type);
 	}
@@ -1016,12 +1041,14 @@ parameter_declaration
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->type=$1;
+		$$->name=$2->name;
 		// printf("%s",$$->type);
 	}
 	| declaration_specifiers{
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->type=$1;
+		$$->name="";
 		// printf("%s",$$->type);
 	}
 	;
@@ -1099,10 +1126,25 @@ labeled_statement
 
 compound_statement
 	: LBRACE RBRACE
-	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} statement_declaration_list RBRACE {
+	| LBRACE 
+	{
+		curr_scope = new scoped_symtab(curr_scope);
+		cerr<<"inside compound stt"<<endl;
+		for(int i=0;i<var_name.size();i++){
+			curr_scope->symbol_map[var_name[i]]=new symbol_info();
+			curr_scope->symbol_map[var_name[i]]->type=type_list[i];
+			curr_scope->symbol_map[var_name[i]]->name=var_name[i];
+		}
+		cerr<<"inside compound stt"<<endl;
+		var_name={};
+		type_list={};
+	} 
+	statement_declaration_list RBRACE 
+	{
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$3->code;
+		
 		all_scopes.push_back(curr_scope);curr_scope = curr_scope->parent;
         
 		//file<<$$->code<<endl; 
@@ -1270,7 +1312,19 @@ jump_statement
 		$$->code="\n break \n";
 	}
 	| RETURN SEMICOLON
+	{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->is_return=true;
+		$$->type="void";
+	}
 	| RETURN expression SEMICOLON
+	{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->is_return=true;
+		$$->type=$2->type;
+	}
 	;
 
 translation_unit
@@ -1294,12 +1348,22 @@ external_declaration
 
 function_definition
 	: declaration_specifiers declarator declaration_list compound_statement
-	| declaration_specifiers declarator compound_statement 
+	| declaration_specifiers declarator
 	{
+		var_name=$2->param_list;
+		type_list=$2->param_types;
+	} 
+	compound_statement 
+	{
+		// cerr<<"function definition ke right "<<$2->is_param_list<<endl;
+		// for(auto it:$2->param_list){
+		// 	cerr<<it<<endl;
+		// }
+		// cerr<<"function def endddd"<<endl;
 		//abhi ke liye
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
-		$$->code=$3->code;
+		$$->code=$4->code;
         
 		// file<<$$->code<<endl;
 	}   

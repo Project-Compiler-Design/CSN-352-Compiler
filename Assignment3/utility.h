@@ -48,8 +48,11 @@ struct symbol_info {
     qid place;
     std::string code;
 
+    bool is_return=false;
+
     bool is_continue=false;
     bool is_break=false;
+
 
 
     symbol_info(std::string name="", std::string type="", void* ptr=nullptr, int symbol_size=0, bool is_array=false, int array_length=0, std::vector<int> int_array={},bool is_param_list=false,std::vector<std::string> param_types={},std::vector<std::string> param_list={},int parameter_no=0,int pointer_depth=0, qid place = {"", nullptr}, std::string code = "",

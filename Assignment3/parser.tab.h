@@ -162,7 +162,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 41 "src/parser.y"
+#line 42 "src/parser.y"
 
     char* str;  // For type_specifier, declarator
     struct symbol_info* symbol_info; // For expressions and constants
