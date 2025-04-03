@@ -1121,10 +1121,11 @@ initializer_list
 	;
 
 statement
-	: labeled_statement{$$=$1;}
+	: labeled_statement{$$=$1;cerr<<"label\n";}
 	| compound_statement
 	{
 		$$=$1;
+
 		//file<<$$->code<<endl;
 	}
 	| expression_statement
@@ -1136,6 +1137,8 @@ statement
 
 labeled_statement
 	: ID COLON statement
+	| ID COLON declaration
+	| ID COLON
 	| CASE constant_expression COLON statement
 	| DEFAULT COLON statement
 	;
@@ -1214,6 +1217,7 @@ statement_declaration_list
 	| declaration_list
 	{
 		$$=$1;
+		cerr<<"Hello?\n";
 		//file<<$$->code<<endl;
 	}
 	;
@@ -1247,6 +1251,7 @@ statement_list
 		if($1->return_type!="") $$->return_type=$1->return_type;
 		else $$->return_type=$2->return_type;
 		$$->code=$1->code + "\n" + $2->code;
+		
 	}
 	| error SEMICOLON {yyerrok;}
 	;
@@ -1328,6 +1333,8 @@ jump_statement
 	: GOTO ID SEMICOLON				
 	{ 
 		//printf("Goto statement: %s\n",$2);
+		//idhar ID ko symtab me insert karna he
+		cerr << "goto\n";
 	}
 	| CONTINUE SEMICOLON
 	{
