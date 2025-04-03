@@ -1,13 +1,11 @@
-
 int sum(int a,int b){
-    int c=a+b;
-    return c;
-}
-int main(){
-    int a=4;
-    int c=3;
-    int result=sum(a,c);
-    
-
+    int result = a + b;
     return result;
+}
+
+int main(){
+    int a = 5;
+    int b = 10;
+    int c = sum(a,b);
+    return 0;
 }

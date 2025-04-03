@@ -4,15 +4,15 @@ FUNC_BEGIN sum
     a := param0
     b := param1
     t0:=  a+b
-    c:= t0
-    RETURN c
+    result:= t0
+    RETURN result
 FUNC_END sum
 FUNC_BEGIN main
-    a:= 4
-    c:= 3
+    a:= 5
+    b:= 10
     PARAM a
-    PARAM c
+    PARAM b
     t1:= CALL sum
-    result:= t1
-    RETURN result
+    c:= t1
+    RETURN 0
 FUNC_END main

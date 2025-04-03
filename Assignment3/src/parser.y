@@ -29,6 +29,7 @@
 
     vector<string> type_list = {};
 	vector<string> var_name={};
+	vector<string> goto_list={};
     
 
 
@@ -71,12 +72,12 @@
 %type <symbol_info> initializer_list statement labeled_statement compound_statement 
 %type <symbol_info> declaration_list statement_list expression_statement statement_declaration_list
 %type <symbol_info> selection_statement iteration_statement jump_statement 
-%type <symbol_info> translation_unit external_declaration function_definition
+%type <symbol_info> translation_unit external_declaration function_definition start_symbol
 
 %type <str> declaration_specifiers storage_class_specifier type_qualifier type_specifier enum_specifier specifier_qualifier_list
 %type <str> struct_or_union struct_or_union_specifier 
 
-%start translation_unit
+%start start_symbol
 
 %%
 
@@ -1121,7 +1122,11 @@ initializer_list
 	;
 
 statement
-	: labeled_statement{$$=$1;cerr<<"label\n";}
+	: labeled_statement
+	{
+		$$=$1;cerr<<"label\n";
+
+	}
 	| compound_statement
 	{
 		$$=$1;
@@ -1137,7 +1142,16 @@ statement
 
 labeled_statement
 	: ID COLON statement
-	| ID COLON declaration
+	{
+
+		// curr-scope->symbol_map[$1]=new symbol_info();
+		// curr_scope->symbol_map[$1]->name=$1;
+		// curr_scope->symbol_map[$1]->type="label";
+		cerr<<"ID COLON statement"<<$1<<endl;
+	}
+	| ID COLON declaration{
+		cerr<<"ID COLON declaration"<<$1<<endl;
+	}
 	| ID COLON
 	| CASE constant_expression COLON statement
 	| DEFAULT COLON statement
@@ -1160,7 +1174,9 @@ compound_statement
 		type_list={};
 	} 
 	statement_declaration_list RBRACE 
+
 	{
+		cerr<<"inside compound sttttttttttttt"<<endl;
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$3->code;
@@ -1187,20 +1203,26 @@ compound_statement
 statement_declaration_list
 	: statement_list statement_declaration_list
 	{
-        
+        cerr<<"statement lis222222 found"<<endl;
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
 		$$->code=$1->code + "\n" + $2->code;
 		$$->is_return=($1->is_return)|($2->is_return);
 		if($1->return_type!="") $$->return_type=$1->return_type;
 		else $$->return_type=$2->return_type;
+		
         
 
 	}
 	| declaration_list statement_declaration_list
 	{
-        
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+        cerr<<"statement list11111 found"<<endl;
 		$$->code=$1->code + "\n" + $2->code;
 		$$->is_return=$2->is_return;
 		$$->return_type=$2->return_type;
+		
         
 		
 	}
@@ -1211,6 +1233,7 @@ statement_declaration_list
 		$$->code=$1->code;
 		$$->is_return=$1->is_return;
 		$$->return_type=$1->return_type;
+		cerr<<"statement list found"<<$$->code<<endl;
 		
 		
 	}
@@ -1242,7 +1265,7 @@ declaration_list
 statement_list
 	: statement { 
 		$$=$1;
-		
+		cerr<<"statement list\n";
 
 	}
 	| statement_list statement
@@ -1334,6 +1357,7 @@ jump_statement
 	{ 
 		//printf("Goto statement: %s\n",$2);
 		//idhar ID ko symtab me insert karna he
+		goto_list.push_back($2);
 		cerr << "goto\n";
 	}
 	| CONTINUE SEMICOLON
@@ -1356,7 +1380,7 @@ jump_statement
 		$$=new_symbol;
 		$$->is_return=true;
 		$$->return_type="void";
-		$$->code="RETURN\n";
+		$$->code="\nRETURN\n";
 	}
 	| RETURN expression SEMICOLON
 	{
@@ -1364,20 +1388,25 @@ jump_statement
 		$$=new_symbol;
 		$$->is_return=true;
 		$$->return_type=$2->type;
-		$$->code=$2->code + "RETURN "+$2->place.first+"\n";
+		$$->code=$2->code + "\nRETURN "+$2->place.first+"\n";
 	}
 	;
 
+start_symbol: translation_unit
+{
+	file<<$1->code<<endl;
+}
+;
 translation_unit
 	: external_declaration 				 
 	{
-		$$=$1;
+		$$->code=$1->code;
 		// file<<$$->code<<endl;
 	}   //{printf("Reached the root node.\n");}
 	| translation_unit external_declaration //{printf("Reached the root node.\n");}
 	{
 		$$->code=$1->code+$2->code;
-		file<<$$->code<<endl;
+		// file<<$$->code<<endl;
 	}
 	| 
 	;
