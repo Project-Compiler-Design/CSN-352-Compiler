@@ -308,25 +308,72 @@ unary_expression
 	}
 	| INCREMENT unary_expression
 	| DECREMENT unary_expression
-	| unary_operator cast_expression
+	| unary_operator cast_expression {
+		$$=$2;
+		string original_type=$2->type;
+		if($1->code=="&"){
+			$$->type=original_type+"*";
+		}
+		cerr<<"cast ka type "<<$$->type<<endl;
+		cerr<<"Found unary_operator "<<endl;
+	}
 	| SIZEOF unary_expression
 	| SIZEOF LPARENTHESES type_name RPARENTHESES
 	;
 
 unary_operator
-	: AMPERSAND
+	: AMPERSAND {
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->name="ampersand";
+		$$->code="&";
+		cerr<<"ampersand "<<endl;
+	}
 	| STAR
+	{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->name="star";
+		$$->code="*";
+	}
 	| PLUS
+	{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->name="plus";
+		$$->code="+";
+	}
 	| MINUS
+	{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->name="minus";
+		$$->code="-";
+	}
 	| TILDE
+	{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->name="tilde";
+		$$->code="~";
+	}
 	| EXCLAMATION
+	{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->name="exclamation";
+		$$->code="!";
+
+	}
 	;
 
 cast_expression
 	: unary_expression 
 	{
 		$$=$1;
-		printf("Unary expression %s\n",$$->name.c_str());
+		cerr<<"found unnnnary expree"<<endl;
+		// printf("Unary expression %s\n",$$->name.c_str());
+		
 	}
 	| LPARENTHESES type_name RPARENTHESES cast_expression
     {
@@ -549,11 +596,12 @@ conditional_expression
 assignment_expression
 	: conditional_expression				
 	{ 
+		cerr<<"condiiiiiii"<<endl;
 		//printf("conditional inside assignment = %s\n",$$);
 		// $$ = strdup($1);
 		$$=$1;
-		printf("cond expression = %s\n",$1->type.c_str());
-		printf("cond expression2 = %s\n",$1->name.c_str());
+		// printf("cond expression = %s\n",$1->type.c_str());
+		// printf("cond expression2 = %s\n",$1->name.c_str());
 		cerr << "condi expression found: " << $1->type << endl;
 	}
 	| unary_expression assignment_operator assignment_expression 
@@ -590,14 +638,15 @@ assignment_expression
                 }else{
                     printf("Correct type assignment\n");
                 }
-                
+                cerr<<$3->type<<endl;
                 find_symbol->type=priority_to_type[max(type_priority[find_symbol->type],type_priority[$3->type])];
+				
                 find_symbol->name=$1->name;
                 find_symbol->place=$1->place;
                 find_symbol->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
                 //file<<find_symbol->code<<endl;
                 
-                cerr<<"Correct type assignment"<<endl;
+                
 
                 //3AC code
                 cerr<<"3AC code for assignment"<<endl;

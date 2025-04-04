@@ -1,18 +1,5 @@
-FUNC_BEGIN sum
-    param0 := PARAM
-    param1 := PARAM
-    a := param0
-    b := param1
-    t0:=  a+b
-    result:= t0
-    RETURN result
-FUNC_END sum
 FUNC_BEGIN main
-    a:= 5
-    b:= 10
-    PARAM a
-    PARAM b
-    t1:= CALL sum
-    c:= t1
+    p:= 5
+    a:=  p
     RETURN 0
 FUNC_END main
