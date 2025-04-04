@@ -3,8 +3,8 @@
 
 #include "3AC.cpp"
 
-map<string, int> type_priority = {{"char",0},{"int",1},{"float",2},{"double",3}};
-string priority_to_type[] = {"char", "int", "float", "double"};
+map<string, int> type_priority = {{"char",1},{"int",2},{"float",3},{"double",4}};
+string priority_to_type[] = {"","char", "int", "float", "double"};
 
 //set_pointer_data function
 // This function sets the value of a pointer in the symbol_info struct based on the type provided.
@@ -188,4 +188,15 @@ string replace_break_continue(string original_code,string end_label,string updat
     }
     return new_code;
 }
+
+int count_star(string s){
+    // cerr<<"hey"<<endl;
+    int count = 0;
+    while(s.back() == '*'){
+        count++;
+        s.pop_back();
+    }
+    return count;
+}
+
 #endif

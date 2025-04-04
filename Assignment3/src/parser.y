@@ -314,6 +314,10 @@ unary_expression
 		if($1->code=="&"){
 			$$->type=original_type+"*";
 		}
+        if($1->code=="*"){
+            if(original_type.back()!='*') cerr<<"ERROR!!!!!! star applied to non pointer"<<endl;
+            else $$->type.pop_back();
+        }
 		cerr<<"cast ka type "<<$$->type<<endl;
 		cerr<<"Found unary_operator "<<endl;
 	}
@@ -327,6 +331,7 @@ unary_operator
 		$$=new_symbol;
 		$$->name="ampersand";
 		$$->code="&";
+        $$->pointer_depth++;
 		cerr<<"ampersand "<<endl;
 	}
 	| STAR
@@ -633,13 +638,19 @@ assignment_expression
 				}
 			}
 			else{
-                if(type_priority[find_symbol->type]<type_priority[$3->type]){
+                cerr<<"idharrrrrrrrrrrrrrrr"<<endl;
+                cerr<<find_symbol->type<<endl;
+                cerr<<$3->type<<endl;
+                if(min(type_priority[$1->type],type_priority[$3->type])==0 && $1->type!=$3->type){
+                    printf("ERROR!!!!!!: Type mismatch in assignment\n");
+                }
+                if(type_priority[$1->type]<type_priority[$3->type]){
                     printf("ERROR!!!!!!: Type mismatch in assignment\n");
                 }else{
                     printf("Correct type assignment\n");
                 }
                 cerr<<$3->type<<endl;
-                find_symbol->type=priority_to_type[max(type_priority[find_symbol->type],type_priority[$3->type])];
+                if(min(type_priority[$1->type],type_priority[find_symbol->type])>0) find_symbol->type=priority_to_type[max(type_priority[find_symbol->type],type_priority[$3->type])];
 				
                 find_symbol->name=$1->name;
                 find_symbol->place=$1->place;
@@ -725,14 +736,21 @@ declaration
             pointer_info.pop();
 			// Check if the symbol exists in the current scope
 			if (curr_scope->symbol_map[top_symbol]->type!= ""){
-				cerr<<("top ka type = %s\n", curr_scope->symbol_map[top_symbol]->type.c_str())<<endl;
+				cerr<<"top ka type = "<<curr_scope->symbol_map[top_symbol]->type.c_str()<<endl;
+                if(depth!=count_star(curr_scope->symbol_map[top_symbol]->type)){
+                    cerr<<("Error: Pointer depth mismatch\n")<<endl;
+                    flag = 1;
+                }
 
 				if (type_priority[$1] < type_priority[curr_scope->symbol_map[top_symbol]->type]) {
 					printf("Error: Type mismatch in declaration\n");
 					flag = 1;
 				}
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
-                curr_scope->symbol_map[top_symbol]->type = priority_to_type[max(type_priority[$1], type_priority[curr_scope->symbol_map[top_symbol]->type])];
+                if(type_priority[$1]>0 && type_priority[curr_scope->symbol_map[top_symbol]->type]>0) curr_scope->symbol_map[top_symbol]->type = priority_to_type[max(type_priority[$1], type_priority[curr_scope->symbol_map[top_symbol]->type])];
+                else{
+                    cout<<"ERROR!!!!!!: Type mismatch in declaration, pointer depth invalid\n";
+                }
 				$$->code = $2->code;
 
 			} else {
@@ -797,7 +815,7 @@ init_declarator
     }
     | declarator EQUALS initializer { 
 		printf("declaratoreiii %s\n",$1->name.c_str());
-		if(lookup_symbol_global($1->name, curr_scope)!=nullptr){
+		if(lookup_symbol_local($1->name, curr_scope)!=nullptr){
 			printf("Redeclaration error \n");
 			exit(1);
 		}
@@ -817,7 +835,7 @@ init_declarator
 				$1->type = $3->type;
 			}
 		}
-		
+        cerr<<$3->type<<endl;
 		$$ = $1;
 		if($3->place.first[0]!='t')
 		{

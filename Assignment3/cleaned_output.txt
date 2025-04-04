@@ -1,5 +1,12 @@
-FUNC_BEGIN main
-    p:= 5
-    a:=  p
+    a:= 10FUNC_BEGIN main
+    PARAM 4
+    t0:= CALL
+    x:= t0
+    a:= 5
+    b:= 7
+    c:= 8
+    t1:=  a+b
+    t2:=  t1-c
+    d:= t2
     RETURN 0
 FUNC_END main
