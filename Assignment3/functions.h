@@ -126,6 +126,10 @@ bool isSingleNumber(const string &line) {
     }
     return !line.empty();  // Ensure it's not an empty string
 }
+bool startsWithPointerOrAddress(const string& line) {
+    regex pattern(R"(^(\*\*\w+)|(^\*\w+)|(^&&\w+)|(^&\w+))");
+    return regex_search(line, pattern);
+}
 
 // Function to clean Three-Address Code from input file and write to output file
 void cleanTAC(const string &inputFileName, const string &outputFileName) {
@@ -150,7 +154,12 @@ void cleanTAC(const string &inputFileName, const string &outputFileName) {
         // Skip empty lines and lines with only a single number
         if (line.empty() || isSingleNumber(line)) continue;
 
-        // Check if the line is a label (ends with ':') and write accordingly
+        // Skip lines with pointers or address-of expressions
+        if (startsWithPointerOrAddress(line) && line.find('=') == string::npos) {
+            continue;
+        }
+
+        // Check if the line is a label or function
         if (!line.empty() && line.back() == ':' || !line.empty() && line.substr(0,4)=="FUNC") {
             outputFile << line << endl;  // Labels should not be indented
         } else {
@@ -163,7 +172,6 @@ void cleanTAC(const string &inputFileName, const string &outputFileName) {
     
     cout << "Cleaning complete! Check " << outputFileName << endl;
 }
-
 
 string replace_break_continue(string original_code,string end_label,string update_label,int i){
     string new_code = original_code;
@@ -195,6 +203,16 @@ int count_star(string s){
     while(s.back() == '*'){
         count++;
         s.pop_back();
+    }
+    return count;
+}
+
+int count_init_star(string s){
+    // cerr<<"hey"<<endl;
+    int count = 0;
+    while(s.front() == '*'){
+        count++;
+        s.erase(0,1);
     }
     return count;
 }

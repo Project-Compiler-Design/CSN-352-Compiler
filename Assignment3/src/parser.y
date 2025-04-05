@@ -309,16 +309,27 @@ unary_expression
 	| INCREMENT unary_expression
 	| DECREMENT unary_expression
 	| unary_operator cast_expression {
-		$$=$2;
+		symbol_info* new_symbol=new symbol_info();
+		
+		// file<<"cast ka place "<<$2->place.first<<endl;
 		string original_type=$2->type;
+		$$=new_symbol;
 		if($1->code=="&"){
 			$$->type=original_type+"*";
+			
 		}
         if($1->code=="*"){
             if(original_type.back()!='*') cerr<<"ERROR!!!!!! star applied to non pointer"<<endl;
-            else $$->type.pop_back();
+            else{
+				$$->type=original_type;
+				$$->type.pop_back();
+			}
         }
-		cerr<<"cast ka type "<<$$->type<<endl;
+		
+		$$->name=$2->name;
+		$$->code=$2->code+"\n"+$1->code+$2->place.first;
+		$$->place.first=$1->code+$2->place.first;
+		// file<<"cast ka code ffff"<<$$->code<<endl;
 		cerr<<"Found unary_operator "<<endl;
 	}
 	| SIZEOF unary_expression
@@ -612,7 +623,7 @@ assignment_expression
 	| unary_expression assignment_operator assignment_expression 
 	{
 		printf("unary inside assignment = %s\n",$1->name.c_str());
-		printf("Assignment expression = %s\n",$3->type.c_str());
+		printf("Assignment expression = %s\n",$1->type.c_str());
         symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
         if(find_symbol != nullptr) {
 			cerr<<"find symbol type: "<<(find_symbol->type).substr(0,6)<<endl;
@@ -661,13 +672,32 @@ assignment_expression
 
                 //3AC code
                 cerr<<"3AC code for assignment"<<endl;
-				if($3->place.first[0]!='t')
+				if($3->place.first[0]!='t' && $3->place.first[0]!='&' && $3->place.first[0]!='*' && $3->place.first[0]!='+' && $3->place.first[0]!='-' && $3->place.first[0]!='~' && $3->place.first[0]!='!')
 				{
 					$3->code="";
 				}
-                $$->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
-                $$->place=$1->place;
-                cerr<<"hiiiiiiiiiiiii "<<$$->code<<endl;
+				int flag=0;
+				if($1->place.first[0]=='*'){
+					int count_init_starr=count_init_star($1->place.first);
+					if(count_init_starr>1){
+						flag=1;
+						string code="";
+						qid temp=newtemp($1->type,curr_scope);
+						string prev=($1->place.first).erase(0,count_init_starr);
+						for(int i=0;i<count_init_starr;i++){
+							code=code+"\n"+temp.first+":= *"+prev;
+							prev=temp.first;
+							temp=newtemp($1->type,curr_scope);
+						}
+						$$->code=$1->code+"\n"+$3->code+"\n"+code;
+						$$->place=temp;
+					}
+				}
+                if(flag==0){
+					$$->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
+					$$->place=$1->place;
+				} 
+                // file<<"hiiiiiiiiiiiii "<<$$->code<<endl;
 				
 			}
 			
@@ -746,10 +776,11 @@ declaration
 					printf("Error: Type mismatch in declaration\n");
 					flag = 1;
 				}
+				// file<<"decl ka code "<<$2->code<<endl;
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
                 if(type_priority[$1]>0 && type_priority[curr_scope->symbol_map[top_symbol]->type]>0) curr_scope->symbol_map[top_symbol]->type = priority_to_type[max(type_priority[$1], type_priority[curr_scope->symbol_map[top_symbol]->type])];
                 else{
-                    cout<<"ERROR!!!!!!: Type mismatch in declaration, pointer depth invalid\n";
+                    cout<<"ERROR!!!!!!: Type mismatch in declaration\n";
                 }
 				$$->code = $2->code;
 
@@ -835,15 +866,17 @@ init_declarator
 				$1->type = $3->type;
 			}
 		}
-        cerr<<$3->type<<endl;
+        
 		$$ = $1;
-		if($3->place.first[0]!='t')
-		{
+		// file<<"initiali ka place   "<<$3->place.first<<"initiii"<<endl;
+		// file<<"initiali ka code   "<<$3->code<<"initiii"<<endl;
+		if($3->place.first[0]!='t' && $3->place.first[0]!='&' && $3->place.first[0]!='*' && $3->place.first[0]!='-' && $3->place.first[0]!='!'){
 			$3->code="";
 		}
+		
 		$$->code=$3->code+"\n"+$1->place.first+":= "+$3->place.first;
 		$$->place=$1->place;
-		// file<<$$->code<<endl;
+		
 		printf("declarator equals initializer %s\n",$$->name.c_str()); 
 		
     }

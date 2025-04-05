@@ -1,20 +1,16 @@
+FUNC_BEGIN find_Value
+param0 := PARAM
+ptr := param0
 
-a:= 10FUNC_BEGIN main
-PARAM 4
-t0:= CALL 
-x:= t0
+*ptr
+RETURN *ptr
+FUNC_END find_Value
+FUNC_BEGIN main
 
 a:= 5
 
-b:= 7
-
-c:= 8
-
-
-t1:=  a+b
-
-t2:=  t1-c
-d:= t2
+&a
+ptr:= &a
 0
 RETURN 0
 FUNC_END main

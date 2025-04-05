@@ -1,23 +1,9 @@
-// int func(int x)
-// {
-//     int n = 4;
-//     if (n > 0)
-//     {
-//         int temp = func(n - 1);
-//     }
-//     x++;
-//     return x;
-// }
+int find_Value(int *ptr){
+    return *ptr;
+}
 
-int a= 10;
-
-int main()
-{
-    int x = func(4);
-
+int main(){
     int a = 5;
-    int b = 7;
-    int c = 8;
-    int d = a + b - c;
+    int *ptr = &a;
     return 0;
 }

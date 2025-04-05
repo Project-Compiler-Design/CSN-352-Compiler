@@ -1,25 +1,45 @@
-a
-ID a
-Direct declarator a
-con
+find_Value
+ID find_Value
+ptr
+ID ptr
+Pointer direct declarator with depth 1
+int
+par num1
+Brackets found with parameter= find_Value
+Par list 1
+param list size 1
+int
+has a parameter or not 1
+Direct declarator find_Value
+inside compound stt
+fffffptr
+inside compound stt
+ID found: ptr
+ID ptr
+ID2 ptr
+check
+Symbol found ptr
+Code 
 Primary expression found: int
 postfix expression found: int
 found unnnnary expree
+ERROR!!!!!! star applied to non pointer
+Found unary_operator 
+found unnnnary expree
 condiiiiiii
-condi expression found: int
-IDHAR HU MAIIII
-declaratoreiii a
-Yes int found
-int
-declarator equals initializer a
-a
-hi
-parsing stack top = a
-Declaration specifiers = int
-Init declarator list = a
-dollar 3 type = 
-top ka type = int
-Correct type declaration
+condi expression found: 
+IDHAR HU MAIIII2
+0break check in statement
+statement list
+statement list found
+*ptr
+RETURN *ptr
+
+inside compound sttttttttttttt
+function definition ke right 1
+hellllo
+Error: Return type not matching
+ffffnnnnnamefind_Valuefffffnnnnnn
 main
 ID main
 It is function without params 
@@ -27,42 +47,6 @@ has a parameter or not 0
 Direct declarator main
 inside compound stt
 inside compound stt
-x
-ID x
-Direct declarator x
-ID found: func
-ID func
-ID2 func
-check
-Error: Undeclared variable func
-Primary expression found: 
-con
-Primary expression found: int
-postfix expression found: int
-found unnnnary expree
-condiiiiiii
-condi expression found: int
-$1 ka name 
-is a number int
-Error: Undeclared function func
-ppfffix expPARAM 4
-t0:= CALL 
-postfix expression found: 
-found unnnnary expree
-condiiiiiii
-condi expression found: 
-IDHAR HU MAIIII
-declaratoreiii x
-
-declarator equals initializer x
-x
-hi
-parsing stack top = x
-Declaration specifiers = int
-Init declarator list = x
-dollar 3 type = 
-Created new symbol: x with type int
-Correct type declaration
 a
 ID a
 Direct declarator a
@@ -75,7 +59,6 @@ condi expression found: int
 IDHAR HU MAIIII
 declaratoreiii a
 Yes int found
-int
 declarator equals initializer a
 a
 hi
@@ -85,53 +68,10 @@ Init declarator list = a
 dollar 3 type = 
 top ka type = int
 Correct type declaration
-b
-ID b
-Direct declarator b
-con
-Primary expression found: int
-postfix expression found: int
-found unnnnary expree
-condiiiiiii
-condi expression found: int
-IDHAR HU MAIIII
-declaratoreiii b
-Yes int found
-int
-declarator equals initializer b
-b
-hi
-parsing stack top = b
-Declaration specifiers = int
-Init declarator list = b
-dollar 3 type = 
-top ka type = int
-Correct type declaration
-c
-ID c
-Direct declarator c
-con
-Primary expression found: int
-postfix expression found: int
-found unnnnary expree
-condiiiiiii
-condi expression found: int
-IDHAR HU MAIIII
-declaratoreiii c
-Yes int found
-int
-declarator equals initializer c
-c
-hi
-parsing stack top = c
-Declaration specifiers = int
-Init declarator list = c
-dollar 3 type = 
-top ka type = int
-Correct type declaration
-d
-ID d
-Direct declarator d
+ptr
+ID ptr
+Pointer direct declarator with depth 1
+ampersand 
 ID found: a
 ID a
 ID2 a
@@ -141,38 +81,21 @@ Code
 Primary expression found: int
 postfix expression found: int
 found unnnnary expree
-ID found: b
-ID b
-ID2 b
-check
-Symbol found b
-Code 
-Primary expression found: int
-postfix expression found: int
-found unnnnary expree
-ID found: c
-ID c
-ID2 c
-check
-Symbol found c
-Code 
-Primary expression found: int
-postfix expression found: int
+Found unary_operator 
 found unnnnary expree
 condiiiiiii
-condi expression found: int
+condi expression found: int*
 IDHAR HU MAIIII
-declaratoreiii d
-Yes int found
-int
-declarator equals initializer d
-d
+declaratoreiii ptr
+declarator equals initializer ptr
+ptr
 hi
-parsing stack top = d
+parsing stack top = ptr
 Declaration specifiers = int
-Init declarator list = d
+Init declarator list = ptr
 dollar 3 type = 
-top ka type = int
+top ka type = int*
+ERROR!!!!!!: Type mismatch in declaration
 Correct type declaration
 con
 Primary expression found: int
@@ -188,9 +111,6 @@ RETURN 0
 
 statement list11111 found
 statement list11111 found
-statement list11111 found
-statement list11111 found
-statement list11111 found
 inside compound sttttttttttttt
 function definition ke right 0
 hellllo
@@ -198,24 +118,24 @@ Return type matched
 ffffnnnnnamemainfffffnnnnnn
 Parsing stack size = 0
 Printing scope table
-Count of scopes 2
+Count of scopes 3
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | int                  | 4       | 10         |
+| find_Value      |                      | 0       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| ptr             | int                  | 4       | N/A        |
 -----------------------------------------------------------------
 Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
 | a               | int                  | 4       | 5          |
-| b               | int                  | 4       | 7          |
-| c               | int                  | 4       | 8          |
-| d               | int                  | 4       | N/A        |
-| t0              |                      | 0       | N/A        |
-| t1              | int                  | 4       | N/A        |
-| t2              | int                  | 4       | N/A        |
-| x               | int                  | 4       | N/A        |
+| ptr             | int*                 | 0       | N/A        |
 -----------------------------------------------------------------
 Scope is here
 Cleaning complete! Check cleaned_output.txt
