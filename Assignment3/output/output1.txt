@@ -14,10 +14,46 @@ declarator i
 i
 hi
 parsing stack top = i
-Declaration specifiers = int
+Declaration specifiers = char
 Init declarator list = i
 dollar 3 type = 
-Created new symbol: i with type int
+Created new symbol: i with type char
+Correct type declaration
+p
+ID p
+Direct declarator p
+con
+Primary expression found: int
+postfix expression found: int
+found unnnnary expree
+condiiiiiii
+condi expression found: int
+IDHAR HU MAIIII
+declaratoreiii p
+Yes int found
+int
+declarator equals initializer p
+p
+hi
+parsing stack top = p
+Declaration specifiers = int
+Init declarator list = p
+dollar 3 type = 
+top ka type = int
+Correct type declaration
+a
+ID a
+Direct declarator a
+a
+hiiii
+declarator a
+a
+hi
+parsing stack top = a
+Declaration specifiers = int
+Init declarator list = a
+dollar 3 type = 
+Created new symbol: a with type int
 Correct type declaration
 ID found: i
 ID i
@@ -25,6 +61,117 @@ ID2 i
 check
 Symbol found i
 Code 
+Primary expression found: char
+postfix expression found: char
+found unnnnary expree
+condiiiiiii
+condi expression found: char
+IDHAR HU MAIIII2
+inside compound stt
+inside compound stt
+con
+Primary expression found: char
+postfix expression found: char
+found unnnnary expree
+ID found: p
+ID p
+ID2 p
+check
+Symbol found p
+Code 
+Primary expression found: int
+postfix expression found: int
+con
+Primary expression found: int
+postfix expression found: int
+found unnnnary expree
+condiiiiiii
+condi expression found: int
+unary inside assignment = p
+Assignment expression = int
+find symbol type: int
+idharrrrrrrrrrrrrrrr
+int
+int
+Correct type assignment
+int
+3AC code for assignment
+hiiiiiiiiiiiii 
+
+p:=  1
+IDHAR HU MAIIII2
+label
+statement list
+ID found: p
+ID p
+ID2 p
+check
+Symbol found p
+Code 
+Primary expression found: int
+postfix expression found: int
+con
+Primary expression found: int
+postfix expression found: int
+found unnnnary expree
+condiiiiiii
+condi expression found: int
+unary inside assignment = p
+Assignment expression = int
+find symbol type: int
+idharrrrrrrrrrrrrrrr
+int
+int
+Correct type assignment
+int
+3AC code for assignment
+hiiiiiiiiiiiii 
+
+p:=  10
+IDHAR HU MAIIII2
+statement list
+1break check in statement
+statement list
+con
+Primary expression found: char
+postfix expression found: char
+found unnnnary expree
+inside compound stt
+inside compound stt
+ID found: p
+ID p
+ID2 p
+check
+Symbol found p
+Code 
+Primary expression found: int
+postfix expression found: int
+con
+Primary expression found: int
+postfix expression found: int
+found unnnnary expree
+condiiiiiii
+condi expression found: int
+unary inside assignment = p
+Assignment expression = int
+find symbol type: int
+idharrrrrrrrrrrrrrrr
+int
+int
+Correct type assignment
+int
+3AC code for assignment
+hiiiiiiiiiiiii 
+
+p:=  2
+IDHAR HU MAIIII2
+statement list
+ID found: a
+ID a
+ID2 a
+check
+Symbol found a
+Code 
 Primary expression found: int
 postfix expression found: int
 found unnnnary expree
@@ -37,11 +184,11 @@ con
 Primary expression found: int
 postfix expression found: int
 found unnnnary expree
-ID found: i
-ID i
-ID2 i
+ID found: p
+ID p
+ID2 p
 check
-Symbol found i
+Symbol found p
 Code 
 Primary expression found: int
 postfix expression found: int
@@ -51,7 +198,7 @@ postfix expression found: int
 found unnnnary expree
 condiiiiiii
 condi expression found: int
-unary inside assignment = i
+unary inside assignment = p
 Assignment expression = int
 find symbol type: int
 idharrrrrrrrrrrrrrrr
@@ -62,70 +209,7 @@ int
 3AC code for assignment
 hiiiiiiiiiiiii 
 
-i:=  1
-IDHAR HU MAIIII2
-label
-statement list
-ID found: i
-ID i
-ID2 i
-check
-Symbol found i
-Code 
-Primary expression found: int
-postfix expression found: int
-con
-Primary expression found: int
-postfix expression found: int
-found unnnnary expree
-condiiiiiii
-condi expression found: int
-unary inside assignment = i
-Assignment expression = int
-find symbol type: int
-idharrrrrrrrrrrrrrrr
-int
-int
-Correct type assignment
-int
-3AC code for assignment
-hiiiiiiiiiiiii 
-
-i:=  10
-IDHAR HU MAIIII2
-statement list
-1break check in statement
-statement list
-con
-Primary expression found: int
-postfix expression found: int
-found unnnnary expree
-ID found: i
-ID i
-ID2 i
-check
-Symbol found i
-Code 
-Primary expression found: int
-postfix expression found: int
-con
-Primary expression found: int
-postfix expression found: int
-found unnnnary expree
-condiiiiiii
-condi expression found: int
-unary inside assignment = i
-Assignment expression = int
-find symbol type: int
-idharrrrrrrrrrrrrrrr
-int
-int
-Correct type assignment
-int
-3AC code for assignment
-hiiiiiiiiiiiii 
-
-i:=  2
+p:=  3
 IDHAR HU MAIIII2
 label
 statement list
@@ -135,11 +219,11 @@ con
 Primary expression found: int
 postfix expression found: int
 found unnnnary expree
-ID found: i
-ID i
-ID2 i
+ID found: p
+ID p
+ID2 p
 check
-Symbol found i
+Symbol found p
 Code 
 Primary expression found: int
 postfix expression found: int
@@ -149,7 +233,7 @@ postfix expression found: int
 found unnnnary expree
 condiiiiiii
 condi expression found: int
-unary inside assignment = i
+unary inside assignment = p
 Assignment expression = int
 find symbol type: int
 idharrrrrrrrrrrrrrrr
@@ -160,17 +244,17 @@ int
 3AC code for assignment
 hiiiiiiiiiiiii 
 
-i:=  3
+p:=  4
 IDHAR HU MAIIII2
 label
 statement list
 1break check in statement
 statement list
-ID found: i
-ID i
-ID2 i
+ID found: p
+ID p
+ID2 p
 check
-Symbol found i
+Symbol found p
 Code 
 Primary expression found: int
 postfix expression found: int
@@ -180,7 +264,7 @@ postfix expression found: int
 found unnnnary expree
 condiiiiiii
 condi expression found: int
-unary inside assignment = i
+unary inside assignment = p
 Assignment expression = int
 find symbol type: int
 idharrrrrrrrrrrrrrrr
@@ -191,9 +275,19 @@ int
 3AC code for assignment
 hiiiiiiiiiiiii 
 
-i:=  0
+p:=  5
 IDHAR HU MAIIII2
 label
+statement list
+statement list foundLABEL3:
+
+
+p:=  5
+statement lis222222 found
+statement lis222222 found
+statement lis222222 found
+statement lis222222 found
+inside compound sttttttttttttt
 statement list
 1break check in statement
 statement list
@@ -202,7 +296,47 @@ statement list found
 
 statement lis222222 found
 statement lis222222 found
-statement lis222222 found
+inside compound sttttttttttttt
+label
+statement list
+con
+Primary expression found: char
+postfix expression found: char
+found unnnnary expree
+ID found: p
+ID p
+ID2 p
+check
+Symbol found p
+Code 
+Primary expression found: int
+postfix expression found: int
+con
+Primary expression found: int
+postfix expression found: int
+found unnnnary expree
+condiiiiiii
+condi expression found: int
+unary inside assignment = p
+Assignment expression = int
+find symbol type: int
+idharrrrrrrrrrrrrrrr
+int
+int
+Correct type assignment
+int
+3AC code for assignment
+hiiiiiiiiiiiii 
+
+p:=  3
+IDHAR HU MAIIII2
+label
+statement list
+1break check in statement
+statement list
+statement list found
+ break 
+
 statement lis222222 found
 statement lis222222 found
 statement lis222222 found
@@ -224,6 +358,8 @@ RETURN 0
 
 statement lis222222 found
 statement list11111 found
+statement list11111 found
+statement list11111 found
 inside compound sttttttttttttt
 function definition ke right 0
 hellllo
@@ -231,7 +367,7 @@ Return type matched
 ffffnnnnnamemainfffffnnnnnn
 Parsing stack size = 0
 Printing scope table
-Count of scopes 3
+Count of scopes 5
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
@@ -245,7 +381,19 @@ Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| i               | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| a               | int                  | 4       | N/A        |
+| i               | char                 | 2       |            |
+| p               | int                  | 4       | 0          |
 -----------------------------------------------------------------
 Scope is here
 Cleaning complete! Check cleaned_output.txt

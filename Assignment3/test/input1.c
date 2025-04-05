@@ -1,20 +1,33 @@
 int main()
 {
-    int i;
+    char i;
+    int p=0;
+    int a;
     switch(i)
     {
-        case 1:
-            i = 1;
-            i=10;
+        case '+':
+            p = 1;
+            p=10;
             break;
-        case 2:
-            i = 2;
+        case '-':
+{
+            p=2;
+            
+            switch(a)
+            {
+                case 1:
+                    p=3;
+                    break;
+                case 2:
+                    p=4;
+                    break;
+                default:
+                    p=5;
+            }
             break;
-        case 3:
-            i = 3;
-            break;
-        default:
-            i = 0;
+            }
+        case '*':         
+            p=3;
             break;
     }
     

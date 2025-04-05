@@ -1,26 +1,37 @@
 FUNC_BEGIN main
 
 
-if(i==1) goto LABEL0
-if(i==2) goto LABEL1
-if(i==3) goto LABEL2
-goto LABEL3
+p:= 0
+
+
+if(i=='+') goto LABEL0
+if(i=='-') goto LABEL5
+if(i=='*') goto LABEL6
 
 LABEL0:
 
 
-i:=  1
+p:=  1
 
 
-i:=  10
+p:=  10
 
- goto LABEL4
+ goto LABEL7
  
+
+LABEL5:
+
+
+p:=  2
+
+if(a==1) goto LABEL1
+if(a==2) goto LABEL2
+goto LABEL3
 
 LABEL1:
 
 
-i:=  2
+p:=  3
 
  goto LABEL4
  
@@ -28,7 +39,7 @@ i:=  2
 LABEL2:
 
 
-i:=  3
+p:=  4
 
  goto LABEL4
  
@@ -36,12 +47,22 @@ i:=  3
 LABEL3:
 
 
-i:=  0
+p:=  5
+LABEL4:
 
- goto LABEL4
+
+ goto LABEL7
  
 
-LABEL4:
+LABEL6:
+
+
+p:=  3
+
+ goto LABEL7
+ 
+
+LABEL7:
 
 0
 RETURN 0
