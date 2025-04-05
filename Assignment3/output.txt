@@ -1,20 +1,48 @@
-
-a:= 10FUNC_BEGIN main
-PARAM 4
-t0:= CALL 
-x:= t0
-
-a:= 5
-
-b:= 7
-
-c:= 8
+FUNC_BEGIN main
 
 
-t1:=  a+b
+if(i==1) goto LABEL0
+if(i==2) goto LABEL1
+if(i==3) goto LABEL2
+goto LABEL3
 
-t2:=  t1-c
-d:= t2
+LABEL0:
+
+
+i:=  1
+
+
+i:=  10
+
+ goto LABEL4
+ 
+
+LABEL1:
+
+
+i:=  2
+
+ goto LABEL4
+ 
+
+LABEL2:
+
+
+i:=  3
+
+ goto LABEL4
+ 
+
+LABEL3:
+
+
+i:=  0
+
+ goto LABEL4
+ 
+
+LABEL4:
+
 0
 RETURN 0
 FUNC_END main

@@ -26,11 +26,17 @@
     vector<scoped_symtab*> all_scopes={curr_scope};
 	
 	std::ofstream file("output.txt");
-
+	void debug(string s1,string s2)
+	{
+		file<<s1<<endl;
+		file<<s2<<endl;
+		file<<s1<<endl;
+	}
+	
     vector<string> type_list = {};
 	vector<string> var_name={};
 	vector<string> goto_list={};
-    
+    queue<pair<string,string>> case_list;
 
 
 	struct ArgList {
@@ -708,6 +714,10 @@ expression
 		// file<<$1->code<<endl;
 	}	
 	| expression COMMA assignment_expression
+	{
+
+		$$->code=$1->code + "\n" + $3->code;
+	}
     //means?
 	;
 
@@ -1200,7 +1210,10 @@ statement
 
 		//file<<$$->code<<endl;
 	}
-	| expression_statement
+	| expression_statement{
+		//debug("expression statement",$1->code);
+		$$=$1;
+		}
 	| selection_statement{$$=$1;}
 	| iteration_statement{$$=$1;}
 	| jump_statement{$$=$1;
@@ -1221,7 +1234,20 @@ labeled_statement
 	}
 	| ID COLON
 	| CASE constant_expression COLON statement
+	{
+		//debug("case mai",$2->place.first);
+		string label=newlabel();
+		$$->code = label +":\n"+ $4->code;
+		case_list.push({$2->code,label});
+		
+	}
 	| DEFAULT COLON statement
+	{
+		string label=newlabel();
+		case_list.push({"default",label});
+		$$->code = label+":\n"+ $3->code;
+
+	}
 	;
 
 compound_statement
@@ -1348,7 +1374,7 @@ statement_list
 
 expression_statement
 	: SEMICOLON
-	| expression SEMICOLON   //{printf("Expression semicolon\n");}
+	| expression SEMICOLON   {$$=$1;}
 	;
 
 selection_statement
@@ -1367,7 +1393,24 @@ selection_statement
 		$$->code=$3->code+"\n"+"if("+ $3->place.first +") goto "+truelabel+"\n"+"goto "+falselabel+"\n"+truelabel+":\n"+$5->code+"\n"+"goto "+endlabel+"\n"+falselabel+":\n"+$7->code+"\n"+endlabel+":\n";
 		//file<<$$->code<<endl;
 	}      //{printf("It is in if-else block\n");}
-	| SWITCH LPARENTHESES expression RPARENTHESES statement					//{printf("It is in switch block\n");}
+	| SWITCH LPARENTHESES expression RPARENTHESES statement
+	{
+		int t1=0;
+		string str="";
+		while(!case_list.empty()){
+			string label=case_list.front().second;
+			string case_value=case_list.front().first;
+			case_list.pop();
+			if(case_value=="default")
+			{
+				str+="goto "+label+"\n";
+			}
+			else str+="if("+$3->place.first+"=="+case_value+") goto "+label+"\n";
+		}
+		string endlabel=newlabel();
+		$$->code= $3->code+"\n"+str+"\n"+$5->code+"\n"+endlabel+":\n";
+		$$->code=replace_break_continue($$->code,endlabel," ",1);
+	}					//{printf("It is in switch block\n");}
 	;
 
 iteration_statement
