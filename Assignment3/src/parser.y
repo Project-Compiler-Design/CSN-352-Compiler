@@ -149,6 +149,24 @@ postfix_expression
             cerr << "Primary expression found: " << $1->type << endl;
         }
 	| postfix_expression LBRACKET expression RBRACKET
+	{
+		string array_name=$1->name;
+		symbol_info* find_symbol = lookup_symbol_global(array_name, curr_scope);
+		if(find_symbol == nullptr) {
+			file<<"Error: Undeclared variable "<<array_name<<endl;
+		}
+		else{
+			if(find_symbol->is_array==false){
+				file<<"Error: Not an array "<<array_name<<endl;
+			}
+			else{
+				file<<"Array found "<<find_symbol->type<<endl;
+				
+			}
+			
+		}
+		file<<"here is array access "<<endl;
+	}
 	| postfix_expression LPARENTHESES RPARENTHESES	
 	{
 		
@@ -864,12 +882,19 @@ init_declarator
 			else{
 				$1->int_array = $3->int_array;
 				$1->type = $3->type;
+				curr_scope->symbol_map[$1->name]->is_array=true;
+				string code=$1->name+":= alloc " +to_string(4*$1->array_length);
+				for(int i=0;i<$1->array_length;i++){
+					qid temp=newtemp($1->type,curr_scope);
+					code=code+"\n"+temp.first+":= "+to_string(i)+"*4";
+					code=code+"\n"+"*( "+$1->name+" + "+temp.first+" ):= "+to_string(*(int*)($1->int_array[i]->ptr));
+				}
+				// file<<code<<endl;
+				$$->code=code;
 			}
 		}
-        
-		$$ = $1;
-		// file<<"initiali ka place   "<<$3->place.first<<"initiii"<<endl;
-		// file<<"initiali ka code   "<<$3->code<<"initiii"<<endl;
+        if($1->is_array==false){
+			$$ = $1;
 		if($3->place.first[0]!='t' && $3->place.first[0]!='&' && $3->place.first[0]!='*' && $3->place.first[0]!='-' && $3->place.first[0]!='!'){
 			$3->code="";
 		}
@@ -878,6 +903,8 @@ init_declarator
 		$$->place=$1->place;
 		
 		printf("declarator equals initializer %s\n",$$->name.c_str()); 
+		}
+		
 		
     }
     ;

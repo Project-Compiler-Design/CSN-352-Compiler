@@ -1,9 +1,6 @@
-int find_Value(int *ptr){
-    return *ptr;
-}
 
 int main(){
-    int a = 5;
-    int *ptr = &a;
+    int a[2]= {1,2};
+    a[1]=3;
     return 0;
 }

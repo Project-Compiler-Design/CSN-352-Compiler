@@ -1,45 +1,3 @@
-find_Value
-ID find_Value
-ptr
-ID ptr
-Pointer direct declarator with depth 1
-int
-par num1
-Brackets found with parameter= find_Value
-Par list 1
-param list size 1
-int
-has a parameter or not 1
-Direct declarator find_Value
-inside compound stt
-fffffptr
-inside compound stt
-ID found: ptr
-ID ptr
-ID2 ptr
-check
-Symbol found ptr
-Code 
-Primary expression found: int
-postfix expression found: int
-found unnnnary expree
-ERROR!!!!!! star applied to non pointer
-Found unary_operator 
-found unnnnary expree
-condiiiiiii
-condi expression found: 
-IDHAR HU MAIIII2
-0break check in statement
-statement list
-statement list found
-*ptr
-RETURN *ptr
-
-inside compound sttttttttttttt
-function definition ke right 1
-hellllo
-Error: Return type not matching
-ffffnnnnnamefind_Valuefffffnnnnnn
 main
 ID main
 It is function without params 
@@ -49,7 +7,19 @@ inside compound stt
 inside compound stt
 a
 ID a
+con
+Primary expression found: int
+postfix expression found: int
+found unnnnary expree
+Array length = 2
 Direct declarator a
+con
+Primary expression found: int
+postfix expression found: int
+found unnnnary expree
+condiiiiiii
+condi expression found: int
+IDHAR HU MAIIII
 con
 Primary expression found: int
 postfix expression found: int
@@ -59,19 +29,14 @@ condi expression found: int
 IDHAR HU MAIIII
 declaratoreiii a
 Yes int found
-declarator equals initializer a
 a
 hi
 parsing stack top = a
 Declaration specifiers = int
 Init declarator list = a
-dollar 3 type = 
+dollar 3 type = int
 top ka type = int
 Correct type declaration
-ptr
-ID ptr
-Pointer direct declarator with depth 1
-ampersand 
 ID found: a
 ID a
 ID2 a
@@ -79,24 +44,31 @@ check
 Symbol found a
 Code 
 Primary expression found: int
+con
+Primary expression found: int
 postfix expression found: int
 found unnnnary expree
-Found unary_operator 
+condiiiiiii
+condi expression found: int
+IDHAR HU MAIIII2
+postfix expression found: int
+con
+Primary expression found: int
+postfix expression found: int
 found unnnnary expree
 condiiiiiii
-condi expression found: int*
-IDHAR HU MAIIII
-declaratoreiii ptr
-declarator equals initializer ptr
-ptr
-hi
-parsing stack top = ptr
-Declaration specifiers = int
-Init declarator list = ptr
-dollar 3 type = 
-top ka type = int*
-ERROR!!!!!!: Type mismatch in declaration
-Correct type declaration
+condi expression found: int
+unary inside assignment = a
+Assignment expression = int
+find symbol type: int
+idharrrrrrrrrrrrrrrr
+int
+int
+Correct type assignment
+int
+3AC code for assignment
+IDHAR HU MAIIII2
+statement list
 con
 Primary expression found: int
 postfix expression found: int
@@ -109,7 +81,7 @@ statement list
 statement list found0
 RETURN 0
 
-statement list11111 found
+statement lis222222 found
 statement list11111 found
 inside compound sttttttttttttt
 function definition ke right 0
@@ -118,24 +90,18 @@ Return type matched
 ffffnnnnnamemainfffffnnnnnn
 Parsing stack size = 0
 Printing scope table
-Count of scopes 3
+Count of scopes 2
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| find_Value      |                      | 0       | N/A        |
 -----------------------------------------------------------------
 Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| ptr             | int                  | 4       | N/A        |
------------------------------------------------------------------
-Scope is here
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| a               | int                  | 4       | 5          |
-| ptr             | int*                 | 0       | N/A        |
+| a               | int                  | 4       | 1          |
+| t0              | int                  | 4       | N/A        |
+| t1              | int                  | 4       | N/A        |
 -----------------------------------------------------------------
 Scope is here
 Cleaning complete! Check cleaned_output.txt

@@ -1,16 +1,14 @@
-FUNC_BEGIN find_Value
-param0 := PARAM
-ptr := param0
-
-*ptr
-RETURN *ptr
-FUNC_END find_Value
+Array found int
+here is array access 
 FUNC_BEGIN main
+a:= alloc 8
+t0:= 0*4
+*( a + t0 ):= 1
+t1:= 1*4
+*( a + t1 ):= 2
 
-a:= 5
 
-&a
-ptr:= &a
+a:=  3
 0
 RETURN 0
 FUNC_END main
