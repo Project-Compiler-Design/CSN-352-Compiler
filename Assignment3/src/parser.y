@@ -87,7 +87,10 @@ constant:
     | REAL_LITERAL       {$$ = new symbol_info("", "real", $1->ptr, $1->symbol_size);}
     | STRING_LITERAL     
 	{
-		$$ = new symbol_info("", "string", $1->ptr, $1->symbol_size);
+		$$ = new symbol_info("", "char*", $1->ptr, $1->symbol_size);
+        $$->str_val=$1->str_val;
+        $$->place=qid($1->str_val,nullptr);
+        $$->code=$1->str_val;
 	}
     | OCTAL_LITERAL      {$$ = new symbol_info("", "octal", $1->ptr, $1->symbol_size);}
     | CHARACTER_LITERAL  
@@ -146,7 +149,16 @@ postfix_expression
 			else{
                 string code=$3->code;
                 qid temp=newtemp(find_symbol->type,curr_scope);
-                code=code+"\n"+temp.first+":= "+"4 * "+$3->place.first;
+                if(find_symbol->type=="int"){
+					code=code+"\n"+temp.first+":= "+"4 * "+$3->place.first;
+				}
+				else if(find_symbol->type=="float"){
+					code=code+"\n"+temp.first+":= "+"4 * "+$3->place.first;
+				}
+				else if(find_symbol->type=="char"){
+					code=code+"\n"+temp.first+":= "+"2 * "+$3->place.first;
+				}
+
                 qid temp2=newtemp(find_symbol->type,curr_scope);
                 code=code+"\n"+temp2.first+":= *("+$1->place.first+" + "+temp.first+")";
                 $$->code=code;
@@ -273,7 +285,10 @@ argument_expression_list
         if($1->name==""){
             $$=$1;
             $$->param_types.push_back($1->type);
-            $$->param_list.push_back(std::to_string(*(int*)($1->ptr)));
+            if($1->type=="int")$$->param_list.push_back(std::to_string(*(int*)($1->ptr)));
+			else if($1->type=="float")$$->param_list.push_back(std::to_string(*(float*)($1->ptr)));
+			else if($1->type=="char")$$->param_list.push_back(std::to_string(*(char*)($1->ptr)));
+			else if($1->type=="char*")$$->param_list.push_back($1->str_val);
         }
         else{
             symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
@@ -291,8 +306,12 @@ argument_expression_list
         { 
             if($3->name==""){
                 $$=$1;
+                //check 1 or 3
                 $$->param_types.push_back($3->type);
-                $$->param_list.push_back(std::to_string(*(int*)($1->ptr)));
+                if($3->type=="int")$$->param_list.push_back(std::to_string(*(int*)($3->ptr)));
+                else if($3->type=="float")$$->param_list.push_back(std::to_string(*(float*)($3->ptr)));
+                else if($3->type=="char")$$->param_list.push_back(std::to_string(*(char*)($3->ptr)));
+                else if($3->type=="char*")$$->param_list.push_back($3->str_val);
             }
             else{
                 symbol_info* find_symbol = lookup_symbol_global($3->name, curr_scope);
@@ -628,6 +647,9 @@ assignment_expression
 				}
 			}
 			else{
+                if(find_symbol->type=="char*"){
+                    error_list.push_back("Line "+to_string(yylineno)+" : char* is not modifiable");
+                }
                 if(min(type_priority[$1->type],type_priority[$3->type])==0 && $1->type!=$3->type){
                     error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in assignment");
                 }
@@ -670,7 +692,56 @@ assignment_expression
                         $$->code=$3->code+"\n"+code+":= "+$3->place.first+"\n";
                     }
                     else{
-                        $$->code=$1->code + "\n" + third_code + "\n" + $1->place.first + ":=  " + $3->place.first;
+                        string op=$2->code;
+                        string tcode="";
+                        if(op=="=")
+                        {
+                            tcode=$1->place.first + ":=  " + $3->place.first;
+                        }
+                        else if(op=="*=")
+                        {
+                            tcode=$1->place.first + ":=  " + $1->place.first+"*"+$3->place.first;
+                        }
+                        else if(op=="/=")
+                        {
+                            tcode=$1->place.first + ":=  " + $1->place.first+"/"+$3->place.first;
+                        }
+                        else if(op=="%=")
+                        {
+                            tcode=$1->place.first + ":=  " + $1->place.first+"%"+$3->place.first;
+                        }
+                        else if(op=="+=")
+                        {
+                            tcode=$1->place.first + ":=  " + $1->place.first+"+"+$3->place.first;
+                        }
+                        else if(op=="-=")
+                        {
+                            tcode=$1->place.first + ":=  " + $1->place.first+"-"+$3->place.first;
+                        }
+                        else if(op=="<<=")
+                        {
+                            tcode=$1->place.first + ":=  " + $1->place.first+"<<"+$3->place.first;
+                        }
+                        else if(op==">>=")
+                        {
+                            tcode=$1->place.first + ":=  " + $1->place.first+">>"+$3->place.first;
+                        }
+                        else if(op=="&=")
+                        {
+                            tcode=$1->place.first + ":=  " + $1->place.first+"&"+$3->place.first;
+                        }
+                        else if(op=="^=")
+                        {
+                            tcode=$1->place.first + ":=  " + $1->place.first+"^"+$3->place.first;
+                        }
+                        else if(op=="|=")
+                        {
+                            tcode=$1->place.first + ":=  " + $1->place.first+"|"+$3->place.first;
+                        }   
+                        else{
+                            error_list.push_back("Line "+to_string(yylineno)+" : Invalid assignment operator");
+                        }
+                        $$->code=$1->code + "\n" + third_code + "\n" + tcode+"\n";
                         $$->place=$1->place;
                     }                   
 				} 				
@@ -737,6 +808,7 @@ declaration
                 if(type_priority[$1]>0 && type_priority[curr_scope->symbol_map[top_symbol]->type]>0) curr_scope->symbol_map[top_symbol]->type = priority_to_type[max(type_priority[$1], type_priority[curr_scope->symbol_map[top_symbol]->type])];
                 else{
                     error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in declaration");
+                    flag=1;
                 }
 
 				$$->code = $2->code;
@@ -788,8 +860,14 @@ init_declarator
 		if($1->is_array==true){
 			curr_scope->symbol_map[$1->name]->is_array=true;
 			curr_scope->symbol_map[$1->name]->array_length=$1->array_length;
-			string code=$1->name+":= alloc " +to_string(4*$1->array_length);
-			$$->code=code;
+			 if($1->type=="int" || $1->type=="float"){
+				string code=$1->name+":= alloc " +to_string(4*$1->array_length);
+				$$->code=code;
+			}
+			else if($1->type=="char[]"){
+				string code=$1->name+":= alloc " +to_string(2*$1->array_length);
+				$$->code=code;
+			} 
 		}
 		
 		curr_scope->symbol_map[$1->name]->type=$1->type;
@@ -816,12 +894,21 @@ init_declarator
 				$1->int_array = $3->int_array;
 				$1->type = $3->type;
 				curr_scope->symbol_map[$1->name]->is_array=true;
-				string code=$1->name+":= alloc " +to_string(4*$1->array_length);
+				 string code=$1->name+":= alloc ";
+				if($1->type=="int" || $1->type=="float"){
+					code=code+to_string(4*$1->array_length);
+				}
+				else if($1->type=="char"){
+					code=code+to_string(2*$1->array_length);
+				}
 				for(int i=0;i<$1->array_length;i++){
 					qid temp=newtemp($1->type,curr_scope);
-					code=code+"\n"+temp.first+":= "+to_string(i)+"*4";
-					code=code+"\n"+"*( "+$1->name+" + "+temp.first+" ):= "+to_string(*(int*)($1->int_array[i]->ptr));
-				}
+					code=code+"\n"+temp.first+":= "+to_string(i)+"*";
+					if($1->type=="int") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ):= "+to_string(*(int*)($1->int_array[i]->ptr));
+					else if($1->type=="float") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ):= "+to_string(*(float*)($1->int_array[i]->ptr));
+					else if($1->type=="char") code=code+"2\n"+"*( "+$1->name+" + "+temp.first+" ):= "+char(*(char*)($1->int_array[i]->ptr));
+					else if($1->type=="char*") code=code+"2\n"+"*( "+$1->name+" + "+temp.first+" ):= "+$1->int_array[i]->str_val;
+				} 
 				$$->code=code;
 			}
 		}
@@ -1477,14 +1564,14 @@ function_definition
 		}
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
-		$$->code="FUNC_BEGIN "+$2->name+"\n";
+		$$->code="\nFUNC_BEGIN "+$2->name+"\n";
 		for(int i=0;i<$2->param_list.size();i++){
 			$$->code=$$->code+"param"+std::to_string(i)+" := PARAM\n";
 		}
 		for(int i=0;i<$2->param_list.size();i++){
 			$$->code=$$->code+$2->param_list[i]+" := param"+std::to_string(i)+"\n";
 		}
-		$$->code=$$->code+$4->code+"FUNC_END "+$2->name+"\n";
+		$$->code=$$->code+$4->code+"\nFUNC_END "+$2->name+"\n";
 
 	}   
 	| declarator declaration_list compound_statement

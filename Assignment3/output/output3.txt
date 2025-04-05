@@ -1,25 +1,17 @@
 FUNC_BEGIN main
-    p:= 0
-    a:= 0
-    if(i=='a') goto LABEL0
-    if(i=='b') goto LABEL1
-    goto LABEL2
-LABEL0:
-    p:=  p+1
-    p:=  p-1
-    goto LABEL3
-LABEL1:
-    a:=  15
-    goto LABEL3
-LABEL2:
-    a:=  a*10
-LABEL3:
-    RETURN 0
+    str:= "hello"
+    PARAM "%s\n"
+    PARAM str
+    t0:= CALL printf,2
+    c:= str
 FUNC_END main
 Cleaning complete! Check 
-======================================================================
-No Errors in the code
-Intermediate code generated successfully
+=====================LIST OF ERRORS===================================
+Line 4 : Type mismatch in declaration
+Line 7 : Not an array str
+Line 7 : Pointer depth mismatch
+Line 7 : Type mismatch in declaration
+Line 8 : Missing return statement
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
@@ -33,13 +25,8 @@ Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
------------------------------------------------------------------
-Scope is here
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| a               | int                  | 4       | 0          |
-| i               | char                 | 2       |            |
-| p               | int                  | 4       | 0          |
+| c               | char*                | 0       | N/A        |
+| str             | char*                | 0       | N/A        |
+| t0              |                      | 0       | N/A        |
 -----------------------------------------------------------------
 Scope is here
