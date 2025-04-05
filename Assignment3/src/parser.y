@@ -23,6 +23,7 @@
     stack<int> pointer_info;
 
     scoped_symtab* curr_scope = new scoped_symtab();
+	
     vector<scoped_symtab*> all_scopes={curr_scope};
 	
 	std::ofstream file("output.txt");
@@ -103,7 +104,11 @@ constant:
     | EXP_LITERAL        {$$ = new symbol_info("", "exp", $1->ptr, $1->symbol_size);} 
     | HEXA_LITERAL       {$$ = new symbol_info("", "hexa", $1->ptr, $1->symbol_size);}
     | REAL_LITERAL       {$$ = new symbol_info("", "real", $1->ptr, $1->symbol_size);}
-    | STRING_LITERAL     {$$ = new symbol_info("", "string", $1->ptr, $1->symbol_size);}
+    | STRING_LITERAL     
+	{
+		file<<"this  is string literal"<<$1->str_val<<endl;
+		$$ = new symbol_info("", "string", $1->ptr, $1->symbol_size);
+	}
     | OCTAL_LITERAL      {$$ = new symbol_info("", "octal", $1->ptr, $1->symbol_size);}
     | CHARACTER_LITERAL  
 	{
@@ -198,7 +203,7 @@ postfix_expression
 				cout<<"Function type "<<find_symbol->type<<endl;
 		  		std::vector<std::string> original_list=find_symbol->param_types;
 				std::vector<std::string> new_list=$3->param_types;
-				if(original_list.size()!=new_list.size()){
+				if($1->name!="printf" && $1->name!="scanf" && original_list.size()!=new_list.size()){
 					cout<<"Error: Size of actual and formal parameter list does not match "<<endl;
 				}
 				else{
@@ -216,7 +221,7 @@ postfix_expression
 			for(int i=0;i<$3->param_list.size();i++){
 				middle=middle+"PARAM "+$3->param_list[i]+"\n";
 			}
-			$$->code=$1->code + middle + temp.first+":= CALL "+$1->place.first;
+			$$->code=$1->code + middle + temp.first+":= CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
 			$$->place=temp;
 			cerr<<"ppfffix exp"<<$$->code<<endl;
             //printf("Function call= %s\n",$1);
@@ -1773,6 +1778,9 @@ void print_scope_table() {
 }
 
 int main() {
+	symbol_info* new_symbol=new symbol_info();
+	curr_scope->symbol_map["printf"]=new_symbol;
+	curr_scope->symbol_map["scanf"]=new_symbol;
 	yyparse();
 
 	printf("Parsing stack size = %d\n",parsing_stack.size());

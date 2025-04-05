@@ -1,0 +1,8 @@
+this  is string literal"hello"
+FUNC_BEGIN main
+
+str:= 
+0
+RETURN 0
+FUNC_END main
+

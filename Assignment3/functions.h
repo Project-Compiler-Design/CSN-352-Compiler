@@ -236,6 +236,12 @@ string remove_equal(string s) {
     return temp;
 }
 
-
+string get_last_line(string s) {
+    size_t pos = s.rfind(":=");
+    if (pos != string::npos) {
+        return s.substr(pos + 2); // Get everything after the last :=
+    }
+    return ""; // Return empty string if := is not found
+}
 
 #endif

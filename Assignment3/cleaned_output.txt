@@ -1,19 +1,5 @@
+    this  is string literal"hello"
 FUNC_BEGIN main
-    p:= 0
-    a:= 0
-    if(i=='a') goto LABEL0
-    if(i=='b') goto LABEL2
-LABEL0:
-    a:= 0
-    p:=  p+1
-    goto LABEL3
-LABEL2:
-    a:=  a+1
-    goto LABEL1
-    a:=  a-1
-    goto LABEL1
-LABEL1:
-    goto LABEL3
-LABEL3:
+    str:=
     RETURN 0
 FUNC_END main
