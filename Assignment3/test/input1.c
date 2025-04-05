@@ -2,7 +2,7 @@ int main()
 {
     char i;
     int p=0;
-    int a;
+    int a=0;
     switch(i)
     {
         case '+':
@@ -10,10 +10,9 @@ int main()
             p=10;
             break;
         case '-':
-{
+        {
             p=2;
-            
-            switch(a)
+            switch(0)
             {
                 case 1:
                     p=3;
