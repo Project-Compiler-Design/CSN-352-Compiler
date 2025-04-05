@@ -50,6 +50,7 @@ struct symbol_info {
 
     bool is_return=false;
     std::string return_type="";
+    bool is_array_access=false;
     bool is_continue=false;
     bool is_break=false;
 

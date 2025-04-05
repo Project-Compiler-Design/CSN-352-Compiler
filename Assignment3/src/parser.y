@@ -153,19 +153,28 @@ postfix_expression
 		string array_name=$1->name;
 		symbol_info* find_symbol = lookup_symbol_global(array_name, curr_scope);
 		if(find_symbol == nullptr) {
-			file<<"Error: Undeclared variable "<<array_name<<endl;
+			cerr<<"Error: Undeclared variable "<<array_name<<endl;
 		}
 		else{
 			if(find_symbol->is_array==false){
-				file<<"Error: Not an array "<<array_name<<endl;
+				cerr<<"Error: Not an array "<<array_name<<endl;
 			}
 			else{
-				file<<"Array found "<<find_symbol->type<<endl;
+				cerr<<"Array found "<<find_symbol->type<<endl;
+                string code=$3->code;
+                qid temp=newtemp(find_symbol->type,curr_scope);
+                code=code+"\n"+temp.first+":= "+"4 * "+$3->place.first;
+                qid temp2=newtemp(find_symbol->type,curr_scope);
+                code=code+"\n"+temp2.first+":= *("+$1->place.first+" + "+temp.first+")";
+                $$->code=code;
+                $$->place.first=temp2.first;
+                
+                
 				
 			}
 			
 		}
-		file<<"here is array access "<<endl;
+		cerr<<"here is array access "<<endl;
 	}
 	| postfix_expression LPARENTHESES RPARENTHESES	
 	{
@@ -322,7 +331,8 @@ unary_expression
 	: postfix_expression 
 	{
 		$$=$1;
-		cerr << "postfix expression found: " << $1->type << endl;
+		// cerr << "postfix expression found: " << $1->type << endl;
+        
 	}
 	| INCREMENT unary_expression
 	| DECREMENT unary_expression
@@ -637,6 +647,7 @@ assignment_expression
 		// printf("cond expression = %s\n",$1->type.c_str());
 		// printf("cond expression2 = %s\n",$1->name.c_str());
 		cerr << "condi expression found: " << $1->type << endl;
+        
 	}
 	| unary_expression assignment_operator assignment_expression 
 	{
@@ -678,6 +689,8 @@ assignment_expression
                 }else{
                     printf("Correct type assignment\n");
                 }
+                string third_code=$3->code;
+                string first_code=$1->code;
                 cerr<<$3->type<<endl;
                 if(min(type_priority[$1->type],type_priority[find_symbol->type])>0) find_symbol->type=priority_to_type[max(type_priority[find_symbol->type],type_priority[$3->type])];
 				
@@ -712,8 +725,17 @@ assignment_expression
 					}
 				}
                 if(flag==0){
-					$$->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
-					$$->place=$1->place;
+                    if(find_symbol->is_array==true){
+                        string code=remove_equal(first_code);
+
+                        $$->code=$3->code+"\n"+code+":= "+$3->place.first;
+                    }
+                    else{
+                         // file<<"find symbol ka codeeee "<<third_code<<endl;
+                        $$->code=$1->code + "\n" + third_code + "\n" + $1->place.first + ":=  " + $3->place.first;
+                        $$->place=$1->place;
+                    }
+                   
 				} 
                 // file<<"hiiiiiiiiiiiii "<<$$->code<<endl;
 				

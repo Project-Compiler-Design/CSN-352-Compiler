@@ -9,20 +9,17 @@ a
 ID a
 con
 Primary expression found: int
-postfix expression found: int
 found unnnnary expree
 Array length = 2
 Direct declarator a
 con
 Primary expression found: int
-postfix expression found: int
 found unnnnary expree
 condiiiiiii
 condi expression found: int
 IDHAR HU MAIIII
 con
 Primary expression found: int
-postfix expression found: int
 found unnnnary expree
 condiiiiiii
 condi expression found: int
@@ -46,15 +43,26 @@ Code
 Primary expression found: int
 con
 Primary expression found: int
-postfix expression found: int
+found unnnnary expree
+con
+Primary expression found: int
+found unnnnary expree
+con
+Primary expression found: int
 found unnnnary expree
 condiiiiiii
 condi expression found: int
 IDHAR HU MAIIII2
-postfix expression found: int
+Array found int
+here is array access 
 con
 Primary expression found: int
-postfix expression found: int
+found unnnnary expree
+con
+Primary expression found: int
+found unnnnary expree
+con
+Primary expression found: int
 found unnnnary expree
 condiiiiiii
 condi expression found: int
@@ -71,7 +79,6 @@ IDHAR HU MAIIII2
 statement list
 con
 Primary expression found: int
-postfix expression found: int
 found unnnnary expree
 condiiiiiii
 condi expression found: int
@@ -102,6 +109,12 @@ Scope is here
 | a               | int                  | 4       | 1          |
 | t0              | int                  | 4       | N/A        |
 | t1              | int                  | 4       | N/A        |
+| t2              | int                  | 4       | N/A        |
+| t3              | int                  | 4       | N/A        |
+| t4              | int                  | 4       | N/A        |
+| t5              | int                  | 4       | N/A        |
+| t6              | int                  | 4       | N/A        |
+| t7              | int                  | 4       | N/A        |
 -----------------------------------------------------------------
 Scope is here
 Cleaning complete! Check cleaned_output.txt

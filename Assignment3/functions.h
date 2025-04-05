@@ -217,4 +217,25 @@ int count_init_star(string s){
     return count;
 }
 
+
+string remove_equal(string s) {
+    int lastpos=-1;
+    for(int i=0;i<s.length();i++){
+        if(s[i]=='\n'){
+            lastpos=i;
+        }
+    }
+    string temp = s.substr(0, lastpos+1);
+    int index=lastpos;
+    while(s[index]!='=') index++;
+    index++;
+    while(index<s.length()){
+        temp+=s[index];
+        index++;
+    }
+    return temp;
+}
+
+
+
 #endif
