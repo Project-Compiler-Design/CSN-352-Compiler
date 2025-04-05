@@ -1,6 +1,11 @@
-
+int foo()
+{
+    int a=0;
+    return 1;
+}
 int main()
 {
-    char* str="hello";
+    printf();
+    int c=foo();
     return 0;
 }

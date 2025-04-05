@@ -3,6 +3,8 @@
 
 #include "3AC.cpp"
 
+
+
 map<string, int> type_priority = {{"char",1},{"int",2},{"float",3},{"double",4}};
 string priority_to_type[] = {"","char", "int", "float", "double"};
 
@@ -132,21 +134,23 @@ bool startsWithPointerOrAddress(const string& line) {
 }
 
 // Function to clean Three-Address Code from input file and write to output file
-void cleanTAC(const string &inputFileName, const string &outputFileName) {
-    ifstream inputFile(inputFileName);
-    ofstream outputFile(outputFileName);
+void cleanTAC(string input) {
 
-    if (!inputFile.is_open()) {
-        cerr << "Error: Could not open " << inputFileName << endl;
-        return;
-    }
-    if (!outputFile.is_open()) {
-        cerr << "Error: Could not open " << outputFileName << endl;
-        return;
-    }
-
-    string line;
-    while (getline(inputFile, line)) {
+    string line="";
+    int index=0;
+    while(index<input.length()){
+        line="";
+        while(index<input.length()){
+            if(input[index]!='\n'){
+                line+=input[index];
+                index++;
+            }
+            else{
+                index++;
+                break;
+            }
+        }
+        
         // Trim leading and trailing spaces
         while (!line.empty() && isspace(line.front())) line.erase(line.begin());
         while (!line.empty() && isspace(line.back())) line.pop_back();
@@ -161,16 +165,12 @@ void cleanTAC(const string &inputFileName, const string &outputFileName) {
 
         // Check if the line is a label or function
         if (!line.empty() && line.back() == ':' || !line.empty() && line.substr(0,4)=="FUNC") {
-            outputFile << line << endl;  // Labels should not be indented
+            cerr << line << endl;  // Labels should not be indented
         } else {
-            outputFile << "    " << line << endl;  // Indent normal instructions
-        }
+            cerr << "    " << line << endl;  // Indent normal instructions
+        }   
     }
-
-    inputFile.close();
-    outputFile.close();
-    
-    cout << "Cleaning complete! Check " << outputFileName << endl;
+    cout << "Cleaning complete! Check " << endl;
 }
 
 string replace_break_continue(string original_code,string end_label,string update_label,int i){
@@ -243,5 +243,12 @@ string get_last_line(string s) {
     }
     return ""; // Return empty string if := is not found
 }
+
+void debug(string s1,string s2)
+	{
+		cerr<<s1<<endl;
+		cerr<<s2<<endl;
+		cerr<<s1<<endl;
+	}
 
 #endif
