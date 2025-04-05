@@ -28,9 +28,9 @@
 	std::ofstream file("output.txt");
 	void debug(string s1,string s2)
 	{
-		file<<s1<<endl;
-		file<<s2<<endl;
-		file<<s1<<endl;
+		cerr<<s1<<endl;
+		cerr<<s2<<endl;
+		cerr<<s1<<endl;
 	}
 	
     vector<string> type_list = {};
@@ -135,6 +135,7 @@ primary_expression
 				$$->place=qid($1,find_symbol);
 				$$->code="";
 				$$->type=find_symbol->type;
+				$$->is_array=find_symbol->is_array;
 				cerr<<"Symbol found "<<$$->place.second->name<<endl;
 				cerr<<"Code "<<$$->code<<endl;
 			}
@@ -265,14 +266,20 @@ postfix_expression
 	| postfix_expression LAMBDA_ARROW ID
 	| postfix_expression INCREMENT
 	{
-		$$=$1;
-		$$->code=$1->code + "\n" + $1->place.first+":=  "+$1->place.first+"+1";
+		if($1->is_array==true){
+			string code = get_last_line($1->code);
+			$$->code=$1->code + "\n" + code + ":= "+code+"+1\n";
+		}
+		else  $$->code=$1->code + "\n" + $1->place.first+":=  "+$1->place.first+"+1";
 		
 	}
 	| postfix_expression DECREMENT
 	{
-		$$=$1;
-		$$->code=$1->code + "\n" + $1->place.first+":=  "+$1->place.first+"-1";
+		if($1->is_array==true){
+			string code = get_last_line($1->code);
+			$$->code=$1->code + "\n" + code + ":= "+code+"-1\n";
+		}
+		else  $$->code=$1->code + "\n" + $1->place.first+":=  "+$1->place.first+"-1";
 	}
 	;
 
@@ -739,7 +746,7 @@ assignment_expression
                     if(find_symbol->is_array==true){
                         string code=remove_equal(first_code);
 
-                        $$->code=$3->code+"\n"+code+":= "+$3->place.first;
+                        $$->code=$3->code+"\n"+code+":= "+$3->place.first+"\n";
                     }
                     else{
                          // file<<"find symbol ka codeeee "<<third_code<<endl;
@@ -897,7 +904,18 @@ init_declarator
         symbol_info* new_symbol = new symbol_info();
         new_symbol=$1;
 		curr_scope->symbol_map[$1->name]=new_symbol;
+		curr_scope->symbol_map[$1->name]->name=$1->name;
+		if($1->is_array==true){
+			curr_scope->symbol_map[$1->name]->is_array=true;
+			curr_scope->symbol_map[$1->name]->array_length=$1->array_length;
+			string code=$1->name+":= alloc " +to_string(4*$1->array_length);
+			$$->code=code;
+		}
+		
+		curr_scope->symbol_map[$1->name]->type=$1->type;
+		
         $$ =new_symbol;
+		
 		cerr<<"declarator "<<$$->name.c_str()<<endl; 
 		parsing_stack.push($1->name.c_str());
         pointer_info.push($1->pointer_depth);
@@ -1365,8 +1383,8 @@ compound_statement
 		$$->code=$3->code;
 		$$->is_return=$3->is_return;
 		$$->return_type=$3->return_type;
-		
 		all_scopes.push_back(curr_scope);curr_scope = curr_scope->parent;
+		cerr<<"inside compound"<<endl;
         
 		//file<<$$->code<<endl; 
 	}
@@ -1412,9 +1430,11 @@ statement_declaration_list
 	| statement_list{
 		
 		symbol_info* new_symbol=new symbol_info();
+		debug("statement list found================================================================",$1->code);
 		$$=new_symbol;
 		$$->code=$1->code;
 		$$->is_return=$1->is_return;
+		//dikkat badi hai
 		$$->return_type=$1->return_type;
 		cerr<<"statement list found"<<$$->code<<endl;
 	}
@@ -1499,7 +1519,6 @@ selection_statement
 		string endlabel=newlabel();
 		$$->code= $4->code+"\n"+str+"\n"+$6->code+"\n"+endlabel+":\n";
 		$$->code=replace_break_continue($$->code,endlabel," ",1);
-		
 		case_list.pop();
 	}					//{printf("It is in switch block\n");}
 	;

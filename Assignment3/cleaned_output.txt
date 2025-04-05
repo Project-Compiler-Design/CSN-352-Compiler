@@ -1,18 +1,18 @@
 FUNC_BEGIN main
     p:= 0
     a:= 0
-    if(i=='+') goto LABEL0
-    if(i=='-') goto LABEL1
-    if(i=='*') goto LABEL2
+    if(i=='a') goto LABEL0
+    if(i=='b') goto LABEL2
 LABEL0:
-    p:=  1
-    p:=  10
-    goto LABEL3
-LABEL1:
-    p:=  2
+    a:= 0
+    p:=  p+1
     goto LABEL3
 LABEL2:
-    p:=  3
+    a:=  a+1
+    goto LABEL1
+    a:=  a-1
+    goto LABEL1
+LABEL1:
     goto LABEL3
 LABEL3:
     RETURN 0

@@ -5,29 +5,34 @@ int main()
     int a=0;
     switch(i)
     {
-        case '+':
-            p = 1;
-            p=10;
-            break;
-        case '-':
+        case 'a':
         {
-            p=2;
-            switch(0)
+            int a=0;
+            p++;
+            break;
+        }
+        case 'b':
+        
+        {
+            switch(p)
             {
                 case 1:
-                    p=3;
+                {
+                    int b=0;
+                    a++;
                     break;
+                }
                 case 2:
-                    p=4;
+                {
+                    int c=0;
+                    a--;
                     break;
-                default:
-                    p=5;
+                }
             }
+        
             break;
-            }
-        case '*':         
-            p=3;
-            break;
+        
+        }
     }
     
     return 0;
