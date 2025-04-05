@@ -16,6 +16,72 @@ t2:=  1*5
 t3:=  t2+6
 t4:= 4 * t3
  *(a + t4):= t7
+FUNC_BEGIN main
+
+
+p:= 0
+
+
+if(i=='+') goto LABEL0
+if(i=='-') goto LABEL5
+if(i=='*') goto LABEL6
+
+LABEL0:
+
+
+p:=  1
+
+
+p:=  10
+
+ goto LABEL7
+ 
+
+LABEL5:
+
+
+p:=  2
+
+if(a==1) goto LABEL1
+if(a==2) goto LABEL2
+goto LABEL3
+
+LABEL1:
+
+
+p:=  3
+
+ goto LABEL4
+ 
+
+LABEL2:
+
+
+p:=  4
+
+ goto LABEL4
+ 
+
+LABEL3:
+
+
+p:=  5
+LABEL4:
+
+
+ goto LABEL7
+ 
+
+LABEL6:
+
+
+p:=  3
+
+ goto LABEL7
+ 
+
+LABEL7:
+
 0
 RETURN 0
 FUNC_END main

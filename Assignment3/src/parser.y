@@ -26,11 +26,17 @@
     vector<scoped_symtab*> all_scopes={curr_scope};
 	
 	std::ofstream file("output.txt");
-
+	void debug(string s1,string s2)
+	{
+		file<<s1<<endl;
+		file<<s2<<endl;
+		file<<s1<<endl;
+	}
+	
     vector<string> type_list = {};
 	vector<string> var_name={};
 	vector<string> goto_list={};
-    
+    stack<queue<pair<string,string>>> case_list;
 
 
 	struct ArgList {
@@ -633,7 +639,9 @@ logical_or_expression
 	;
 
 conditional_expression
-	: logical_or_expression 			{$$=$1;}
+	: logical_or_expression 			{$$=$1;
+	//debug("Conditional expression",$1->code);
+	}
 	| logical_or_expression QUESTION_MARK expression COLON conditional_expression
 	;
 
@@ -644,6 +652,7 @@ assignment_expression
 		//printf("conditional inside assignment = %s\n",$$);
 		// $$ = strdup($1);
 		$$=$1;
+		//debug("Assignment expression",$1->place.first);
 		// printf("cond expression = %s\n",$1->type.c_str());
 		// printf("cond expression2 = %s\n",$1->name.c_str());
 		cerr << "condi expression found: " << $1->type << endl;
@@ -675,6 +684,7 @@ assignment_expression
 				}
 				else{
 					printf("Error: Type mismatch in assignment of struct or union attributes\n");
+					//$$->code=$1->code + "\n" + $3->code +"\n" + $1->place.first+":=  "+$3->place.first;
 				}
 			}
 			else{
@@ -702,6 +712,7 @@ assignment_expression
                 
 
                 //3AC code
+				//debug("Assignment expression",$3->place.first);
                 cerr<<"3AC code for assignment"<<endl;
 				if($3->place.first[0]!='t' && $3->place.first[0]!='&' && $3->place.first[0]!='*' && $3->place.first[0]!='+' && $3->place.first[0]!='-' && $3->place.first[0]!='~' && $3->place.first[0]!='!')
 				{
@@ -773,16 +784,23 @@ expression
 	{
         cerr<<"IDHAR HU MAIIII2"<<endl;
         $$=$1;
+		//debug("Assignment expression = ",$1->place.first);
         // file<<"Assignment expression = "<<$1->code<<endl;
 		// cout<<"Assignment expression = "<<$1->code<<endl;
 		// file<<$1->code<<endl;
 	}	
 	| expression COMMA assignment_expression
+	{
+		//debug("Assignment expression = ",$1->place.first);
+		$$->code=$1->code + "\n" + $3->code;
+
+		
+	}
     //means?
 	;
 
 constant_expression
-	: conditional_expression
+	: conditional_expression{$$=$1;}
 	;
 
 declaration
@@ -1282,7 +1300,10 @@ statement
 
 		//file<<$$->code<<endl;
 	}
-	| expression_statement
+	| expression_statement{
+		//debug("expression statement",$1->code);
+		$$=$1;
+		}
 	| selection_statement{$$=$1;}
 	| iteration_statement{$$=$1;}
 	| jump_statement{$$=$1;
@@ -1303,7 +1324,20 @@ labeled_statement
 	}
 	| ID COLON
 	| CASE constant_expression COLON statement
+	{
+		//debug("case mai",$2->place.first);
+		string label=newlabel();
+		$$->code = label +":\n"+ $4->code;
+		case_list.top().push({$2->code,label});
+		
+	}
 	| DEFAULT COLON statement
+	{
+		string label=newlabel();
+		case_list.top().push({"default",label});
+		$$->code = label+":\n"+ $3->code;
+
+	}
 	;
 
 compound_statement
@@ -1383,8 +1417,6 @@ statement_declaration_list
 		$$->is_return=$1->is_return;
 		$$->return_type=$1->return_type;
 		cerr<<"statement list found"<<$$->code<<endl;
-		
-		
 	}
 	| declaration_list
 	{
@@ -1430,7 +1462,7 @@ statement_list
 
 expression_statement
 	: SEMICOLON
-	| expression SEMICOLON   //{printf("Expression semicolon\n");}
+	| expression SEMICOLON   {$$=$1;}
 	;
 
 selection_statement
@@ -1449,7 +1481,27 @@ selection_statement
 		$$->code=$3->code+"\n"+"if("+ $3->place.first +") goto "+truelabel+"\n"+"goto "+falselabel+"\n"+truelabel+":\n"+$5->code+"\n"+"goto "+endlabel+"\n"+falselabel+":\n"+$7->code+"\n"+endlabel+":\n";
 		//file<<$$->code<<endl;
 	}      //{printf("It is in if-else block\n");}
-	| SWITCH LPARENTHESES expression RPARENTHESES statement					//{printf("It is in switch block\n");}
+	| SWITCH{queue<std::pair<std::string, std::string>> q;
+		case_list.push(q);
+		}LPARENTHESES expression RPARENTHESES statement
+	{
+		string str="";
+		while(!case_list.top().empty()){
+			string label=case_list.top().front().second;
+			string case_value=case_list.top().front().first;
+			case_list.top().pop();
+			if(case_value=="default")
+			{
+				str+="goto "+label+"\n";
+			}
+			else str+="if("+$4->place.first+"=="+case_value+") goto "+label+"\n";
+		}
+		string endlabel=newlabel();
+		$$->code= $4->code+"\n"+str+"\n"+$6->code+"\n"+endlabel+":\n";
+		$$->code=replace_break_continue($$->code,endlabel," ",1);
+		
+		case_list.pop();
+	}					//{printf("It is in switch block\n");}
 	;
 
 iteration_statement
