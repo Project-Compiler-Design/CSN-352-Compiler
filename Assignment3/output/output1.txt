@@ -1,16 +1,47 @@
+storage class specifier 
+typedef
+storage class specifier 
+storage class specifier 
+int
+storage class specifier 
+storage class specifier 
+typedef,int
+storage class specifier 
+declaration_list
+
+c:= 3
+declaration_list
+declaration_list
+
+d:= 4
+declaration_list
+declaration_list
+
+declaration_list
+return 
+0
+RETURN 0
+
+return 
 FUNC_BEGIN main
-    p:= 5
-    a:= &p
+    c:= 3
+    d:= 4
+    t0:=  c+d
+    t1:=  4*3
+    t2:= (t1)
+    t3:=  t0-t2
+    a:=  t3
     RETURN 0
 FUNC_END main
 Cleaning complete! Check 
 =====================LIST OF ERRORS===================================
-Line 6 : Type mismatch in declaration
+Line 9 : Return type not matched
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+| A               |                      | 0       | N/A        |
 | main            |                      | 0       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
@@ -19,7 +50,12 @@ Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | int*                 | 0       | N/A        |
-| p               | int                  | 4       | 5          |
+| a               | int                  | 4       | N/A        |
+| c               | int                  | 4       | 3          |
+| d               | int                  | 4       | 4          |
+| t0              | int                  | 4       | N/A        |
+| t1              | int                  | 4       | N/A        |
+| t2              | int                  | 4       | N/A        |
+| t3              | int                  | 4       | N/A        |
 -----------------------------------------------------------------
 Scope is here

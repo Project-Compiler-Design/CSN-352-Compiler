@@ -1,5 +1,17 @@
+declaration_list
+
+str:= "hello"
+declaration_list
+herrrrrrrrrrr 
+str
+herrrrrrrrrrr 
+declaration_list
+
+c:= str
+declaration_list
 FUNC_BEGIN main
     str:= "hello"
+    "%s\n"
     PARAM "%s\n"
     PARAM str
     t0:= CALL printf,2

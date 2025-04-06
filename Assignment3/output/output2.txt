@@ -1,3 +1,19 @@
+declaration_list
+
+declaration_list
+declaration_list
+
+p:= 0
+declaration_list
+declaration_list
+
+a:= 0
+declaration_list
+return 
+0
+RETURN 0
+
+return 
 FUNC_BEGIN main
     p:= 0
     a:= 0
@@ -17,9 +33,8 @@ LABEL3:
     RETURN 0
 FUNC_END main
 Cleaning complete! Check 
-======================================================================
-No Errors in the code
-Intermediate code generated successfully
+=====================LIST OF ERRORS===================================
+Line 18 : Return type not matched
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------

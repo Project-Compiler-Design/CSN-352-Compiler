@@ -12,6 +12,7 @@
 
 	std::stack<std::string> parsing_stack;
     std::stack<int> pointer_info;
+	std::map<std::string,std::string> type_def_mapping;
 
     scoped_symtab* curr_scope = new scoped_symtab();
     std::vector<scoped_symtab*> all_scopes={curr_scope};
@@ -20,7 +21,7 @@
 		
     vector<string> type_list = {};
 	vector<string> var_name={};
-	vector<string> goto_list={};
+	map<string,string> goto_list;
     stack<queue<pair<string,string>>> case_list;
 
 	struct ArgList {
@@ -128,6 +129,13 @@ primary_expression
 	}
 	| STRING_LITERAL 
 	| LPARENTHESES expression RPARENTHESES
+	{
+		symbol_info* new_symbol = new symbol_info();
+		new_symbol->place=newtemp($2->type,curr_scope);
+		// debug("here ",new_symbol->place.first);
+		new_symbol->code=$2->code+"\n"+new_symbol->place.first+":= ("+$2->place.first+")";
+		$$=new_symbol;
+	}
 	;
 
 postfix_expression
@@ -217,7 +225,7 @@ postfix_expression
 			for(int i=0;i<$3->param_list.size();i++){
 				middle=middle+"PARAM "+$3->param_list[i]+"\n";
 			}
-			$$->code=$1->code + middle + temp.first+":= CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
+			$$->code=$1->code +"\n"+$3->code+ "\n"+ middle + temp.first+":= CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
 			$$->place=temp;
         }
 	| postfix_expression DOT ID
@@ -282,29 +290,46 @@ postfix_expression
 argument_expression_list
     : assignment_expression
     { 
-        if($1->name==""){
-            $$=$1;
-            $$->param_types.push_back($1->type);
-            if($1->type=="int")$$->param_list.push_back(std::to_string(*(int*)($1->ptr)));
-			else if($1->type=="float")$$->param_list.push_back(std::to_string(*(float*)($1->ptr)));
-			else if($1->type=="char")$$->param_list.push_back(std::to_string(*(char*)($1->ptr)));
-			else if($1->type=="char*")$$->param_list.push_back($1->str_val);
-        }
-        else{
-            symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
-            if(find_symbol == nullptr) {
-                error_list.push_back("Line "+to_string(yylineno)+" : Undeclared variable "+$1->name);
-            }
-            else{
-                $$=find_symbol;
-                $$->param_types.push_back(find_symbol->type);
-                $$->param_list.push_back(find_symbol->name);
-            }
-        } 
+		if($1->place.first!=""){
+			// debug("herrrr ", $1->code);
+			$$->code=$1->code;
+			$$->param_types.push_back($1->type);
+			$$->param_list.push_back($1->place.first);
+		}
+		else{
+			if($1->name==""){
+				$$=$1;
+				$$->param_types.push_back($1->type);
+				if($1->type=="int")$$->param_list.push_back(std::to_string(*(int*)($1->ptr)));
+				else if($1->type=="float")$$->param_list.push_back(std::to_string(*(float*)($1->ptr)));
+				else if($1->type=="char")$$->param_list.push_back(std::to_string(*(char*)($1->ptr)));
+				else if($1->type=="char*")$$->param_list.push_back($1->str_val);
+			}
+			else{
+				symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
+				if(find_symbol == nullptr) {
+					error_list.push_back("Line "+to_string(yylineno)+" : Undeclared variable "+$1->name);
+				}
+				else{
+					$$=find_symbol;
+					$$->param_types.push_back(find_symbol->type);
+					$$->param_list.push_back(find_symbol->name);
+				}
+			} 
+		}
+        
       }
     | argument_expression_list COMMA assignment_expression
+
         { 
-            if($3->name==""){
+			if($3->place.first!=""){
+				$$->code=$1->code + "\n" + $3->code;
+				debug("herrrrrrrrrrr ", $3->place.first);
+				$$->param_types.push_back($1->type);
+				$$->param_list.push_back($3->place.first);
+			}
+			else{
+				if($3->name==""){
                 $$=$1;
                 //check 1 or 3
                 $$->param_types.push_back($3->type);
@@ -323,7 +348,9 @@ argument_expression_list
                     $$->param_types.push_back(find_symbol->type);
                     $$->param_list.push_back(find_symbol->name);
                 }
-            }           
+            } 
+			}
+                      
         }
     ;
 
@@ -787,10 +814,20 @@ declaration
     : declaration_specifiers SEMICOLON
     | declaration_specifiers init_declarator_list SEMICOLON 
     {
+		if(std::string($1).substr(0, 7) == "typedef"){
+			string new_type=parsing_stack.top();
+			parsing_stack.pop();
+			string old_type=std::string($1).substr(8);
+			type_def_mapping[new_type]=old_type;
+		}
+		
+		
 		int flag=0;
 		while (!parsing_stack.empty()) {
 			std::string top_symbol = parsing_stack.top();
+			
             int depth = pointer_info.top();
+			
 			parsing_stack.pop();
             pointer_info.pop();
 			if (curr_scope->symbol_map[top_symbol]->type!= ""){
@@ -803,15 +840,20 @@ declaration
                     error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in declaration");
 					flag = 1;
 				}
-
+				
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
                 if(type_priority[$1]>0 && type_priority[curr_scope->symbol_map[top_symbol]->type]>0) curr_scope->symbol_map[top_symbol]->type = priority_to_type[max(type_priority[$1], type_priority[curr_scope->symbol_map[top_symbol]->type])];
                 else{
                     error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in declaration");
                     flag=1;
                 }
+				// debug("declaration specifiers121 ", $2->code);
 
-				$$->code = $2->code;
+				
+				symbol_info* new_symbol = new symbol_info();
+				new_symbol->code = $2->code;
+				$$=new_symbol;
+
 			} else {
 				curr_scope->symbol_map[top_symbol]->type = $1;
                 for(int i=0;i<depth;i++){
@@ -824,6 +866,7 @@ declaration
 				new_symbol = $2;
 				$$=new_symbol;
 			}
+			
 		}
     }
     ;
@@ -831,9 +874,17 @@ declaration
 
 declaration_specifiers
 	: storage_class_specifier
-	| storage_class_specifier declaration_specifiers
+	| storage_class_specifier declaration_specifiers 
+	{
+		debug("storage class specifier ", $1);
+		debug("storage class specifier ", $2);
+		char* buf = (char*)malloc(strlen($1) + strlen($2) + 2); // 1 for comma, 1 for null terminator
+		sprintf(buf, "%s,%s", $1, $2);
+		$$ = buf;
+		debug("storage class specifier ", $$);
+
+	}
 	| type_specifier {$$=$1;}
-	| type_specifier declaration_specifiers
 	| type_qualifier
 	| type_qualifier declaration_specifiers
 	;
@@ -944,7 +995,15 @@ type_specifier
 	| UNSIGNED			{$$=strdup("unsigned");}
 	| struct_or_union_specifier {$$=$1;}
 	| enum_specifier
-	;
+	| ID {
+		if(type_def_mapping.find($1) != type_def_mapping.end()){
+			$$=strdup(type_def_mapping[$1].c_str());
+		}
+		else{
+			error_list.push_back("Line "+to_string(yylineno)+" : Typedef error "+$1);
+		}
+	}
+	;	
 
 struct_or_union_specifier
 	: struct_or_union ID LBRACE struct_declaration_list RBRACE 
@@ -1259,12 +1318,59 @@ statement
 labeled_statement
 	: ID COLON statement
 	{
-
-		// curr-scope->symbol_map[$1]=new symbol_info();
-		// curr_scope->symbol_map[$1]->name=$1;
-		// curr_scope->symbol_map[$1]->type="label";
+		if(lookup_symbol_global($1, curr_scope)!=nullptr){
+			error_list.push_back("Line "+to_string(yylineno)+" : Label Redeclaration error "+$1);
+		}
+		else{
+			symbol_info* new_symbol=new symbol_info();
+			$$=new_symbol;
+			if(goto_list.find($1)!=goto_list.end()){
+				
+				string label=goto_list[$1];
+				// debug("labellllll", $3->code);
+				$$->code=label+":\n"+$3->code;
+				// debug("label", $$->code);
+			}
+			else{
+				debug("labellllll", $3->code);
+				string label=newlabel();
+				$$->code=label+":\n"+$3->code;
+				
+				goto_list[$1]=label;
+			}
+			curr_scope->symbol_map[$1]=new symbol_info();
+			curr_scope->symbol_map[$1]->name=$1;
+			curr_scope->symbol_map[$1]->type="label";
+		}
 	}
 	| ID COLON declaration
+	{
+		
+		if(lookup_symbol_global($1, curr_scope)!=nullptr){
+			error_list.push_back("Line "+to_string(yylineno)+" : Label Redeclaration error "+$1);
+		}
+		else{
+			symbol_info* new_symbol=new symbol_info();
+			$$=new_symbol;
+			if(goto_list.find($1)!=goto_list.end()){
+				
+				string label=goto_list[$1];
+				// debug("labellllll", $3->code);
+				$$->code=label+":\n"+$3->code;
+				// debug("label", $$->code);
+			}
+			else{
+				debug("labellllll", $3->code);
+				string label=newlabel();
+				$$->code=label+":\n"+$3->code;
+				
+				goto_list[$1]=label;
+			}
+			curr_scope->symbol_map[$1]=new symbol_info();
+			curr_scope->symbol_map[$1]->name=$1;
+			curr_scope->symbol_map[$1]->type="label";
+		}
+	}
 	| ID COLON
 	| CASE constant_expression COLON statement
 	{
@@ -1325,8 +1431,8 @@ statement_declaration_list
 		$$=new_symbol;
 		$$->code=$1->code + "\n" + $2->code;
 		$$->is_return=($1->is_return)|($2->is_return);
-		if($1->return_type!="") $$->return_type=$1->return_type;
-		else $$->return_type=$2->return_type;
+		// if($1->return_type!="") $$->return_type=$1->return_type;
+		// else $$->return_type=$2->return_type;
 		
         
 
@@ -1337,7 +1443,7 @@ statement_declaration_list
 		$$=new_symbol;
 		$$->code=$1->code + "\n" + $2->code;
 		$$->is_return=$2->is_return;
-		$$->return_type=$2->return_type;
+		// $$->return_type=$2->return_type;
 		
         
 		
@@ -1349,7 +1455,7 @@ statement_declaration_list
 		$$->code=$1->code;
 		$$->is_return=$1->is_return;
 		//dikkat badi hai
-		$$->return_type=$1->return_type;
+		// $$->return_type=$1->return_type;
 	}
 	| declaration_list
 	{
@@ -1363,6 +1469,7 @@ declaration_list
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$1->code;
+		debug("declaration_list", $$->code);
 	}
 	| declaration_list declaration
 	{
@@ -1378,8 +1485,8 @@ statement_list
 	| statement_list statement
 	{
 		$$->is_return=($1->is_return)|($2->is_return);
-		if($1->return_type!="") $$->return_type=$1->return_type;
-		else $$->return_type=$2->return_type;
+		// if($1->return_type!="") $$->return_type=$1->return_type;
+		// else $$->return_type=$2->return_type;
 		$$->code=$1->code + "\n" + $2->code;
 		
 	}
@@ -1477,8 +1584,25 @@ jump_statement
 	: GOTO ID SEMICOLON				
 	{ 
 		//idhar ID ko symtab me insert karna he
-		goto_list.push_back($2);
-		cerr << "goto\n";
+		if(goto_list.find($2)==goto_list.end()){
+			string label=newlabel();
+			goto_list[$2]=label;
+			symbol_info* new_symbol=new symbol_info();
+			new_symbol->code="goto "+label+"\n";
+			$$=new_symbol;
+		}
+		else{
+			symbol_info* new_symbol=new symbol_info();
+			$$=new_symbol;
+			string label=goto_list[$2];
+			$$->code="goto "+label+"\n";
+			// debug("goto", $$->code);
+		}
+		
+		// debug("goto1111 ",new_symbol->code);
+		
+		
+		// cerr << "goto\n";
 	}
 	| CONTINUE SEMICOLON
 	{
@@ -1509,6 +1633,7 @@ jump_statement
 		$$->is_return=true;
 		$$->return_type=$2->type;
 		$$->code=$2->code + "\nRETURN "+$2->place.first+"\n";
+		debug("return ",$$->code);
 	}
 	;
 
