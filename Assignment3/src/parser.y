@@ -765,13 +765,31 @@ assignment_expression
 						string code="";
 						qid temp=newtemp($1->type,curr_scope);
 						string prev=($1->place.first).erase(0,count_init_starr);
-						for(int i=0;i<count_init_starr;i++){
+						for(int i=0;i<count_init_starr-1;i++){
 							code=code+"\n"+temp.first+":= *"+prev;
 							prev=temp.first;
 							temp=newtemp($1->type,curr_scope);
 						}
+						code=code+"\n"+"*"+prev+":= "+$3->place.first;
 						$$->code=$1->code+"\n"+$3->code+"\n"+code;
 						$$->place=temp;
+					}
+				}
+				if($3->place.first[0]=='*'){
+					int count_init_starr=count_init_star($3->place.first);
+					if(count_init_starr>1){
+						flag=1;
+						string code="";
+						qid temp=newtemp($3->type,curr_scope);
+						string prev=($3->place.first).erase(0,count_init_starr);
+						for(int i=0;i<count_init_starr-1;i++){
+							code=code+"\n"+temp.first+":= *"+prev;
+							prev=temp.first;
+							temp=newtemp($3->type,curr_scope);
+						}
+						code=code+"\n"+$1->place.first+":= *"+temp.first;
+						$$->code=$1->code+"\n"+$3->code+"\n"+code;
+						$$->place=$1->place;
 					}
 				}
                 if(flag==0){
@@ -1723,9 +1741,9 @@ function_definition
 	{
         if(strcmp($1,"void")==0){
 		
-			if($4->return_type!="void"){
-                error_list.push_back("Line "+to_string(yylineno)+" : Return type not matched");
-			}
+			// if($4->return_type!="void"){
+            //     error_list.push_back("Line "+to_string(yylineno)+" : Return type not matched");
+			// }
 		}
 		else{
 			if($4->is_return==0){

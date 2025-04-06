@@ -1,5 +1,6 @@
-=====================LIST OF ERRORS===================================
-Line 6 : Type mismatch in declaration
+======================================================================
+No Errors in the code
+Intermediate code generated successfully
 ======================================================================
 1.  FUNC_BEGIN main
 2.      b:= 3

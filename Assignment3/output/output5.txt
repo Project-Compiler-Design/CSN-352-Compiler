@@ -1,6 +1,5 @@
-======================================================================
-No Errors in the code
-Intermediate code generated successfully
+=====================LIST OF ERRORS===================================
+Line 10 : Missing return statement
 ======================================================================
 1.  FUNC_BEGIN fact
 2.      param0 := PARAM
@@ -18,12 +17,11 @@ Intermediate code generated successfully
 14.      t3:=  n*t2
 15.      RETURN t3
 16.  LABEL2:
-17.      RETURN 0
-18.  FUNC_END fact
-19.  FUNC_BEGIN main
-20.      x:= 10
-21.      PARAM x
-22.      t4:= CALL fact,1
-23.      ans:= t4
-24.      RETURN 0
-25.  FUNC_END main
+17.  FUNC_END fact
+18.  FUNC_BEGIN main
+19.      x:= 10
+20.      PARAM x
+21.      t4:= CALL fact,1
+22.      ans:= t4
+23.      RETURN 0
+24.  FUNC_END main
