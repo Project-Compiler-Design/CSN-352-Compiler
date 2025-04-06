@@ -1,91 +1,15 @@
-declaration specifiers 
-1
-declaration specifiers 
-declaration specifiers 
-0
-declaration specifiers 
-declaration specifiers 
-1
-declaration specifiers 
-declaration specifiers 
-0
-declaration specifiers 
-declaration specifiers 
-1
-declaration specifiers 
-declaration specifiers 
-0
-declaration specifiers 
-declaration specifiers 
-1
-declaration specifiers 
-declaration specifiers 
-0
-declaration specifiers 
------------------
-
-FUNC_BEGIN main
-a:= alloc 8
-
-
-10
-t0:= a+0
-*t0:= 10
-
-10
-t1:= a+4
-*t1:= 10
-
-c:= 4
-
-&c
-p:= &c
-
-&p
-q:= &p
-0
-RETURN 0
-
-FUNC_END main
-----------------
-FUNC_BEGIN main
-    a:= alloc 8
-    t0:= a+0
-    *t0:= 10
-    t1:= a+4
-    *t1:= 10
-    c:= 4
-    p:= &c
-    q:= &p
-    RETURN 0
-FUNC_END main
-Cleaning complete! Check 
 ======================================================================
 No Errors in the code
 Intermediate code generated successfully
 ======================================================================
-Printing scope table
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| A               | struct               | 0       | N/A        |
-| main            | int                  | 4       | N/A        |
-| printf          |                      | 0       | N/A        |
-| scanf           |                      | 0       | N/A        |
-| x               | int                  | 4       | N/A        |
-| y               | int                  | 4       | N/A        |
------------------------------------------------------------------
-Scope is here
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| a               | struct A             | 0       | N/A        |
-| a.x             | int                  | 4       | 10         |
-| a.y             | int                  | 4       | 10         |
-| c               | int                  | 4       | 4          |
-| p               | int*                 | 0       | N/A        |
-| q               | int**                | 0       | N/A        |
-| t0              | struct A             | 0       | N/A        |
-| t1              | struct A             | 0       | N/A        |
------------------------------------------------------------------
-Scope is here
+1.  FUNC_BEGIN main
+2.      a:= alloc 8
+3.      t0:= a+0
+4.      *t0:= 10
+5.      t1:= a+4
+6.      *t1:= 10
+7.      c:= 4
+8.      p:= &c
+9.      q:= &p
+10.      RETURN 0
+11.  FUNC_END main

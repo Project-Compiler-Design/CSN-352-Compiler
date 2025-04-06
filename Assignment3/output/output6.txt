@@ -1,53 +1,13 @@
-declaration specifiers 
-1
-declaration specifiers 
-declaration specifiers 
-0
-declaration specifiers 
------------------
-
-FUNC_BEGIN main
-
-x:= 0.000000
-
-1.200000
-1.260000
-t0:=  1.200000+1.260000
-t1:= (t0)
-x:=  t1
-
-0
-RETURN 0
-
-FUNC_END main
-----------------
-FUNC_BEGIN main
-    x:= 0.000000
-    1.200000
-    1.260000
-    t0:=  1.200000+1.260000
-    t1:= (t0)
-    x:=  t1
-    RETURN 0
-FUNC_END main
-Cleaning complete! Check 
-=====================LIST OF ERRORS===================================
-Line 4 : Type mismatch in assignment
 ======================================================================
-Printing scope table
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| main            | int                  | 4       | N/A        |
-| printf          |                      | 0       | N/A        |
-| scanf           |                      | 0       | N/A        |
------------------------------------------------------------------
-Scope is here
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| t0              | float                | 4       | N/A        |
-| t1              | float                | 4       | N/A        |
-| x               | float                | 4       | 0.000000   |
------------------------------------------------------------------
-Scope is here
+No Errors in the code
+Intermediate code generated successfully
+======================================================================
+1.  FUNC_BEGIN main
+2.      x:= 0.000000
+3.      1.200000
+4.      1.260000
+5.      t0:=  1.200000+1.260000
+6.      t1:= (t0)
+7.      x:=  t1
+8.      RETURN 0
+9.  FUNC_END main

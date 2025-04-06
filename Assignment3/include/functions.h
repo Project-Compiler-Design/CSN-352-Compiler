@@ -135,7 +135,7 @@ bool startsWithPointerOrAddress(const string& line) {
 
 // Function to clean Three-Address Code from input file and write to output file
 void cleanTAC(string input) {
-
+    int lineno=1;
     string line="";
     int index=0;
     while(index<input.length()){
@@ -164,13 +164,15 @@ void cleanTAC(string input) {
         }
 
         // Check if the line is a label or function
+        cerr<<lineno<<".  ";
         if (!line.empty() && line.back() == ':' || !line.empty() && line.substr(0,4)=="FUNC") {
             cerr << line << endl;  // Labels should not be indented
         } else {
             cerr << "    " << line << endl;  // Indent normal instructions
         }   
+        lineno++;
     }
-    cout << "Cleaning complete! Check " << endl;
+    // cout << "Cleaning complete! Check " << endl;
 }
 
 string replace_break_continue(string original_code,string end_label,string update_label,int i){

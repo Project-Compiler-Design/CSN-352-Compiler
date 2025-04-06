@@ -5,6 +5,7 @@
 	#define MAX_ARGS 100
 
     void yyerror(const char *s);
+	void print_errors();
 
     extern int yylex();
     extern int yylineno;
@@ -236,7 +237,7 @@ postfix_expression
 				middle=middle+"PARAM "+$3->param_list[i]+"\n";
 			}
             if(find_symbol->type!="void"){
-                debug("idhar",$1->code);   
+                // debug("idhar",$1->code);   
                 $$->code=$1->code + "\n"+ $3->code + "\n"+ middle + temp.first+":= CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
                 $$->place=temp;
                 $$->type=find_symbol->type;
@@ -252,10 +253,9 @@ postfix_expression
             error_list.push_back("Line "+to_string(yylineno)+" : Undeclared variable "+$1->name);
 		}
 		else{
-			if((find_symbol->type).substr(0,6)=="struct" || (find_symbol->type).substr(0,5)=="union"){
+			if((find_symbol->type).substr(0,6)=="struct"){
 				symbol_info* find_struct;
 				if((find_symbol->type).substr(0,6)=="struct") find_struct=lookup_symbol_global((find_symbol->type).substr(7), curr_scope);
-				else find_struct=lookup_symbol_global((find_symbol->type).substr(6), curr_scope);
 				int flag=0;
 				string var_type="";
 				int offset=0;
@@ -281,6 +281,35 @@ postfix_expression
 					$$=find_symbol;
 				}
 				
+			}
+			else if((find_symbol->type).substr(0,5)=="union")
+			{
+				symbol_info* find_struct;
+				if((find_symbol->type).substr(0,5)=="union") find_struct=lookup_symbol_global((find_symbol->type).substr(6), curr_scope);
+				int flag=0;
+				string var_type="";
+				int offset=0;
+				for(int i=0;i<find_struct->param_list.size();i++){
+					if(find_struct->param_list[i]==$3){
+						var_type=find_struct->param_types[i];
+						flag=1;
+						break;
+					}
+					// offset=max(offset,get_size(find_struct->param_types[i]));
+
+				}
+				if(flag==0){
+                    error_list.push_back("Line "+to_string(yylineno)+" : No such attribute found in struct or union "+$1->name);
+				}
+				else{
+					parsing_stack.push($1->name);
+					parsing_stack.push($3);
+					parsing_stack.push(to_string(offset));
+					parsing_stack.push(var_type);
+					
+					find_symbol->name=$1->name;
+					$$=find_symbol;
+				}
 			}
 			else{
                 error_list.push_back("Line "+to_string(yylineno)+" : Not a struct or union "+$1->name);
@@ -809,7 +838,6 @@ declaration
 			string old_type=std::string($1).substr(8);
 			type_def_mapping[new_type]=old_type;
 		}
-		debug("declaration specifiers ", to_string(parsing_stack.size()));
 		
 		
 		int flag=0;
@@ -864,6 +892,19 @@ declaration
 					
 
 				}
+				else if((curr_scope->symbol_map[top_symbol]->type).substr(0,5)=="union")
+				{
+					string struct_name=(curr_scope->symbol_map[top_symbol]->type).substr(6);
+					symbol_info* find_struct=lookup_symbol_global(struct_name, curr_scope);
+					int size=0;
+					for(int i=0;i<find_struct->param_list.size();i++){
+						size=max(size,get_size(find_struct->param_types[i]));
+					}
+					//debug("Struct size: ",to_string(size));
+					code=code+top_symbol+":= alloc " +to_string(size)+"\n";
+					
+
+				}
 				symbol_info* new_symbol = new symbol_info();
 				new_symbol = new symbol_info($2);
 				$$=new_symbol;
@@ -871,7 +912,7 @@ declaration
 			}
 			
 		}
-		debug("declaration specifiers ", to_string(parsing_stack.size()));
+		// debug("declaration specifiers ", to_string(parsing_stack.size()));
 		$$->code=code;
 		
 		//debug("Declaration: ",curr_scope->symbol_map["p"]->code);
@@ -883,12 +924,12 @@ declaration_specifiers
 	: storage_class_specifier
 	| storage_class_specifier declaration_specifiers 
 	{
-		debug("storage class specifier ", $1);
-		debug("storage class specifier ", $2);
+		// debug("storage class specifier ", $1);
+		// debug("storage class specifier ", $2);
 		char* buf = (char*)malloc(strlen($1) + strlen($2) + 2); // 1 for comma, 1 for null terminator
 		sprintf(buf, "%s,%s", $1, $2);
 		$$ = buf;
-		debug("storage class specifier ", $$);
+		// debug("storage class specifier ", $$);
 
 	}
 	| type_specifier {$$=$1;}
@@ -1000,9 +1041,7 @@ type_specifier
 	| DOUBLE			{$$=strdup("double");}
 	| SIGNED			{$$=strdup("signed");}
 	| UNSIGNED			{$$=strdup("unsigned");}
-	| struct_or_union_specifier {$$=$1;
-	// debug("struct_or_union_specifier", $1);
-	}
+	| struct_or_union_specifier {$$=$1;}
 	| enum_specifier
 	| ID {
 		if(type_def_mapping.find($1) != type_def_mapping.end()){
@@ -1022,8 +1061,6 @@ struct_or_union_specifier
 		new_symbol->param_list = $4->param_list;
 		new_symbol->param_types = $4->param_types;
 		curr_scope->symbol_map[$2]=new_symbol;
-		// for(auto it:$4->param_list)
-		// {debug("777777777777777777777777777777777777",it);}
 	}
 	| struct_or_union LBRACE struct_declaration_list RBRACE
 	| struct_or_union ID
@@ -1649,7 +1686,9 @@ jump_statement
 start_symbol: translation_unit
 {
 	//cerr<<"-----------------"<<endl<<$1->code<<"----------------"<<endl;
-    cleanTAC($1->code);
+    
+	print_errors();
+	cleanTAC($1->code);
 }
 ;
 translation_unit
@@ -1719,7 +1758,7 @@ void yyerror(const char *s) {
     fprintf(stderr, "Error at line %d: %s\n", yylineno, s);
 }
 
-void print_scope_table() {
+void print_errors() {
     if(error_list.size()==0){
         cerr<<"======================================================================"<<endl;
         cerr<<"No Errors in the code"<<endl;
@@ -1733,7 +1772,12 @@ void print_scope_table() {
     }
     cerr<<"======================================================================"<<endl;
     }
+
+}
+
+void print_scope_table(){
     
+    cerr<<"======================================================================"<<endl;
 	cerr<<"Printing scope table"<<endl;
 	int count=0;
 	for(auto scope : all_scopes) {count++;}
@@ -1795,7 +1839,7 @@ void print_scope_table() {
 		}
     }
     printf("-----------------------------------------------------------------\n");
-	cerr<<"Scope is here"<<endl;
+	// cerr<<"Scope is here"<<endl;
     }
 }
 
@@ -1804,5 +1848,5 @@ int main() {
 	curr_scope->symbol_map["printf"]=new_symbol;
 	curr_scope->symbol_map["scanf"]=new_symbol;
 	yyparse();
-	print_scope_table();
+	// print_scope_table();
 }

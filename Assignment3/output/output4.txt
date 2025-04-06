@@ -1,334 +1,82 @@
-declaration specifiers 
-1
-declaration specifiers 
-declaration specifiers 
-0
-declaration specifiers 
-declaration specifiers 
-2
-declaration specifiers 
-declaration specifiers 
-0
-declaration specifiers 
-idhar
-
-idhar
-idhar
-
-idhar
-idhar
-
-idhar
-idhar
-
-idhar
-declaration specifiers 
-1
-declaration specifiers 
-declaration specifiers 
-0
-declaration specifiers 
-declaration specifiers 
-1
-declaration specifiers 
-declaration specifiers 
-0
-declaration specifiers 
-idhar
-
-idhar
-idhar
-
-idhar
-idhar
-
-idhar
-idhar
-
-idhar
-idhar
-
-idhar
-idhar
-
-idhar
------------------
-
-FUNC_BEGIN main
-
-
-
-"Enter an operator (+, -, *, /): "
-PARAM "Enter an operator (+, -, *, /): "
-t0:= CALL printf,1
-
-
-"%c"
-
-&operation
-PARAM "%c"
-PARAM &operation
-t1:= CALL scanf,2
-
-
-"Enter two operands: "
-PARAM "Enter two operands: "
-t2:= CALL printf,1
-
-
-"%lf %lf"
-
-&n1
-
-&n2
-PARAM "%lf %lf"
-PARAM &n1
-PARAM &n2
-t3:= CALL scanf,3
-
-
-
-r:= 0
-
-if(operation=='+') goto LABEL0
-if(operation=='-') goto LABEL5
-if(operation=='*') goto LABEL6
-if(operation=='/') goto LABEL7
-goto LABEL8
-
-LABEL0:
-
-"%.1lf + %.1lf = %.1lf"
-
-
-
-
-t4:=  n1+n2
-PARAM "%.1lf + %.1lf = %.1lf"
-PARAM n1
-PARAM n2
-PARAM t4
-t5:= CALL printf,4
-
-
- goto LABEL9
- 
-
-LABEL5:
-
-if(b==1) goto LABEL1
-if(b==2) goto LABEL2
-goto LABEL3
-
-LABEL1:
-
- goto LABEL4
- 
-
-LABEL2:
-
-r:=  r-1
-
-"%.1lf - %.1lf = %.1lf"
-
-
-
-
-t6:=  n1-n2
-PARAM "%.1lf - %.1lf = %.1lf"
-PARAM n1
-PARAM n2
-PARAM t6
-t7:= CALL printf,4
-
-
- goto LABEL4
- 
-
-LABEL3:
-
-"Error! operator is not correct"
-PARAM "Error! operator is not correct"
-t8:= CALL printf,1
-
-
- goto LABEL4
- 
-
-LABEL4:
-
-
- goto LABEL9
- 
-
-LABEL6:
-
-"%.1lf * %.1lf = %.1lf"
-
-
-
-
-t9:=  n1*n2
-PARAM "%.1lf * %.1lf = %.1lf"
-PARAM n1
-PARAM n2
-PARAM t9
-t10:= CALL printf,4
-
-LABEL7:
-
-"%.1lf / %.1lf = %.1lf"
-
-
-
-
-t11:=  n1/n2
-PARAM "%.1lf / %.1lf = %.1lf"
-PARAM n1
-PARAM n2
-PARAM t11
-t12:= CALL printf,4
-
-
- goto LABEL9
- 
-
-LABEL8:
-
-"Error! operator is not correct"
-PARAM "Error! operator is not correct"
-t13:= CALL printf,1
-
-LABEL9:
-
-0
-RETURN 0
-
-FUNC_END main
-----------------
-FUNC_BEGIN main
-    "Enter an operator (+, -, *, /): "
-    PARAM "Enter an operator (+, -, *, /): "
-    t0:= CALL printf,1
-    "%c"
-    PARAM "%c"
-    PARAM &operation
-    t1:= CALL scanf,2
-    "Enter two operands: "
-    PARAM "Enter two operands: "
-    t2:= CALL printf,1
-    "%lf %lf"
-    PARAM "%lf %lf"
-    PARAM &n1
-    PARAM &n2
-    t3:= CALL scanf,3
-    r:= 0
-    if(operation=='+') goto LABEL0
-    if(operation=='-') goto LABEL5
-    if(operation=='*') goto LABEL6
-    if(operation=='/') goto LABEL7
-    goto LABEL8
-LABEL0:
-    "%.1lf + %.1lf = %.1lf"
-    t4:=  n1+n2
-    PARAM "%.1lf + %.1lf = %.1lf"
-    PARAM n1
-    PARAM n2
-    PARAM t4
-    t5:= CALL printf,4
-    goto LABEL9
-LABEL5:
-    if(b==1) goto LABEL1
-    if(b==2) goto LABEL2
-    goto LABEL3
-LABEL1:
-    goto LABEL4
-LABEL2:
-    r:=  r-1
-    "%.1lf - %.1lf = %.1lf"
-    t6:=  n1-n2
-    PARAM "%.1lf - %.1lf = %.1lf"
-    PARAM n1
-    PARAM n2
-    PARAM t6
-    t7:= CALL printf,4
-    goto LABEL4
-LABEL3:
-    "Error! operator is not correct"
-    PARAM "Error! operator is not correct"
-    t8:= CALL printf,1
-    goto LABEL4
-LABEL4:
-    goto LABEL9
-LABEL6:
-    "%.1lf * %.1lf = %.1lf"
-    t9:=  n1*n2
-    PARAM "%.1lf * %.1lf = %.1lf"
-    PARAM n1
-    PARAM n2
-    PARAM t9
-    t10:= CALL printf,4
-LABEL7:
-    "%.1lf / %.1lf = %.1lf"
-    t11:=  n1/n2
-    PARAM "%.1lf / %.1lf = %.1lf"
-    PARAM n1
-    PARAM n2
-    PARAM t11
-    t12:= CALL printf,4
-    goto LABEL9
-LABEL8:
-    "Error! operator is not correct"
-    PARAM "Error! operator is not correct"
-    t13:= CALL printf,1
-LABEL9:
-    RETURN 0
-FUNC_END main
-Cleaning complete! Check 
 ======================================================================
 No Errors in the code
 Intermediate code generated successfully
 ======================================================================
-Printing scope table
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| main            | int                  | 4       | N/A        |
-| printf          |                      | 0       | N/A        |
-| scanf           |                      | 0       | N/A        |
------------------------------------------------------------------
-Scope is here
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| t6              | double               | 0       | N/A        |
-| t7              |                      | 0       | N/A        |
-| t8              |                      | 0       | N/A        |
------------------------------------------------------------------
-Scope is here
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| t10             |                      | 0       | N/A        |
-| t11             | double               | 0       | N/A        |
-| t12             |                      | 0       | N/A        |
-| t13             |                      | 0       | N/A        |
-| t4              | double               | 0       | N/A        |
-| t5              |                      | 0       | N/A        |
-| t9              | double               | 0       | N/A        |
------------------------------------------------------------------
-Scope is here
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| b               | int                  | 4       | N/A        |
-| n1              | double               | 0       | N/A        |
-| n2              | double               | 0       | N/A        |
-| operation       | char                 | 2       |            |
-| r               | int                  | 4       | 0          |
-| t0              |                      | 0       | N/A        |
-| t1              |                      | 0       | N/A        |
-| t2              |                      | 0       | N/A        |
-| t3              |                      | 0       | N/A        |
------------------------------------------------------------------
-Scope is here
+1.  FUNC_BEGIN main
+2.      "Enter an operator (+, -, *, /): "
+3.      PARAM "Enter an operator (+, -, *, /): "
+4.      t0:= CALL printf,1
+5.      "%c"
+6.      PARAM "%c"
+7.      PARAM &operation
+8.      t1:= CALL scanf,2
+9.      "Enter two operands: "
+10.      PARAM "Enter two operands: "
+11.      t2:= CALL printf,1
+12.      "%lf %lf"
+13.      PARAM "%lf %lf"
+14.      PARAM &n1
+15.      PARAM &n2
+16.      t3:= CALL scanf,3
+17.      r:= 0
+18.      if(operation=='+') goto LABEL0
+19.      if(operation=='-') goto LABEL5
+20.      if(operation=='*') goto LABEL6
+21.      if(operation=='/') goto LABEL7
+22.      goto LABEL8
+23.  LABEL0:
+24.      "%.1lf + %.1lf = %.1lf"
+25.      t4:=  n1+n2
+26.      PARAM "%.1lf + %.1lf = %.1lf"
+27.      PARAM n1
+28.      PARAM n2
+29.      PARAM t4
+30.      t5:= CALL printf,4
+31.      goto LABEL9
+32.  LABEL5:
+33.      if(b==1) goto LABEL1
+34.      if(b==2) goto LABEL2
+35.      goto LABEL3
+36.  LABEL1:
+37.      goto LABEL4
+38.  LABEL2:
+39.      r:=  r-1
+40.      "%.1lf - %.1lf = %.1lf"
+41.      t6:=  n1-n2
+42.      PARAM "%.1lf - %.1lf = %.1lf"
+43.      PARAM n1
+44.      PARAM n2
+45.      PARAM t6
+46.      t7:= CALL printf,4
+47.      goto LABEL4
+48.  LABEL3:
+49.      "Error! operator is not correct"
+50.      PARAM "Error! operator is not correct"
+51.      t8:= CALL printf,1
+52.      goto LABEL4
+53.  LABEL4:
+54.      goto LABEL9
+55.  LABEL6:
+56.      "%.1lf * %.1lf = %.1lf"
+57.      t9:=  n1*n2
+58.      PARAM "%.1lf * %.1lf = %.1lf"
+59.      PARAM n1
+60.      PARAM n2
+61.      PARAM t9
+62.      t10:= CALL printf,4
+63.  LABEL7:
+64.      "%.1lf / %.1lf = %.1lf"
+65.      t11:=  n1/n2
+66.      PARAM "%.1lf / %.1lf = %.1lf"
+67.      PARAM n1
+68.      PARAM n2
+69.      PARAM t11
+70.      t12:= CALL printf,4
+71.      goto LABEL9
+72.  LABEL8:
+73.      "Error! operator is not correct"
+74.      PARAM "Error! operator is not correct"
+75.      t13:= CALL printf,1
+76.  LABEL9:
+77.      RETURN 0
+78.  FUNC_END main
