@@ -233,13 +233,15 @@ postfix_expression
 				else find_struct=lookup_symbol_global((find_symbol->type).substr(6), curr_scope);
 				int flag=0;
 				string var_type="";
-
+				int offset=0;
 				for(int i=0;i<find_struct->param_list.size();i++){
 					if(find_struct->param_list[i]==$3){
 						var_type=find_struct->param_types[i];
 						flag=1;
 						break;
 					}
+					offset+=get_size(find_struct->param_types[i]);
+
 				}
 				if(flag==0){
                     error_list.push_back("Line "+to_string(yylineno)+" : No such attribute found in struct or union "+$1->name);
@@ -247,7 +249,9 @@ postfix_expression
 				else{
 					parsing_stack.push($1->name);
 					parsing_stack.push($3);
+					parsing_stack.push(to_string(offset));
 					parsing_stack.push(var_type);
+					
 					find_symbol->name=$1->name;
 					$$=find_symbol;
 				}
@@ -626,11 +630,14 @@ assignment_expression
 	: conditional_expression			{$$=$1;}
 	| unary_expression assignment_operator assignment_expression 
 	{
+		$$ = new symbol_info();
         symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
         if(find_symbol != nullptr) {
 			if((find_symbol->type).substr(0,6)=="struct" || (find_symbol->type).substr(0,5)=="union"){
 				if(parsing_stack.top()==$3->type){
 					//Semantic Analysis
+					parsing_stack.pop();
+					string offset = parsing_stack.top();
 					parsing_stack.pop();
 					string attr=parsing_stack.top();
 					parsing_stack.pop();
@@ -641,6 +648,14 @@ assignment_expression
 					find_struct->struct_attr_values.push_back($3);
                     //checkerror
 					//3AC code kabhi toh karenge
+					qid var=newtemp(find_symbol->type,curr_scope);
+					string tempo="";
+					tempo=tempo+$1->code;
+					tempo=tempo+"\n"+$3->code;
+					tempo=tempo+"\n"+var.first+":= "+$1->place.first+"+"+offset;
+					tempo=tempo+"\n*"+var.first+":= "+$3->place.first;
+					$$->code=$$->code + tempo;
+					$$->place=var;	
 				}
 				else{
                     error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in assignment of struct or union attributes");
@@ -693,52 +708,9 @@ assignment_expression
                     }
                     else{
                         string op=$2->code;
-                        string tcode="";
-                        if(op=="=")
-                        {
-                            tcode=$1->place.first + ":=  " + $3->place.first;
-                        }
-                        else if(op=="*=")
-                        {
-                            tcode=$1->place.first + ":=  " + $1->place.first+"*"+$3->place.first;
-                        }
-                        else if(op=="/=")
-                        {
-                            tcode=$1->place.first + ":=  " + $1->place.first+"/"+$3->place.first;
-                        }
-                        else if(op=="%=")
-                        {
-                            tcode=$1->place.first + ":=  " + $1->place.first+"%"+$3->place.first;
-                        }
-                        else if(op=="+=")
-                        {
-                            tcode=$1->place.first + ":=  " + $1->place.first+"+"+$3->place.first;
-                        }
-                        else if(op=="-=")
-                        {
-                            tcode=$1->place.first + ":=  " + $1->place.first+"-"+$3->place.first;
-                        }
-                        else if(op=="<<=")
-                        {
-                            tcode=$1->place.first + ":=  " + $1->place.first+"<<"+$3->place.first;
-                        }
-                        else if(op==">>=")
-                        {
-                            tcode=$1->place.first + ":=  " + $1->place.first+">>"+$3->place.first;
-                        }
-                        else if(op=="&=")
-                        {
-                            tcode=$1->place.first + ":=  " + $1->place.first+"&"+$3->place.first;
-                        }
-                        else if(op=="^=")
-                        {
-                            tcode=$1->place.first + ":=  " + $1->place.first+"^"+$3->place.first;
-                        }
-                        else if(op=="|=")
-                        {
-                            tcode=$1->place.first + ":=  " + $1->place.first+"|"+$3->place.first;
-                        }   
-                        else{
+                        string tcode=get_assignment_statement($1->place.first,op,$3->place.first);
+                        
+                        if(tcode=="error"){
                             error_list.push_back("Line "+to_string(yylineno)+" : Invalid assignment operator");
                         }
                         $$->code=$1->code + "\n" + third_code + "\n" + tcode+"\n";
@@ -787,7 +759,9 @@ declaration
     : declaration_specifiers SEMICOLON
     | declaration_specifiers init_declarator_list SEMICOLON 
     {
+		//debug("Declaration: ",$1);
 		int flag=0;
+		string code="";
 		while (!parsing_stack.empty()) {
 			std::string top_symbol = parsing_stack.top();
             int depth = pointer_info.top();
@@ -806,10 +780,6 @@ declaration
 
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
                 if(type_priority[$1]>0 && type_priority[curr_scope->symbol_map[top_symbol]->type]>0) curr_scope->symbol_map[top_symbol]->type = priority_to_type[max(type_priority[$1], type_priority[curr_scope->symbol_map[top_symbol]->type])];
-                else{
-                    error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in declaration");
-                    flag=1;
-                }
 
 				$$->code = $2->code;
 			} else {
@@ -820,11 +790,27 @@ declaration
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
                 curr_scope->symbol_map[top_symbol]->pointer_depth = depth;
 
+				if((curr_scope->symbol_map[top_symbol]->type).substr(0,6)=="struct")
+				{
+					string struct_name=(curr_scope->symbol_map[top_symbol]->type).substr(7);
+					symbol_info* find_struct=lookup_symbol_global(struct_name, curr_scope);
+					int size=0;
+					for(int i=0;i<find_struct->param_list.size();i++){
+						size+=get_size(find_struct->param_types[i]);
+					}
+					//debug("Struct size: ",to_string(size));
+					code=code+top_symbol+":= alloc " +to_string(size)+"\n";
+					
+
+				}
 				symbol_info* new_symbol = new symbol_info();
-				new_symbol = $2;
+				new_symbol = new symbol_info($2);
 				$$=new_symbol;
+
 			}
 		}
+		$$->code =code;
+		//debug("Declaration: ",curr_scope->symbol_map["p"]->code);
     }
     ;
 
@@ -864,7 +850,7 @@ init_declarator
 				string code=$1->name+":= alloc " +to_string(4*$1->array_length);
 				$$->code=code;
 			}
-			else if($1->type=="char[]"){
+			else if($1->type=="char"){
 				string code=$1->name+":= alloc " +to_string(2*$1->array_length);
 				$$->code=code;
 			} 
@@ -942,7 +928,9 @@ type_specifier
 	| DOUBLE			{$$=strdup("double");}
 	| SIGNED			{$$=strdup("signed");}
 	| UNSIGNED			{$$=strdup("unsigned");}
-	| struct_or_union_specifier {$$=$1;}
+	| struct_or_union_specifier {$$=$1;
+	// debug("struct_or_union_specifier", $1);
+	}
 	| enum_specifier
 	;
 
@@ -954,6 +942,8 @@ struct_or_union_specifier
 		new_symbol->param_list = $4->param_list;
 		new_symbol->param_types = $4->param_types;
 		curr_scope->symbol_map[$2]=new_symbol;
+		// for(auto it:$4->param_list)
+		// {debug("777777777777777777777777777777777777",it);}
 	}
 	| struct_or_union LBRACE struct_declaration_list RBRACE
 	| struct_or_union ID
@@ -996,7 +986,7 @@ struct_declaration
 		$$=$2;
 		for(auto it: $2->param_list)
 					{
-						cerr<<it<<endl;
+						//cerr<<it<<endl;
 						symbol_info* x=new symbol_info();
 						x->type = $1;
 						

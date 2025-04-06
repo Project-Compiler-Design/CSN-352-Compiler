@@ -1,16 +1,12 @@
 FUNC_BEGIN main
-    str:= "hello"
     PARAM "%s\n"
     PARAM str
     t0:= CALL printf,2
-    c:= str
 FUNC_END main
 Cleaning complete! Check 
 =====================LIST OF ERRORS===================================
-Line 4 : Type mismatch in declaration
 Line 7 : Not an array str
 Line 7 : Pointer depth mismatch
-Line 7 : Type mismatch in declaration
 Line 8 : Missing return statement
 ======================================================================
 Printing scope table

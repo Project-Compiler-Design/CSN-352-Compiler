@@ -243,7 +243,69 @@ string get_last_line(string s) {
     }
     return ""; // Return empty string if := is not found
 }
+int get_size(const std::string& type) {
+    if (type == "int") return 4;
+    if (type == "char") return 2;
+    if (type == "float") return 4;
+    if (type == "double") return 8;
+    if (type == "short") return 2;
+    if (type == "long") return 8;
+    if (type == "void") return 0;
+    return 4;
+}
 
+string get_assignment_statement(string t1,string op,string t2)
+{
+    string tcode="";
+    if(op=="=")
+    {
+        tcode=t1 + ":=  " + t2;
+    }
+    else if(op=="*=")
+    {
+        tcode=t1 + ":=  " + t1+"*"+t2;
+    }
+    else if(op=="/=")
+    {
+        tcode=t1 + ":=  " + t1+"/"+t2;
+    }
+    else if(op=="%=")
+    {
+        tcode=t1 + ":=  " + t1+"%"+t2;
+    }
+    else if(op=="+=")
+    {
+        tcode=t1 + ":=  " + t1+"+"+t2;
+    }
+    else if(op=="-=")
+    {
+        tcode=t1 + ":=  " + t1+"-"+t2;
+    }
+    else if(op=="<<=")
+    {
+        tcode=t1 + ":=  " + t1+"<<"+t2;
+    }
+    else if(op==">>=")
+    {
+        tcode=t1 + ":=  " + t1+">>"+t2;
+    }
+    else if(op=="&=")
+    {
+        tcode=t1 + ":=  " + t1+"&"+t2;
+    }
+    else if(op=="^=")
+    {
+        tcode=t1 + ":=  " + t1+"^"+t2;
+    }
+    else if(op=="|=")
+    {
+        tcode=t1 + ":=  " + t1+"|"+t2;
+    }   
+    else{
+        tcode="error";
+    }
+    return tcode;
+}
 void debug(string s1,string s2)
 	{
 		cerr<<s1<<endl;

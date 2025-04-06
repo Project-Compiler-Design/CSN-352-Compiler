@@ -1,6 +1,4 @@
 FUNC_BEGIN main
-    p:= 0
-    a:= 0
     if(i=='a') goto LABEL0
     if(i=='b') goto LABEL1
     goto LABEL2

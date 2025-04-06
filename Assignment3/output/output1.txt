@@ -1,25 +1,36 @@
 FUNC_BEGIN main
-    p:= 5
-    a:= &p
+    p:= alloc 8
+    t0:= p+0
+    *t0:= 10
+    t1:= p+4
+    *t1:= 8
+    t2:=  p+p
+    a:=  t2
     RETURN 0
 FUNC_END main
 Cleaning complete! Check 
 =====================LIST OF ERRORS===================================
-Line 6 : Type mismatch in declaration
+Line 11 : Type mismatch in assignment
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+| Node            | struct               | 0       | N/A        |
 | main            |                      | 0       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
+| x               | int                  | 4       | N/A        |
+| y               | int                  | 4       | N/A        |
 -----------------------------------------------------------------
 Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | int*                 | 0       | N/A        |
-| p               | int                  | 4       | 5          |
+| a               | int                  | 4       | N/A        |
+| p               |                      | 0       | N/A        |
+| t0              | struct Node          | 0       | N/A        |
+| t1              | struct Node          | 0       | N/A        |
+| t2              |                      | 0       | N/A        |
 -----------------------------------------------------------------
 Scope is here
