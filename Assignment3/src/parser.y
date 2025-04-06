@@ -186,11 +186,20 @@ postfix_expression
                 }
         }
             qid temp=newtemp($1->type,curr_scope);
-			$$->code=$1->code  + temp.first+":= CALL "+$1->place.first + "\n";
-			$$->place=temp;
+            if(find_symbol->type!="void"){
+                $$->code=$1->code + temp.first+":= CALL "+$1->place.first + "\n";
+                $$->place=temp;
+                $$->type=find_symbol->type;
+            }
+            else{
+                $$->code=$1->code + "CALL "+$1->place.first + "\n";
+                $$->type=find_symbol->type;
+            }
+			
     }		
 	| postfix_expression LPARENTHESES argument_expression_list RPARENTHESES   
 	    {
+            $$ = new symbol_info();
 			symbol_info* find_symbol = lookup_symbol_global($1->name, curr_scope);
 			if(find_symbol == nullptr) {
                 error_list.push_back("Line "+to_string(yylineno)+" : Undeclared function "+$1->name);
@@ -217,8 +226,15 @@ postfix_expression
 			for(int i=0;i<$3->param_list.size();i++){
 				middle=middle+"PARAM "+$3->param_list[i]+"\n";
 			}
-			$$->code=$1->code + middle + temp.first+":= CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
-			$$->place=temp;
+            if(find_symbol->type!="void"){
+                debug("idhar",find_symbol->name);   
+                $$->code=$1->code + middle + temp.first+":= CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
+                $$->place=temp;
+                $$->type=find_symbol->type;
+            }else{
+                $$->code=$1->code + middle + "CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
+                $$->type=find_symbol->type;
+            }
         }
 	| postfix_expression DOT ID
 	{
@@ -287,7 +303,7 @@ argument_expression_list
     : assignment_expression
     { 
         if($1->name==""){
-            $$=$1;
+            $$=new symbol_info($1);
             $$->param_types.push_back($1->type);
             if($1->type=="int")$$->param_list.push_back(std::to_string(*(int*)($1->ptr)));
 			else if($1->type=="float")$$->param_list.push_back(std::to_string(*(float*)($1->ptr)));
@@ -300,7 +316,7 @@ argument_expression_list
                 error_list.push_back("Line "+to_string(yylineno)+" : Undeclared variable "+$1->name);
             }
             else{
-                $$=find_symbol;
+                $$=new symbol_info(find_symbol);
                 $$->param_types.push_back(find_symbol->type);
                 $$->param_list.push_back(find_symbol->name);
             }
@@ -309,7 +325,7 @@ argument_expression_list
     | argument_expression_list COMMA assignment_expression
         { 
             if($3->name==""){
-                $$=$1;
+                $$=new symbol_info($1);
                 //check 1 or 3
                 $$->param_types.push_back($3->type);
                 if($3->type=="int")$$->param_list.push_back(std::to_string(*(int*)($3->ptr)));
@@ -323,7 +339,7 @@ argument_expression_list
                     error_list.push_back("Line "+to_string(yylineno)+" : Undeclared variable "+$3->name);
                 }
                 else{
-                    $$=$1;
+                    $$=new symbol_info($1);
                     $$->param_types.push_back(find_symbol->type);
                     $$->param_list.push_back(find_symbol->name);
                 }
@@ -1533,6 +1549,7 @@ function_definition
 	{
 		var_name=$2->param_list;
 		type_list=$2->param_types;
+        curr_scope->symbol_map[$2->name]->type=$1;
 	} 
 	compound_statement 
 	{

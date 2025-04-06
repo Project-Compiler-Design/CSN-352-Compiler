@@ -98,8 +98,7 @@ HEXA_LITERAL      0[xX]{HEXA_DIGIT}+{IS}?
 OCTAL_LITERAL    0[0-7]+{IS}?
 DECIMAL_LITERAL   {DIGIT}+{IS}? 
 EXP_LITERAL       {DIGIT}+[Ee][+-]?{DIGIT}+{FS}?
-REAL_LITERAL           {DIGIT}*"."{DIGIT}+({EXP})?
-FLOAT_LITERAL     {DIGIT}*"."{DIGIT}+({EXP})?{FS}
+FLOAT_LITERAL     {DIGIT}*"."{DIGIT}+({EXP})?{FS}?
 
 STRING_LITERAL         L?\"(\\.|[^\\"])*\"
 CHARACTER_LITERAL       (L|u8|u|U)?'((\\.)|[^'\\])'
@@ -230,7 +229,6 @@ INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
     yylval.symbol_info->ptr = new char(temp[1]);
     yylval.symbol_info->str_val = std::string(temp + 1); 
     yylval.symbol_info->symbol_size=1; return CHARACTER_LITERAL; free(temp);}
-{REAL_LITERAL}     { yylval.str = strdup(yytext); return REAL_LITERAL; }
 {SINCMNT}          { /* ignore single-line comment */ }
 {MULCMNT}          { /* ignore multi-line comment */ }
 

@@ -1,43 +1,15 @@
-FUNC_BEGIN main
-    if(i=='a') goto LABEL0
-    if(i=='b') goto LABEL1
-    goto LABEL2
-LABEL0:
-    p:=  p+1
-    p:=  p-1
-    goto LABEL3
-LABEL1:
-    a:=  15
-    goto LABEL3
-LABEL2:
-    a:=  a*10
-LABEL3:
-    RETURN 0
-FUNC_END main
-Cleaning complete! Check 
-======================================================================
-No Errors in the code
-Intermediate code generated successfully
+Error at line 6: syntax error
+=====================LIST OF ERRORS===================================
+Line 3 : Struct or Union not declared Node
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| main            |                      | 0       | N/A        |
+| Node            | struct               | 0       | N/A        |
+| data            | int                  | 4       | N/A        |
+| next            | struct               | 0       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
------------------------------------------------------------------
-Scope is here
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
------------------------------------------------------------------
-Scope is here
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| a               | int                  | 4       | 0          |
-| i               | char                 | 2       |            |
-| p               | int                  | 4       | 0          |
 -----------------------------------------------------------------
 Scope is here
