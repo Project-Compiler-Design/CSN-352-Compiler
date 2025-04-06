@@ -1,55 +1,61 @@
-<<<<<<< HEAD
-declaration_list
-
-declaration_list
-declaration_list
-
-p:= 0
-declaration_list
-declaration_list
-
-a:= 0
-declaration_list
-return 
+storage class specifier 
+typedef
+storage class specifier 
+storage class specifier 
+float
+storage class specifier 
+storage class specifier 
+typedef,float
+storage class specifier 
+declaration specifiers 
 0
-RETURN 0
-
-return 
+declaration specifiers 
+declaration specifiers 
+0
+declaration specifiers 
+declaration specifiers 
+1
+declaration specifiers 
+declaration specifiers 
+0
+declaration specifiers 
+declaration specifiers 
+1
+declaration specifiers 
+declaration specifiers 
+0
+declaration specifiers 
+declaration specifiers 
+1
+declaration specifiers 
+declaration specifiers 
+0
+declaration specifiers 
 FUNC_BEGIN main
-    p:= 0
-    a:= 0
-    if(i=='a') goto LABEL0
-    if(i=='b') goto LABEL1
-    goto LABEL2
-LABEL0:
-    p:=  p+1
-    p:=  p-1
-    goto LABEL3
-LABEL1:
-    a:=  15
-    goto LABEL3
-LABEL2:
-    a:=  a*10
-LABEL3:
+    b:= 3
+    c:= b
+    d:= 4
     RETURN 0
 FUNC_END main
 Cleaning complete! Check 
 =====================LIST OF ERRORS===================================
-Line 18 : Return type not matched
-=======
-Error at line 6: syntax error
-=====================LIST OF ERRORS===================================
-Line 3 : Struct or Union not declared Node
->>>>>>> 3987b011a0c40ad2dffaef5d996c9bd871c081be
+Line 6 : Type mismatch in declaration
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| Node            | struct               | 0       | N/A        |
-| data            | int                  | 4       | N/A        |
-| next            | struct               | 0       | N/A        |
+| A               |                      | 0       | N/A        |
+| main            | int                  | 4       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| b               | float                | 4       | 0.000000   |
+| c               | double               | 0       | N/A        |
+| d               | int                  | 4       | 4          |
 -----------------------------------------------------------------
 Scope is here

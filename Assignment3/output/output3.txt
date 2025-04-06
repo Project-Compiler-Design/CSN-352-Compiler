@@ -1,33 +1,35 @@
-<<<<<<< HEAD
-declaration_list
-
-str:= "hello"
-declaration_list
-herrrrrrrrrrr 
-str
-herrrrrrrrrrr 
-declaration_list
-
-c:= str
-declaration_list
+declaration specifiers 
+3
+declaration specifiers 
+declaration specifiers 
+0
+declaration specifiers 
 FUNC_BEGIN main
-    str:= "hello"
-    "%s\n"
-=======
-idhar
-
-idhar
-FUNC_BEGIN main
->>>>>>> 3987b011a0c40ad2dffaef5d996c9bd871c081be
-    PARAM "%s\n"
-    PARAM str
-    t0:= CALL printf,2
+    sum:= 0
+    PARAM "Enter a positive integer: "
+    t0:= CALL printf,1
+    PARAM "%d"
+    PARAM &num
+    t1:= CALL scanf,2
+    count:=  1
+LABEL0:
+    t2:=  count<=num
+    if(t2) goto LABEL2
+    goto LABEL1
+LABEL2:
+    sum:=  sum&count
+    count:=  count+1
+    goto LABEL0
+LABEL1:
+    PARAM "Sum = %d"
+    PARAM sum
+    t3:= CALL printf,2
+    RETURN 0
 FUNC_END main
 Cleaning complete! Check 
-=====================LIST OF ERRORS===================================
-Line 7 : Not an array str
-Line 7 : Pointer depth mismatch
-Line 8 : Missing return statement
+======================================================================
+No Errors in the code
+Intermediate code generated successfully
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
@@ -41,8 +43,17 @@ Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| c               | char*                | 0       | N/A        |
-| str             | char*                | 0       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| count           | int                  | 4       | N/A        |
+| num             | int                  | 4       | N/A        |
+| sum             | int                  | 4       | 0          |
 | t0              |                      | 0       | N/A        |
+| t1              |                      | 0       | N/A        |
+| t2              | int                  | 4       | N/A        |
+| t3              |                      | 0       | N/A        |
 -----------------------------------------------------------------
 Scope is here

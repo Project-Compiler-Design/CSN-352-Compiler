@@ -235,7 +235,7 @@ postfix_expression
 				middle=middle+"PARAM "+$3->param_list[i]+"\n";
 			}
             if(find_symbol->type!="void"){
-                debug("idhar",find_symbol->name);   
+                //debug("idhar",find_symbol->name);   
                 $$->code=$1->code + middle + temp.first+":= CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
                 $$->place=temp;
                 $$->type=find_symbol->type;
@@ -344,7 +344,7 @@ argument_expression_list
         { 
 			if($3->place.first!=""){
 				$$->code=$1->code + "\n" + $3->code;
-				debug("herrrrrrrrrrr ", $3->place.first);
+				//debug("herrrrrrrrrrr ", $3->place.first);
 				$$->param_types.push_back($1->type);
 				$$->param_list.push_back($3->place.first);
 			}
@@ -808,10 +808,13 @@ declaration
 			string old_type=std::string($1).substr(8);
 			type_def_mapping[new_type]=old_type;
 		}
+		debug("declaration specifiers ", to_string(parsing_stack.size()));
 		
 		
 		int flag=0;
 		string code="";
+		symbol_info* nsss=new symbol_info();
+		$$=nsss;
 		while (!parsing_stack.empty()) {
 			std::string top_symbol = parsing_stack.top();
 			
@@ -826,22 +829,18 @@ declaration
                 }
 
 				if (type_priority[$1] < type_priority[curr_scope->symbol_map[top_symbol]->type]) {
+					
                     error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in declaration");
 					flag = 1;
 				}
 				
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
                 if(type_priority[$1]>0 && type_priority[curr_scope->symbol_map[top_symbol]->type]>0) curr_scope->symbol_map[top_symbol]->type = priority_to_type[max(type_priority[$1], type_priority[curr_scope->symbol_map[top_symbol]->type])];
-                else{
-                    error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in declaration");
-                    flag=1;
-                }
+                
 				// debug("declaration specifiers121 ", $2->code);
 
 				
-				symbol_info* new_symbol = new symbol_info();
-				new_symbol->code = $2->code;
-				$$=new_symbol;
+				code=$2->code;
 
 			} else {
 				curr_scope->symbol_map[top_symbol]->type = $1;
@@ -871,7 +870,9 @@ declaration
 			}
 			
 		}
-		$$->code =code;
+		debug("declaration specifiers ", to_string(parsing_stack.size()));
+		$$->code=code;
+		
 		//debug("Declaration: ",curr_scope->symbol_map["p"]->code);
     }
     ;
@@ -1078,9 +1079,7 @@ struct_declaration
 	;
 
 specifier_qualifier_list
-	: type_specifier specifier_qualifier_list
-	| type_specifier
-	| type_qualifier specifier_qualifier_list
+	: type_specifier
 	| type_qualifier
 	;
 
@@ -1341,7 +1340,7 @@ labeled_statement
 				// debug("label", $$->code);
 			}
 			else{
-				debug("labellllll", $3->code);
+				//debug("labellllll", $3->code);
 				string label=newlabel();
 				$$->code=label+":\n"+$3->code;
 				
@@ -1369,7 +1368,7 @@ labeled_statement
 				// debug("label", $$->code);
 			}
 			else{
-				debug("labellllll", $3->code);
+				//debug("labellllll", $3->code);
 				string label=newlabel();
 				$$->code=label+":\n"+$3->code;
 				
@@ -1478,7 +1477,7 @@ declaration_list
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$1->code;
-		debug("declaration_list", $$->code);
+		//debug("declaration_list", $$->code);
 	}
 	| declaration_list declaration
 	{
@@ -1642,7 +1641,7 @@ jump_statement
 		$$->is_return=true;
 		$$->return_type=$2->type;
 		$$->code=$2->code + "\nRETURN "+$2->place.first+"\n";
-		debug("return ",$$->code);
+		//debug("return ",$$->code);
 	}
 	;
 
@@ -1692,9 +1691,9 @@ function_definition
                 error_list.push_back("Line "+to_string(yylineno)+" : Missing return statement");
 			}
 			else{
-				if($4->return_type!=$1){
-                    error_list.push_back("Line "+to_string(yylineno)+" : Return type not matched");
-				}
+				// if($4->return_type!=$1){
+                //     error_list.push_back("Line "+to_string(yylineno)+" : Return type not matched");
+				// }
 			}
 		}
 		symbol_info* new_symbol=new symbol_info();

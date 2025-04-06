@@ -1,0 +1,103 @@
+declaration specifiers 
+1
+declaration specifiers 
+declaration specifiers 
+0
+declaration specifiers 
+declaration specifiers 
+2
+declaration specifiers 
+declaration specifiers 
+0
+declaration specifiers 
+FUNC_BEGIN main
+    PARAM "Enter an operator (+, -, *, /): "
+    t0:= CALL printf,1
+    PARAM "%c"
+    PARAM &operation
+    t1:= CALL scanf,2
+    PARAM "Enter two operands: "
+    t2:= CALL printf,1
+    PARAM "%lf %lf"
+    PARAM &n1
+    PARAM &n2
+    t3:= CALL scanf,3
+    if(operation=='+') goto LABEL0
+    if(operation=='-') goto LABEL1
+    if(operation=='*') goto LABEL2
+    if(operation=='/') goto LABEL3
+    goto LABEL4
+LABEL0:
+    PARAM "%.1lf + %.1lf = %.1lf"
+    PARAM n1
+    PARAM n2
+    PARAM t4
+    t5:= CALL printf,4
+    goto LABEL5
+LABEL1:
+    PARAM "%.1lf - %.1lf = %.1lf"
+    PARAM n1
+    PARAM n2
+    PARAM t6
+    t7:= CALL printf,4
+    goto LABEL5
+LABEL2:
+    PARAM "%.1lf * %.1lf = %.1lf"
+    PARAM n1
+    PARAM n2
+    PARAM t8
+    t9:= CALL printf,4
+    goto LABEL5
+LABEL3:
+    PARAM "%.1lf / %.1lf = %.1lf"
+    PARAM n1
+    PARAM n2
+    PARAM t10
+    t11:= CALL printf,4
+    goto LABEL5
+LABEL4:
+    PARAM "Error! operator is not correct"
+    t12:= CALL printf,1
+LABEL5:
+    RETURN 0
+FUNC_END main
+Cleaning complete! Check 
+======================================================================
+No Errors in the code
+Intermediate code generated successfully
+======================================================================
+Printing scope table
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| main            | int                  | 4       | N/A        |
+| printf          |                      | 0       | N/A        |
+| scanf           |                      | 0       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| t10             | double               | 0       | N/A        |
+| t11             |                      | 0       | N/A        |
+| t12             |                      | 0       | N/A        |
+| t4              | double               | 0       | N/A        |
+| t5              |                      | 0       | N/A        |
+| t6              | double               | 0       | N/A        |
+| t7              |                      | 0       | N/A        |
+| t8              | double               | 0       | N/A        |
+| t9              |                      | 0       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| n1              | double               | 0       | N/A        |
+| n2              | double               | 0       | N/A        |
+| operation       | char                 | 2       |            |
+| t0              |                      | 0       | N/A        |
+| t1              |                      | 0       | N/A        |
+| t2              |                      | 0       | N/A        |
+| t3              |                      | 0       | N/A        |
+-----------------------------------------------------------------
+Scope is here
