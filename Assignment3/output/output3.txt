@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 declaration_list
 
 str:= "hello"
@@ -12,24 +13,27 @@ declaration_list
 FUNC_BEGIN main
     str:= "hello"
     "%s\n"
+=======
+idhar
+
+idhar
+FUNC_BEGIN main
+>>>>>>> 3987b011a0c40ad2dffaef5d996c9bd871c081be
     PARAM "%s\n"
     PARAM str
     t0:= CALL printf,2
-    c:= str
 FUNC_END main
 Cleaning complete! Check 
 =====================LIST OF ERRORS===================================
-Line 4 : Type mismatch in declaration
 Line 7 : Not an array str
 Line 7 : Pointer depth mismatch
-Line 7 : Type mismatch in declaration
 Line 8 : Missing return statement
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| main            |                      | 0       | N/A        |
+| main            | int                  | 4       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
 -----------------------------------------------------------------

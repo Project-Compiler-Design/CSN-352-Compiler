@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 storage class specifier 
 typedef
 storage class specifier 
@@ -36,20 +37,88 @@ FUNC_END main
 Cleaning complete! Check 
 =====================LIST OF ERRORS===================================
 Line 9 : Return type not matched
+=======
+idhar
+func
+idhar
+FUNC_BEGIN func
+    param0 := PARAM
+    param1 := PARAM
+    param2 := PARAM
+    y := param0
+    z := param1
+    k := param2
+    t0:=  y+z
+    t1:=  t0+k
+    x:=  t1
+    RETURN x
+FUNC_END func
+FUNC_BEGIN hihello
+    param0 := PARAM
+    param1 := PARAM
+    a := param0
+    b := param1
+    t2:=  a+b
+    x:=  t2
+    i:=  0
+LABEL3:
+    t3:=  i<10
+    if(t3) goto LABEL5
+    goto LABEL4
+LABEL5:
+    t4:=  i%2
+    t5:=  t4==0
+    if(t5) goto LABEL0
+    goto LABEL1
+LABEL0:
+    x:=  x+i
+    goto LABEL2
+LABEL1:
+    x:=  x-i
+LABEL2:
+    i:=  i+1
+    goto LABEL3
+LABEL4:
+    RETURN
+FUNC_END hihello
+FUNC_BEGIN main
+    PARAM a
+    PARAM b
+    PARAM c
+    t6:= CALL func,3
+    d:=  t6
+    PARAM a
+    PARAM b
+    CALL hihello,2
+    RETURN 0
+FUNC_END main
+Cleaning complete! Check 
+======================================================================
+No Errors in the code
+Intermediate code generated successfully
+>>>>>>> 3987b011a0c40ad2dffaef5d996c9bd871c081be
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+<<<<<<< HEAD
 | A               |                      | 0       | N/A        |
 | main            |                      | 0       | N/A        |
+=======
+| func            | int                  | 4       | N/A        |
+| hihello         | void                 | 0       | N/A        |
+| main            | int                  | 4       | N/A        |
+>>>>>>> 3987b011a0c40ad2dffaef5d996c9bd871c081be
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
+| y               | int                  | 4       | 0          |
 -----------------------------------------------------------------
 Scope is here
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+<<<<<<< HEAD
 | a               | int                  | 4       | N/A        |
 | c               | int                  | 4       | 3          |
 | d               | int                  | 4       | 4          |
@@ -57,5 +126,42 @@ Scope is here
 | t1              | int                  | 4       | N/A        |
 | t2              | int                  | 4       | N/A        |
 | t3              | int                  | 4       | N/A        |
+=======
+| k               | int                  | 4       | N/A        |
+| t0              | int                  | 4       | N/A        |
+| t1              | int                  | 4       | N/A        |
+| x               | int                  | 4       | N/A        |
+| y               | int                  | 4       | N/A        |
+| z               | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| t4              | int                  | 4       | N/A        |
+| t5              | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| a               | int                  | 4       | N/A        |
+| b               | int                  | 4       | N/A        |
+| i               | int                  | 4       | 0          |
+| t2              | int                  | 4       | N/A        |
+| t3              | int                  | 4       | N/A        |
+| x               | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+Scope is here
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| a               | int                  | 4       | 0          |
+| b               | int                  | 4       | 8          |
+| c               | int                  | 4       | 10         |
+| d               | int                  | 4       | N/A        |
+| t6              | int                  | 4       | N/A        |
+| t7              | void                 | 0       | N/A        |
+>>>>>>> 3987b011a0c40ad2dffaef5d996c9bd871c081be
 -----------------------------------------------------------------
 Scope is here
