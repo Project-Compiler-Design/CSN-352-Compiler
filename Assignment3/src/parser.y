@@ -1,5 +1,5 @@
 %{
-	#include "functions.h"
+	#include "include/functions.h"
     using namespace std;
 
 	#define MAX_ARGS 100

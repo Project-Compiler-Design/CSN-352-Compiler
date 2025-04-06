@@ -1,7 +1,7 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-#include "3AC.cpp"
+#include "3AC.h"
 
 
 

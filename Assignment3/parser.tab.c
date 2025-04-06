@@ -69,7 +69,7 @@
 /* First part of user prologue.  */
 #line 1 "src/parser.y"
 
-	#include "functions.h"
+	#include "include/functions.h"
     using namespace std;
 
 	#define MAX_ARGS 100

@@ -1,13 +1,13 @@
 # CSN-352-Compiler
 
 This project implements a **C to MIPS compiler** using **3-address code (3AC)** as an intermediate representation.  
-Currently, the project is in **Phase 2**, which involves building a **Parser** for syntax analysis.
+Currently, the project is in **Phase 3**, which involves checking the semantics and generating the 3-address code.
 
 ---
 
 ## 📂 Project Directory Structure  
 ```bash
-Assignment2/
+Assignment3/
 │── src/                 # Source code directory
 │   ├── scanner.l          # Lex file for lexical analysis
 |   ├── parser.y         # File for syntax analysis
@@ -23,6 +23,7 @@ Assignment2/
 │── Makefile             # Build automation file
 │── run.sh               # Script to execute test cases
 │── README.md            # Project documentation
+
 
 ```
 ## ⚙️ How to Compile and Run  
@@ -53,7 +54,7 @@ Errors for each code are written within the generated output file corresponding 
     - Parsing: 
         Uses Bison (Yacc) to parse the tokenized code according to standard C grammar.
         Each of the output files contain symbol table and constant table generated after parsing. 
-    - Intermediate Representation: Will use 3AC (Three Address Code) in later phases.
+    - Intermediate Representation: Uses Three address code.
     - Compiler Backend: Will generate MIPS Assembly Code.
 
 ## 📌 Notes

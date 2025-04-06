@@ -713,7 +713,7 @@ char *yytext;
 #line 1 "src/scanner.l"
 #line 3 "src/scanner.l"
     #include "parser.tab.h"
-    #include "utility.h"
+    #include "include/utility.h"
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
