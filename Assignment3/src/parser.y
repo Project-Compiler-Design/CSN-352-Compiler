@@ -132,6 +132,7 @@ primary_expression
 	{
 		symbol_info* new_symbol = new symbol_info();
 		new_symbol->place=newtemp($2->type,curr_scope);
+		new_symbol->type=$2->type;
 		// debug("here ",new_symbol->place.first);
 		new_symbol->code=$2->code+"\n"+new_symbol->place.first+":= ("+$2->place.first+")";
 		$$=new_symbol;
@@ -235,12 +236,12 @@ postfix_expression
 				middle=middle+"PARAM "+$3->param_list[i]+"\n";
 			}
             if(find_symbol->type!="void"){
-                //debug("idhar",find_symbol->name);   
-                $$->code=$1->code + middle + temp.first+":= CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
+                debug("idhar",$1->code);   
+                $$->code=$1->code + "\n"+ $3->code + "\n"+ middle + temp.first+":= CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
                 $$->place=temp;
                 $$->type=find_symbol->type;
             }else{
-                $$->code=$1->code + middle + "CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
+                $$->code=$1->code + "\n"+ $3->code + "\n"+middle + "CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
                 $$->type=find_symbol->type;
             }
         }
@@ -1647,6 +1648,7 @@ jump_statement
 
 start_symbol: translation_unit
 {
+	//cerr<<"-----------------"<<endl<<$1->code<<"----------------"<<endl;
     cleanTAC($1->code);
 }
 ;

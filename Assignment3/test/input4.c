@@ -8,7 +8,8 @@ int main() {
     scanf("%c", &operation);
     printf("Enter two operands: ");
     scanf("%lf %lf",&n1, &n2);
-
+    int b;
+    int r=0;
     switch(operation)
     {
         case '+':
@@ -16,18 +17,25 @@ int main() {
             break;
 
         case '-':
-            printf("%.1lf - %.1lf = %.1lf",n1, n2, n1-n2);
-            break;
+        switch(b)
+        {
+                case 1:
 
+                        break;
+                case 2: 
+                        r--;
+                        printf("%.1lf - %.1lf = %.1lf",n1, n2, n1-n2);
+                        break;
+                default:
+                        printf("Error! operator is not correct");
+                        break;
+        }
+            break;
         case '*':
             printf("%.1lf * %.1lf = %.1lf",n1, n2, n1*n2);
-            break;
-
         case '/':
             printf("%.1lf / %.1lf = %.1lf",n1, n2, n1/n2);
             break;
-
-        // operator doesn't match any case constant +, -, *, /
         default:
             printf("Error! operator is not correct");
     }

@@ -22,6 +22,32 @@ declaration specifiers
 declaration specifiers 
 0
 declaration specifiers 
+-----------------
+
+FUNC_BEGIN main
+a:= alloc 8
+
+
+10
+t0:= a+0
+*t0:= 10
+
+10
+t1:= a+4
+*t1:= 10
+
+c:= 4
+
+&c
+p:= &c
+
+&p
+q:= &p
+0
+RETURN 0
+
+FUNC_END main
+----------------
 FUNC_BEGIN main
     a:= alloc 8
     t0:= a+0

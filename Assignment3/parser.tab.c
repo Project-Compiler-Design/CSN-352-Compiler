@@ -721,8 +721,8 @@ static const yytype_int16 yyrline[] =
     1400,  1402,  1401,  1422,  1422,  1426,  1426,  1430,  1430,  1436,
     1448,  1459,  1468,  1475,  1482,  1486,  1490,  1493,  1501,  1505,
     1506,  1510,  1516,  1523,  1523,  1546,  1556,  1566,  1576,  1592,
-    1615,  1622,  1629,  1637,  1648,  1654,  1658,  1662,  1666,  1670,
-    1674,  1676,  1675,  1711,  1712
+    1615,  1622,  1629,  1637,  1648,  1655,  1659,  1663,  1667,  1671,
+    1675,  1677,  1676,  1712,  1713
 };
 #endif
 
@@ -2122,12 +2122,12 @@ yyreduce:
 				middle=middle+"PARAM "+(yyvsp[-1].symbol_info)->param_list[i]+"\n";
 			}
             if(find_symbol->type!="void"){
-                //debug("idhar",find_symbol->name);   
-                (yyval.symbol_info)->code=(yyvsp[-3].symbol_info)->code + middle + temp.first+":= CALL "+(yyvsp[-3].symbol_info)->place.first + ","+to_string((yyvsp[-1].symbol_info)->param_list.size()) + "\n";
+                debug("idhar",(yyvsp[-3].symbol_info)->code);   
+                (yyval.symbol_info)->code=(yyvsp[-3].symbol_info)->code + "\n"+ (yyvsp[-1].symbol_info)->code + "\n"+ middle + temp.first+":= CALL "+(yyvsp[-3].symbol_info)->place.first + ","+to_string((yyvsp[-1].symbol_info)->param_list.size()) + "\n";
                 (yyval.symbol_info)->place=temp;
                 (yyval.symbol_info)->type=find_symbol->type;
             }else{
-                (yyval.symbol_info)->code=(yyvsp[-3].symbol_info)->code + middle + "CALL "+(yyvsp[-3].symbol_info)->place.first + ","+to_string((yyvsp[-1].symbol_info)->param_list.size()) + "\n";
+                (yyval.symbol_info)->code=(yyvsp[-3].symbol_info)->code + "\n"+ (yyvsp[-1].symbol_info)->code + "\n"+middle + "CALL "+(yyvsp[-3].symbol_info)->place.first + ","+to_string((yyvsp[-1].symbol_info)->param_list.size()) + "\n";
                 (yyval.symbol_info)->type=find_symbol->type;
             }
         }
@@ -3971,47 +3971,48 @@ yyreduce:
   case 224: /* start_symbol: translation_unit  */
 #line 1649 "src/parser.y"
 {
+	cerr<<"-----------------"<<endl<<(yyvsp[0].symbol_info)->code<<"----------------"<<endl;
     cleanTAC((yyvsp[0].symbol_info)->code);
 }
-#line 3977 "parser.tab.c"
+#line 3978 "parser.tab.c"
     break;
 
   case 225: /* translation_unit: external_declaration  */
-#line 1655 "src/parser.y"
+#line 1656 "src/parser.y"
         {
 		(yyval.symbol_info)->code=(yyvsp[0].symbol_info)->code;
 	}
-#line 3985 "parser.tab.c"
+#line 3986 "parser.tab.c"
     break;
 
   case 226: /* translation_unit: translation_unit external_declaration  */
-#line 1659 "src/parser.y"
+#line 1660 "src/parser.y"
         {
 		(yyval.symbol_info)->code=(yyvsp[-1].symbol_info)->code+(yyvsp[0].symbol_info)->code;
 	}
-#line 3993 "parser.tab.c"
+#line 3994 "parser.tab.c"
     break;
 
   case 228: /* external_declaration: function_definition  */
-#line 1667 "src/parser.y"
+#line 1668 "src/parser.y"
         {
 		(yyval.symbol_info)=(yyvsp[0].symbol_info);
 	}
-#line 4001 "parser.tab.c"
+#line 4002 "parser.tab.c"
     break;
 
   case 231: /* $@6: %empty  */
-#line 1676 "src/parser.y"
+#line 1677 "src/parser.y"
         {
 		var_name=(yyvsp[0].symbol_info)->param_list;
 		type_list=(yyvsp[0].symbol_info)->param_types;
         curr_scope->symbol_map[(yyvsp[0].symbol_info)->name]->type=(yyvsp[-1].str);
 	}
-#line 4011 "parser.tab.c"
+#line 4012 "parser.tab.c"
     break;
 
   case 232: /* function_definition: declaration_specifiers declarator $@6 compound_statement  */
-#line 1682 "src/parser.y"
+#line 1683 "src/parser.y"
         {
         if(strcmp((yyvsp[-3].str),"void")==0){
 		
@@ -4041,11 +4042,11 @@ yyreduce:
 		(yyval.symbol_info)->code=(yyval.symbol_info)->code+(yyvsp[0].symbol_info)->code+"\nFUNC_END "+(yyvsp[-2].symbol_info)->name+"\n";
 
 	}
-#line 4045 "parser.tab.c"
+#line 4046 "parser.tab.c"
     break;
 
 
-#line 4049 "parser.tab.c"
+#line 4050 "parser.tab.c"
 
       default: break;
     }
@@ -4238,7 +4239,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 1714 "src/parser.y"
+#line 1715 "src/parser.y"
 
 
 void yyerror(const char *s) {

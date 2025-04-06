@@ -4,10 +4,75 @@ declaration specifiers
 declaration specifiers 
 0
 declaration specifiers 
+idhar
+
+idhar
+idhar
+
+idhar
+idhar
+
+idhar
+-----------------
+
+FUNC_BEGIN main
+
+
+
+sum:= 0
+
+"Enter a positive integer: "
+PARAM "Enter a positive integer: "
+t0:= CALL printf,1
+
+
+"%d"
+
+&num
+PARAM "%d"
+PARAM &num
+t1:= CALL scanf,2
+
+
+1
+count:=  1
+
+LABEL0:
+
+
+t2:=  count<=num
+if(t2) goto LABEL2
+goto LABEL1
+LABEL2:
+
+
+sum:=  sum&count
+
+
+
+
+count:=  count+1
+goto LABEL0
+LABEL1:
+
+
+"Sum = %d"
+
+PARAM "Sum = %d"
+PARAM sum
+t3:= CALL printf,2
+
+0
+RETURN 0
+
+FUNC_END main
+----------------
 FUNC_BEGIN main
     sum:= 0
+    "Enter a positive integer: "
     PARAM "Enter a positive integer: "
     t0:= CALL printf,1
+    "%d"
     PARAM "%d"
     PARAM &num
     t1:= CALL scanf,2
@@ -21,6 +86,7 @@ LABEL2:
     count:=  count+1
     goto LABEL0
 LABEL1:
+    "Sum = %d"
     PARAM "Sum = %d"
     PARAM sum
     t3:= CALL printf,2
