@@ -341,12 +341,13 @@ argument_expression_list
     : assignment_expression
     { 
 		if($1->place.first!=""){
-			// debug("herrrr ", $1->code);
+			
 			$$->code=$1->code;
 			$$->param_types.push_back($1->type);
 			$$->param_list.push_back($1->place.first);
 		}
 		else{
+			debug("gggggggggggggg ", $1->code);
 			if($1->name==""){
 				$$=new symbol_info($1);
 				$$->param_types.push_back($1->type);
@@ -410,7 +411,23 @@ unary_expression
 		$$=$1;        
 	}
 	| INCREMENT unary_expression
+	{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->name=$2->name;
+		$$->place=$2->place;
+		$$->code=$2->code + "\n" + $2->place.first+":=  "+$2->place.first+"+1";
+		
+	}
 	| DECREMENT unary_expression
+	{
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->name=$2->name;
+		$$->place=$2->place;
+		$$->code=$2->code + "\n" + $2->place.first+":=  "+$2->place.first+"-1";
+		
+	}
 	| unary_operator cast_expression 
     {
 		symbol_info* new_symbol=new symbol_info();
@@ -484,6 +501,7 @@ unary_operator
 cast_expression
 	: unary_expression 
 	{
+		
 		$$=$1;
 	}
 	| LPARENTHESES type_name RPARENTHESES cast_expression
@@ -700,7 +718,12 @@ conditional_expression
 	;
 
 assignment_expression
-	: conditional_expression			{$$=$1;}
+	: conditional_expression			
+	{
+		
+		$$=$1;
+		// cerr<<"hereeeeee "<<$$->code<<endl;
+	}
 	| unary_expression assignment_operator assignment_expression 
 	{
 		$$ = new symbol_info();
@@ -890,23 +913,30 @@ declaration
 				code=$2->code;
 
 			} else {
+				
 				curr_scope->symbol_map[top_symbol]->type = $1;
                 for(int i=0;i<depth;i++){
                     curr_scope->symbol_map[top_symbol]->type+="*";
                 }
+				if(curr_scope->symbol_map[top_symbol]->is_array) curr_scope->symbol_map[top_symbol]->type+="*";
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
                 curr_scope->symbol_map[top_symbol]->pointer_depth = depth;
 
 				if((curr_scope->symbol_map[top_symbol]->type).substr(0,6)=="struct")
 				{
+					cerr<<"gggggghjjj "<<$1<<endl;
 					string struct_name=(curr_scope->symbol_map[top_symbol]->type).substr(7);
+					if(struct_name.back()=='*') struct_name.pop_back();
 					symbol_info* find_struct=lookup_symbol_global(struct_name, curr_scope);
 					int size=0;
+					
 					for(int i=0;i<find_struct->param_list.size();i++){
 						size+=get_size(find_struct->param_types[i]);
 					}
 					//debug("Struct size: ",to_string(size));
+					
 					code=code+top_symbol+":= alloc " +to_string(size)+"\n";
+					
 					
 
 				}
@@ -923,10 +953,11 @@ declaration
 					
 
 				}
+				
 				symbol_info* new_symbol = new symbol_info();
 				new_symbol = new symbol_info($2);
 				$$=new_symbol;
-
+				
 			}
 			
 		}
@@ -967,7 +998,7 @@ init_declarator_list
 
 init_declarator
     : declarator { 
-		if(lookup_symbol_global($1->name, curr_scope)!=nullptr){
+		if(lookup_symbol_local($1->name, curr_scope)!=nullptr){
             error_list.push_back("Line "+to_string(yylineno)+" : Redeclaration error "+$1->name);
 		}
         symbol_info* new_symbol = new symbol_info();
@@ -978,6 +1009,7 @@ init_declarator
 			curr_scope->symbol_map[$1->name]->is_array=true;
 			curr_scope->symbol_map[$1->name]->array_length=$1->array_length;
 			 if($1->type=="int" || $1->type=="float"){
+				// cerr<<"gggg"<<$1->type<<endl;
 				string code=$1->name+":= alloc " +to_string(4*$1->array_length);
 				$$->code=code;
 			}
@@ -1010,21 +1042,23 @@ init_declarator
 			else{
 				$1->int_array = $3->int_array;
 				$1->type = $3->type;
+				$1->type=$1->type+"*";
 				curr_scope->symbol_map[$1->name]->is_array=true;
+				curr_scope->symbol_map[$1->name]->type=$1->type;
 				 string code=$1->name+":= alloc ";
-				if($1->type=="int" || $1->type=="float"){
+				if($1->type=="int*" || $1->type=="float*"){
 					code=code+to_string(4*$1->array_length);
 				}
-				else if($1->type=="char"){
+				else if($1->type=="char*"){
 					code=code+to_string(2*$1->array_length);
 				}
 				for(int i=0;i<$1->array_length;i++){
 					qid temp=newtemp($1->type,curr_scope);
 					code=code+"\n"+temp.first+":= "+to_string(i)+"*";
-					if($1->type=="int") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ):= "+to_string(*(int*)($1->int_array[i]->ptr));
-					else if($1->type=="float") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ):= "+to_string(*(float*)($1->int_array[i]->ptr));
-					else if($1->type=="char") code=code+"2\n"+"*( "+$1->name+" + "+temp.first+" ):= "+char(*(char*)($1->int_array[i]->ptr));
-					else if($1->type=="char*") code=code+"2\n"+"*( "+$1->name+" + "+temp.first+" ):= "+$1->int_array[i]->str_val;
+					if($1->type=="int*") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ):= "+to_string(*(int*)($1->int_array[i]->ptr));
+					else if($1->type=="float*") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ):= "+to_string(*(float*)($1->int_array[i]->ptr));
+					else if($1->type=="char*") code=code+"2\n"+"*( "+$1->name+" + "+temp.first+" ):= "+char(*(char*)($1->int_array[i]->ptr));
+					else if($1->type=="char**") code=code+"2\n"+"*( "+$1->name+" + "+temp.first+" ):= "+$1->int_array[i]->str_val;
 				} 
 				$$->code=code;
 			}
@@ -1072,28 +1106,50 @@ type_specifier
 	;	
 
 struct_or_union_specifier
-	: struct_or_union ID LBRACE struct_declaration_list RBRACE 
+	: struct_or_union ID 
 	{
-		symbol_info* new_symbol=new symbol_info();
-		new_symbol->type = $1;
-		new_symbol->param_list = $4->param_list;
-		new_symbol->param_types = $4->param_types;
-		curr_scope->symbol_map[$2]=new_symbol;
+		symbol_info* find_symbol=lookup_symbol_local($2,curr_scope);
+		if(find_symbol==nullptr){
+			symbol_info* new_symbol=new symbol_info();
+			curr_scope->symbol_map[$2]=new_symbol;
+			curr_scope->symbol_map[$2]->name = $2;
+			curr_scope->symbol_map[$2]->type = $1;
+		}
+		else{
+			error_list.push_back("Line "+to_string(yylineno)+" : Struct redeclaration error "+$1);
+		}
+	}
+	LBRACE 
+	{
+		curr_scope = new scoped_symtab(curr_scope);
+		
+	}
+	struct_declaration_list RBRACE 
+	{
+		
+		
+		curr_scope->parent->symbol_map[$2]->param_list = $6->param_list;
+		curr_scope->parent->symbol_map[$2]->param_types = $6->param_types;
+		all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;
+		
 	}
 	| struct_or_union LBRACE struct_declaration_list RBRACE
 	| struct_or_union ID
 	{
+		
 		symbol_info* find_symbol = lookup_symbol_global($2, curr_scope);
 		if (find_symbol != nullptr) {
 			if (find_symbol->type == "struct" || find_symbol->type == "union") {
 				std::string temp = std::string($1) + " " + std::string($2);
 				$$ = strdup(temp.c_str());
+				
 			} else {
                 error_list.push_back("Line "+to_string(yylineno)+" : Variable not of type struct or union");
 			}
 		} else {
             error_list.push_back("Line "+to_string(yylineno)+" : Struct or Union not declared "+$2);
 		}
+		
 	} 
 	;
 
@@ -1196,6 +1252,7 @@ direct_declarator
 		x->name = $1;
 		x->place.first=$1;
 		$$=x;
+		
 	}       
 	| LPARENTHESES declarator RPARENTHESES			
 	| direct_declarator LBRACKET constant_expression RBRACKET			
