@@ -47,7 +47,7 @@ struct symbol_info {
     int pointer_depth=0;
     qid place;
     std::string code;
-    
+    bool is_static=false;
     bool is_return=false;
     std::string return_type="";
     bool is_array_access=false;

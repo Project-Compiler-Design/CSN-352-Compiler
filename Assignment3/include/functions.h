@@ -134,23 +134,67 @@ bool startsWithPointerOrAddress(const string& line) {
 }
 
 // Function to clean Three-Address Code from input file and write to output file
+// void cleanTAC(string input) {
+//     int lineno=1;
+//     string line="";
+//     int index=0;
+//     while(index<input.length()){
+//         line="";
+//         while(index<input.length()){
+//             if(input[index]!='\n'){
+//                 line+=input[index];
+//                 index++;
+//             }
+//             else{
+//                 index++;
+//                 break;
+//             }
+//         }
+        
+//         // Trim leading and trailing spaces
+//         while (!line.empty() && isspace(line.front())) line.erase(line.begin());
+//         while (!line.empty() && isspace(line.back())) line.pop_back();
+
+//         // Skip empty lines and lines with only a single number
+//         if (line.empty() || isSingleNumber(line)) continue;
+
+//         // Skip lines with pointers or address-of expressions
+//         if (startsWithPointerOrAddress(line) && line.find('=') == string::npos) {
+//             continue;
+//         }
+
+//         // Check if the line is a label or function
+//         cerr<<lineno<<".  ";
+//         if (!line.empty() && line.back() == ':' || !line.empty() && line.substr(0,4)=="FUNC") {
+//             cerr << line << endl;  // Labels should not be indented
+//         } else {
+//             cerr << "    " << line << endl;  // Indent normal instructions
+//         }   
+//         lineno++;
+//     }
+//     // cout << "Cleaning complete! Check " << endl;
+// }
+bool isOnlyStringLiteral(const string& line) {
+    // line must start and end with double quotes, and nothing else
+    return line.size() >= 2 && line.front() == '\"' && line.back() == '\"';
+}
+
 void cleanTAC(string input) {
-    int lineno=1;
-    string line="";
-    int index=0;
-    while(index<input.length()){
-        line="";
-        while(index<input.length()){
-            if(input[index]!='\n'){
-                line+=input[index];
+    int lineno = 1;
+    string line = "";
+    int index = 0;
+    while (index < input.length()) {
+        line = "";
+        while (index < input.length()) {
+            if (input[index] != '\n') {
+                line += input[index];
                 index++;
-            }
-            else{
+            } else {
                 index++;
                 break;
             }
         }
-        
+
         // Trim leading and trailing spaces
         while (!line.empty() && isspace(line.front())) line.erase(line.begin());
         while (!line.empty() && isspace(line.back())) line.pop_back();
@@ -163,17 +207,22 @@ void cleanTAC(string input) {
             continue;
         }
 
+        // ✅ Skip lines that contain only a string literal
+        if (isOnlyStringLiteral(line)) {
+            continue;
+        }
+
         // Check if the line is a label or function
-        cerr<<lineno<<".  ";
-        if (!line.empty() && line.back() == ':' || !line.empty() && line.substr(0,4)=="FUNC") {
+        cerr << lineno << ".  ";
+        if (!line.empty() && line.back() == ':' || !line.empty() && line.substr(0, 4) == "FUNC") {
             cerr << line << endl;  // Labels should not be indented
         } else {
             cerr << "    " << line << endl;  // Indent normal instructions
-        }   
+        }
         lineno++;
     }
-    // cout << "Cleaning complete! Check " << endl;
 }
+
 
 string replace_break_continue(string original_code,string end_label,string update_label,int i){
     string new_code = original_code;

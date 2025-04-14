@@ -4,7 +4,5 @@ Intermediate code generated successfully
 ======================================================================
 1.  FUNC_BEGIN main
 2.      b:= 3
-3.      c:= b
-4.      d:= 4
-5.      RETURN 0
-6.  FUNC_END main
+3.      RETURN 0
+4.  FUNC_END main

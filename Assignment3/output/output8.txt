@@ -1,0 +1,100 @@
+=====================LIST OF ERRORS===================================
+Line 24 : Missing return statement
+Line 66 : Missing return statement
+======================================================================
+1.      glb1:= 10
+2.  FUNC_BEGIN bar
+3.      param0 := PARAM
+4.      param1 := PARAM
+5.      a := param0
+6.      b := param1
+7.      lcl:= 10
+8.  LABEL0:
+9.      if(b) goto LABEL2
+10.      goto LABEL1
+11.  LABEL2:
+12.      b:=  b-1
+13.      goto LABEL0
+14.  LABEL1:
+15.      t0:=  a==0
+16.      if(t0) goto LABEL3
+17.      goto LABEL4
+18.  LABEL3:
+19.      RETURN 0
+20.  LABEL4:
+21.      a:=  a+1
+22.      t1:=  a+b
+23.      t2:=  t1+lcl
+24.      PARAM a
+25.      PARAM t2
+26.      t3:= CALL bar,2
+27.  FUNC_END bar
+28.  FUNC_BEGIN main
+29.      b:= alloc 80
+30.      a:= 100
+31.      *(b + t4):= 5
+32.      arr:= alloc 20
+33.      t6:= 0*4
+34.      *( arr + t6 ):= 1
+35.      t7:= 1*4
+36.      *( arr + t7 ):= 2
+37.      t8:= 2*4
+38.      *( arr + t8 ):= 3
+39.      t9:= 3*4
+40.      *( arr + t9 ):= 4
+41.      t10:= 4*4
+42.      *( arr + t10 ):= 5
+43.      i:=  0
+44.  LABEL14:
+45.      t11:=  i<a
+46.      if(t11) goto LABEL16
+47.      goto LABEL15
+48.  LABEL16:
+49.      b:= 0
+50.      b:=  b+i
+51.      t12:=  b%2
+52.      t13:=  b%3
+53.      t14:=  t12!=t13
+54.      if(t14) goto LABEL11
+55.      goto LABEL12
+56.  LABEL11:
+57.      t15:=  a+b
+58.      PARAM "%d\n"
+59.      PARAM t15
+60.      t16:= CALL printf,2
+61.      goto LABEL13
+62.  LABEL12:
+63.      t17:=  b%2
+64.      t18:=  t17==0
+65.      if(t18) goto LABEL9
+66.      goto LABEL10
+67.  LABEL9:
+68.      if(b==100) goto LABEL5
+69.      if(b==1000) goto LABEL6
+70.      goto LABEL7
+71.  LABEL5:
+72.      PARAM "1\n"
+73.      t19:= CALL printf,1
+74.      goto LABEL8
+75.  LABEL6:
+76.      PARAM "2\n"
+77.      t20:= CALL printf,1
+78.  LABEL7:
+79.      PARAM "2\n"
+80.      t21:= CALL printf,1
+81.  LABEL8:
+82.  LABEL10:
+83.  LABEL13:
+84.      ret:=  i
+85.      i:=  i+1
+86.      goto LABEL14
+87.  LABEL15:
+88.      t22:=  b+2
+89.      c:= t22
+90.      := b
+91.  LABEL18:
+92.      newS:= alloc 12
+93.      PARAM 1
+94.      PARAM *b
+95.      t23:= CALL bar,2
+96.  FUNC_END main

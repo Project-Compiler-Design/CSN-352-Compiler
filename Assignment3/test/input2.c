@@ -1,8 +1,6 @@
-typedef float A;
-
-int main(){
-    A b=3;
-    float c=b;
-    int d=4;
+int main()
+{
+    int b=3;
+    int a=-b;
     return 0;
 }

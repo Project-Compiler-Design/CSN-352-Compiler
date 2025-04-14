@@ -27,7 +27,9 @@ int main()
 {
     // int a=4;
     int a = 100, b[20], ret,glb;
-
+    b[1]=5;
+    static int hi;
+    int arr[5] = {1,2,3,4,5};
     int i;
     for ( i = 0; i < a; i++)
     {
@@ -39,7 +41,7 @@ int main()
         {
             switch (b)
             {
-            case -100:
+            case 100:
                 printf("1\n");
                 break;
             case 1000:
@@ -51,11 +53,12 @@ int main()
         // b[19] = i;
         ret = i;
     }
-    int *c = b + ret; // change to *
+    int *c=b+2; // change to *
+    c=b;
 jump:
     struct foo newS[5];
-    // printf("Final = %d", newS[3].b + ret);
-    // if (*(b + 2) == 0){
+    // printf(newS[3].b);
+    // if (*(b+2) == 0){
     //     goto jump;
     // }
         // goto jump;

@@ -4,26 +4,23 @@ Intermediate code generated successfully
 ======================================================================
 1.  FUNC_BEGIN main
 2.      sum:= 0
-3.      "Enter a positive integer: "
-4.      PARAM "Enter a positive integer: "
-5.      t0:= CALL printf,1
-6.      "%d"
-7.      PARAM "%d"
-8.      PARAM &num
-9.      t1:= CALL scanf,2
-10.      count:=  1
-11.  LABEL0:
-12.      t2:=  count<=num
-13.      if(t2) goto LABEL2
-14.      goto LABEL1
-15.  LABEL2:
-16.      sum:=  sum&count
-17.      count:=  count+1
-18.      goto LABEL0
-19.  LABEL1:
-20.      "Sum = %d"
-21.      PARAM "Sum = %d"
-22.      PARAM sum
-23.      t3:= CALL printf,2
-24.      RETURN 0
-25.  FUNC_END main
+3.      PARAM "Enter a positive integer: "
+4.      t0:= CALL printf,1
+5.      PARAM "%d"
+6.      PARAM &num
+7.      t1:= CALL scanf,2
+8.      count:=  1
+9.  LABEL0:
+10.      t2:=  count<=num
+11.      if(t2) goto LABEL2
+12.      goto LABEL1
+13.  LABEL2:
+14.      sum:=  sum&count
+15.      count:=  count+1
+16.      goto LABEL0
+17.  LABEL1:
+18.      PARAM "Sum = %d"
+19.      PARAM sum
+20.      t3:= CALL printf,2
+21.      RETURN 0
+22.  FUNC_END main

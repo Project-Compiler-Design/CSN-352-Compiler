@@ -6,6 +6,7 @@
 
     void yyerror(const char *s);
 	void print_errors();
+    void print_scope_table();
 
     extern int yylex();
     extern int yylineno;
@@ -347,7 +348,7 @@ argument_expression_list
 			$$->param_list.push_back($1->place.first);
 		}
 		else{
-			debug("gggggggggggggg ", $1->code);
+			// debug("gggggggggggggg ", $1->code);
 			if($1->name==""){
 				$$=new symbol_info($1);
 				$$->param_types.push_back($1->type);
@@ -444,6 +445,14 @@ unary_expression
 				$$->type.pop_back();
 			}
         }
+        // if($1->code=="-"){
+        //     debug("ddddd",$2->name);
+        //     qid var=newtemp($2->type,curr_scope);
+			
+        //     if($2->name!="") $$->code=$2->code+"\n"+var.first+":= -"+$2->name;
+        //     else if($2->place.first!="") $$->code=$2->code+"\n"+var.first+":= -"+$2->place.first;
+        //     $$->place=var;
+		// }
 		
 		$$->name=$2->name;
 		$$->code=$2->code+"\n"+$1->code+$2->place.first;
@@ -546,8 +555,13 @@ additive_expression
 	: multiplicative_expression {$$=$1;}
 	| additive_expression PLUS multiplicative_expression 
 	{
+        // cerr<<$1->type<<endl;
+        // cerr<<$3->type<<endl;
         $$ = $1;
-        $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
+        if(count_star($1->type)>count_star($3->type)) $$->type=$1->type;
+        else if(count_star($1->type)<count_star($3->type)) $$->type=$3->type;
+        else $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
+        // cerr<<$$->type<<endl;
 		qid var=newtemp($1->type,curr_scope);
 		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"+"+$3->place.first;
 		$$->place=var;
@@ -722,7 +736,8 @@ assignment_expression
 	{
 		
 		$$=$1;
-		// cerr<<"hereeeeee "<<$$->code<<endl;
+		// cerr<<"hereeeeee "<<$$->name<<endl;
+		// cerr<<"hereeeeee "<<$$->type<<endl;
 	}
 	| unary_expression assignment_operator assignment_expression 
 	{
@@ -762,19 +777,23 @@ assignment_expression
                     error_list.push_back("Line "+to_string(yylineno)+" : char* is not modifiable");
                 }
                 if(min(type_priority[$1->type],type_priority[$3->type])==0 && $1->type!=$3->type){
-                    error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in assignment");
+                    if($3->type!="int" && $1->type!="int") error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in assignment");
                 }
-                if(type_priority[$1->type]<type_priority[$3->type]){
-                    error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in assignment");
+                else if(type_priority[$1->type]<type_priority[$3->type]){
+                    error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in assignment3");
                 }
                 string third_code=$3->code;
                 string first_code=$1->code;
                 if(min(type_priority[$1->type],type_priority[find_symbol->type])>0) find_symbol->type=priority_to_type[max(type_priority[find_symbol->type],type_priority[$3->type])];
-				
+			
                 find_symbol->name=$1->name;
                 find_symbol->place=$1->place;
                 find_symbol->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
-
+                find_symbol->pointer_depth=max($1->pointer_depth, $3->pointer_depth);
+                // cerr<<$1->name<<"  ||||  "<<$1->pointer_depth<<endl;
+                // cerr<<$3->name<<"  ||||  "<<$3->pointer_depth<<endl;
+                // cerr<<"find symbol name "<<find_symbol->name<<endl;
+                // cerr<<"find symbol pointer depth "<<find_symbol->pointer_depth<<endl;
                 //3AC code
 				if($3->place.first[0]!='t' && $3->place.first[0]!='&' && $3->place.first[0]!='*' && $3->place.first[0]!='+' && $3->place.first[0]!='-' && $3->place.first[0]!='~' && $3->place.first[0]!='!')
 				{
@@ -893,7 +912,7 @@ declaration
 			parsing_stack.pop();
             pointer_info.pop();
 			if (curr_scope->symbol_map[top_symbol]->type!= ""){
-                if(depth!=count_star(curr_scope->symbol_map[top_symbol]->type)){
+                if(depth!=count_star(curr_scope->symbol_map[top_symbol]->type) && !curr_scope->symbol_map[top_symbol]->is_array){
                     error_list.push_back("Line "+to_string(yylineno)+" : Pointer depth mismatch");
                     flag = 1;
                 }
@@ -906,11 +925,12 @@ declaration
 				
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
                 if(type_priority[$1]>0 && type_priority[curr_scope->symbol_map[top_symbol]->type]>0) curr_scope->symbol_map[top_symbol]->type = priority_to_type[max(type_priority[$1], type_priority[curr_scope->symbol_map[top_symbol]->type])];
-                
+                if(std::string($1).substr(0,6) == "static"){
+                    curr_scope->symbol_map[top_symbol]->is_static = true;
+                }
 				// debug("declaration specifiers121 ", $2->code);
-
 				
-				code=$2->code;
+				code+=$2->code;
 
 			} else {
 				
@@ -921,10 +941,9 @@ declaration
 				if(curr_scope->symbol_map[top_symbol]->is_array) curr_scope->symbol_map[top_symbol]->type+="*";
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
                 curr_scope->symbol_map[top_symbol]->pointer_depth = depth;
-
 				if((curr_scope->symbol_map[top_symbol]->type).substr(0,6)=="struct")
 				{
-					cerr<<"gggggghjjj "<<$1<<endl;
+					// cerr<<"gggggghjjj "<<$1<<endl;
 					string struct_name=(curr_scope->symbol_map[top_symbol]->type).substr(7);
 					if(struct_name.back()=='*') struct_name.pop_back();
 					symbol_info* find_struct=lookup_symbol_global(struct_name, curr_scope);
@@ -953,6 +972,20 @@ declaration
 					
 
 				}
+                if(curr_scope->symbol_map[top_symbol]->is_array){
+                    // debug("in the arr",curr_scope->symbol_map[top_symbol]->type.substr(0,3));
+                    if(curr_scope->symbol_map[top_symbol]->type.substr(0,3)=="int"){
+                        code=code+top_symbol+":= alloc " +to_string(4*curr_scope->symbol_map[top_symbol]->array_length)+"\n";
+                    }
+                    if(curr_scope->symbol_map[top_symbol]->type.substr(0,5)=="float"){
+                        code=code+top_symbol+":= alloc " +to_string(4*curr_scope->symbol_map[top_symbol]->array_length)+"\n";
+                    }
+                    if(curr_scope->symbol_map[top_symbol]->type.substr(0,4)=="char"){
+                        code=code+top_symbol+":= alloc " +to_string(2*curr_scope->symbol_map[top_symbol]->array_length)+"\n";
+                    }
+                    // debug("in the arr",code);
+                    
+                }
 				
 				symbol_info* new_symbol = new symbol_info();
 				new_symbol = new symbol_info($2);
@@ -963,6 +996,7 @@ declaration
 		}
 		// debug("declaration specifiers ", to_string(parsing_stack.size()));
 		$$->code=code;
+        // debug("in the arr11",$$->code);
 		
 		//debug("Declaration: ",curr_scope->symbol_map["p"]->code);
     }
@@ -1006,15 +1040,15 @@ init_declarator
 		curr_scope->symbol_map[$1->name]=new_symbol;
 		curr_scope->symbol_map[$1->name]->name=$1->name;
 		if($1->is_array==true){
-			curr_scope->symbol_map[$1->name]->is_array=true;
+            curr_scope->symbol_map[$1->name]->is_array=true;
 			curr_scope->symbol_map[$1->name]->array_length=$1->array_length;
 			 if($1->type=="int" || $1->type=="float"){
-				// cerr<<"gggg"<<$1->type<<endl;
+                 // cerr<<"gggg"<<$1->type<<endl;
 				string code=$1->name+":= alloc " +to_string(4*$1->array_length);
 				$$->code=code;
 			}
 			else if($1->type=="char"){
-				string code=$1->name+":= alloc " +to_string(2*$1->array_length);
+                string code=$1->name+":= alloc " +to_string(2*$1->array_length);
 				$$->code=code;
 			} 
 		}
@@ -1034,7 +1068,6 @@ init_declarator
 		curr_scope->symbol_map[$1->name]=$3;
 		parsing_stack.push($1->name.c_str());
         pointer_info.push($1->pointer_depth);
-
 		if($1->is_array){
 			if($3->int_array.size() > $1->array_length){
                 error_list.push_back("Line "+to_string(yylineno)+" : Array size mismatch "+$1->name);
@@ -1398,6 +1431,7 @@ initializer
 	: assignment_expression {
 		$1->int_array.push_back($1);
 		$$=$1;
+        // cerr<<$1->name<<"  "<<$1->pointer_depth<<endl;
 	}
 	| LBRACE initializer_list RBRACE {$$ = $2;}
 	| LBRACE initializer_list COMMA RBRACE {$$ = $2;}
@@ -1761,7 +1795,7 @@ jump_statement
 start_symbol: translation_unit
 {
 	//cerr<<"-----------------"<<endl<<$1->code<<"----------------"<<endl;
-    
+    // print_scope_table();
 	print_errors();
 	cleanTAC($1->code);
 }
@@ -1862,12 +1896,12 @@ void print_scope_table(){
     printf("-----------------------------------------------------------------\n");
 	
     for (const auto& it : scope->symbol_map) {
+
         if (!it.second) {  // Check if symbol_info* is null (shouldn't happen after your fix)
             printf("| %-15s | %-20s | %-7s | %-10s |\n",
                    it.first.c_str(), "uninitialized", "N/A", "N/A");
             continue;
         }
-
         std::string valueStr = "N/A";  // Default value
         int size = 0;  // Default size
 
@@ -1887,7 +1921,9 @@ void print_scope_table(){
         } else {
             size = 0;  // Unknown type
         }
-
+        if(it.second->is_static){
+            it.second->type = "static "+it.second->type;
+        }
         printf("| %-15s | %-20s | %-7d | %-10s |\n",
                it.first.c_str(),          // Identifier
                it.second->type.c_str(),   // Type
@@ -1923,5 +1959,4 @@ int main() {
 	curr_scope->symbol_map["printf"]=new_symbol;
 	curr_scope->symbol_map["scanf"]=new_symbol;
 	yyparse();
-	// print_scope_table();
 }
