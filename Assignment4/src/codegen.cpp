@@ -6,26 +6,18 @@
 #include <algorithm>
 #include <cctype>
 #include <map>
+
+#include "../include/utility.h" // Include your utility header
 using namespace std;
 
 // Simulated symbol table structure
-struct symbol_info {
-    string name, type, str_val, return_type, code;
-    void* ptr = nullptr;
-    int symbol_size = 0;
-    bool is_array = false, is_param_list = false, is_return = false;
-    int array_length = 0, parameter_no = 0, pointer_depth = 0;
-    vector<symbol_info*> int_array, struct_attr_values;
-    vector<string> param_types, param_list;
-};
+
 
 // Symbol table type
-struct symbol_table {
-    unordered_map<string, symbol_info*> symbol_map;
-};
 
-map<pair<symbol_table*,string>,string> var_to_reg;
-unordered_map<string,pair<symbol_table*,string>> reg_to_var;
+
+map<pair<scoped_symtab*,string>,string> var_to_reg;
+unordered_map<string,pair<scoped_symtab*,string>> reg_to_var;
 map<string, int> funcStackSize;
 
 // --- Global Variables ---
@@ -51,7 +43,7 @@ bool isConstantLiteral(const string& s) {
     return !s.empty() && all_of(s.begin(), s.end(), ::isdigit);
 }
 
-string getRegister(symbol_table* scope,const string& var) {
+string getRegister(scoped_symtab* scope,const string& var) {
     if(var_to_reg.count({scope,var})) {
         return var_to_reg[{scope,var}];
     }
@@ -104,7 +96,7 @@ void generate_return_MIPS(string val) {
 }
 
 // --- Operation/Assignment Handlers ---
-void load_if_constant(symbol_table* scope, const string& var, const string& reg) {
+void load_if_constant(scoped_symtab* scope, const string& var, const string& reg) {
     if (loadedConstants[var]) return;
     if(isConstantLiteral(var)) {
         if(reg_of_const.count(var)) {
@@ -129,7 +121,7 @@ void load_if_constant(symbol_table* scope, const string& var, const string& reg)
     
 }
 
-void handle_operation(string lhs, string rhs, size_t operator_pos, const string& opp, symbol_table* scope) {
+void handle_operation(string lhs, string rhs, size_t operator_pos, const string& opp, scoped_symtab* scope) {
     cout<<"Handling operation: " << lhs << " := " << rhs << endl;
     string op1 = trim(rhs.substr(0, operator_pos));
     string op2 = trim(rhs.substr(operator_pos + opp.size()));
@@ -148,10 +140,24 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
         mipsCode.push_back("    div " + r1 + ", " + r2);
         mipsCode.push_back("    mflo " + rd);
     }
-    // Extend here with ==, !=, <, etc.
+    else if(opp=="=="){
+        mipsCode.push_back("    seq " + rd + ", " + r1 + ", " + r2);
+    }
+    else if (opp == "!=") mipsCode.push_back("    sne " + rd + ", " + r1 + ", " + r2);
+    else if (opp == "<")  mipsCode.push_back("    slt " + rd + ", " + r1 + ", " + r2);
+    else if (opp == "<=") {
+        mipsCode.push_back("    slt " + rd + ", " + r2 + ", " + r1);
+        mipsCode.push_back("    xori " + rd + ", " + rd + ", 1");
+    }
+    else if (opp == ">")  mipsCode.push_back("    slt " + rd + ", " + r2 + ", " + r1);
+    else if (opp == ">=") {
+        mipsCode.push_back("    slt " + rd + ", " + r1 + ", " + r2);
+        mipsCode.push_back("    xori " + rd + ", " + rd + ", 1");
+    }
+
 }
 
-void handle_assignment(string lhs, string rhs, symbol_table* scope) {
+void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
     cout<<"Handling assignment: " << lhs << " := " << rhs << endl;
     string dst = getRegister(scope,lhs);
     if (isConstantLiteral(rhs)) {
@@ -194,7 +200,7 @@ int get_size_from_type(string type) {
     else if(type == "bool")return 1;
 }
 
-int calculate_function_stack_size(symbol_table* scope) {
+int calculate_function_stack_size(scoped_symtab* scope) {
     int size = 0;
 
     for (const auto& [name, sym] : scope->symbol_map) {
@@ -206,7 +212,7 @@ int calculate_function_stack_size(symbol_table* scope) {
     return size;
 }
 
-void pass1(vector<pair<string, symbol_table*>>& codeList){
+void pass1(vector<pair<string, scoped_symtab*>>& codeList){
     for(auto &code : codeList){
         string t = trim(code.first);
         if(t.empty()){
@@ -214,7 +220,7 @@ void pass1(vector<pair<string, symbol_table*>>& codeList){
         }
         else{
             if(t.rfind("FUNC_BEGIN", 0) == 0){
-                symbol_table* scope = code.second;
+                scoped_symtab* scope = code.second;
                 int stack_size = calculate_function_stack_size(scope);
                 istringstream iss(t);
                 string dummy, funcName;
@@ -227,7 +233,7 @@ void pass1(vector<pair<string, symbol_table*>>& codeList){
 }
 
 
-void pass2(vector<pair<string, symbol_table*>>& codeList){
+void pass2(vector<pair<string, scoped_symtab*>>& codeList){
     for(auto &code : codeList){
         string t = trim(code.first);
         cout << t << "\n";
@@ -254,6 +260,24 @@ void pass2(vector<pair<string, symbol_table*>>& codeList){
                 iss >> keyword >> val;
                 generate_return_MIPS(val);
             }
+            else if (t.rfind("if(", 0) == 0 && t.find("goto") != string::npos) {
+                size_t start = t.find('(') + 1;
+                size_t end = t.find(')');
+                string condition = t.substr(start, end - start);
+                string label = trim(t.substr(t.find("goto") + 4));
+                cout<<"Condition: " << condition << ", Label: " << label << endl;
+                string reg = getRegister(code.second, condition);
+                load_if_constant(code.second, condition, reg);
+                mipsCode.push_back("    bnez " + reg + ", " + label);
+            }
+            else if (t.rfind("goto", 0) == 0) {
+                string label = trim(t.substr(4));
+                mipsCode.push_back("    j " + label);
+            }
+            else if (t.back() == ':' && isalpha(t[0])) {
+                // Handle labels like LABEL0:
+                mipsCode.push_back(t);
+            }
             if (t.find(":=") != string::npos) {
                 size_t lhsEnd = t.find(":=");
                 string lhs = trim(t.substr(0, lhsEnd));
@@ -267,61 +291,40 @@ void pass2(vector<pair<string, symbol_table*>>& codeList){
     }
 }
 
+bool isAddress(const std::string& token) {
+    return token.size() > 2 && token[0] == '0' && token[1] == 'x';
+}
 
 
-// --- Main MIPS Generator per line ---
-// void generateMIPS(const string& line, symbol_table* scope) {
-//     cout<<"Processing line: " << line << endl;
-//     string trimmed = trim(line);
-//     if (trimmed.find("FUNC_BEGIN") == 0) return generate_func_begin_MIPS(trimmed);
-//     if (trimmed.find("FUNC_END") == 0) return generate_func_end_MIPS(trimmed);
-//     if (trimmed.find("RETURN") == 0) return generate_return_MIPS(trimmed);
+void codegen_main() {
 
-//     if (trimmed.find(":=") != string::npos) {
-//         size_t lhsEnd = trimmed.find(":=");
-//         string lhs = trim(trimmed.substr(0, lhsEnd));
-//         string rhs = trim(trimmed.substr(lhsEnd + 2));
+    std::ifstream infile("output/output1.txt");  // Replace with your file path
+    if (!infile.is_open()) {
+        std::cerr << "Failed to open the file.\n";
+        return;
+    }
 
-//         auto [opPos, opp] = find_operator(rhs);
-//         if (opPos != string::npos) handle_operation(lhs, rhs, opPos, opp, scope);
-//         else handle_assignment(lhs, rhs, scope);
-//     }
-// }
+    std::vector<std::pair<std::string,scoped_symtab*>> codeList;
+    std::string line;
 
-// --- Main ---
-int main() {
-    // Simulated 3AC input with dummy symbol_table*
-    vector<pair<string, symbol_table*>> codeList;
+    while (std::getline(infile, line)) {
+        std::istringstream iss(line);
+        std::string addressStr;
+        if (!(iss >> addressStr) || !isAddress(addressStr)) {
+            continue; // skip invalid address
+        }
 
-    // Example symbol table with values
-    auto* globalScope = new symbol_table();
-    int a_val = 2, b_val = 3;
-    globalScope->symbol_map["d"] = new symbol_info{"d", "int"};
-    globalScope->symbol_map["e"] = new symbol_info{"e", "int"};
-    globalScope->symbol_map["d"]->ptr = &a_val;
-    globalScope->symbol_map["e"]->ptr = &b_val;
-    globalScope->symbol_map["a"] = new symbol_info{"a", "int"};
-    globalScope->symbol_map["b"] = new symbol_info{"b", "int"};
+        // Convert hex string to pointer
+        scoped_symtab* address = reinterpret_cast<scoped_symtab*>(std::stoull(addressStr, nullptr, 16));
 
+        std::string restOfLine;
+        std::getline(iss, restOfLine);
+        if (!restOfLine.empty() && restOfLine[0] == ' ')
+            restOfLine = restOfLine.substr(1); // remove leading space
 
-    // Example 3AC with symbol table per line
-    // codeList.push_back({"FUNC_BEGIN main", globalScope});
-    // codeList.push_back({"a := 3", globalScope});
-    // codeList.push_back({"b := 3", globalScope});
-    // codeList.push_back({"c := a", globalScope});
-    // codeList.push_back({"d := b + a", globalScope});
-    // codeList.push_back({"e := d + c", globalScope});
-    // codeList.push_back({"RETURN 0", globalScope});
-    // codeList.push_back({"FUNC_END main", globalScope});
-    codeList.push_back({"FUNC_BEGIN add", globalScope});
-    codeList.push_back({"d := 2", globalScope});
-    codeList.push_back({"e := 3", globalScope});
-    codeList.push_back({"RETURN d + e", globalScope});
-    codeList.push_back({"FUNC_END add", globalScope});
+        codeList.emplace_back(restOfLine, address);
+    }
 
-    // for (const auto& [code, scope] : codeList) {
-    //     generateMIPS(code, scope);
-    // }
     pass1(codeList);
     pass2(codeList);
 
@@ -330,5 +333,5 @@ int main() {
         cout << line << endl;
     }
 
-    return 0;
+    return;
 }

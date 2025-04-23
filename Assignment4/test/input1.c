@@ -1,15 +1,11 @@
-int add(){
-    int x = 0;
-    int y=x+6;
-    int z=x*y-9;
-    return z;
-}
+
 int main(){
-    int k=add();
-    int i=add();
-    return 0;
-    while(1){
-        int i=0;
-        i++;
+    int a = 2;
+    if(a==3){
+        int b=4;
     }
+    else{
+        int c=5;
+    }
+    return 0;
 }

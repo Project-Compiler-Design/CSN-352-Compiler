@@ -6,6 +6,7 @@
 
     void yyerror(const char *s);
 	void print_errors();
+	void codegen_main();
 
     extern int yylex();
     extern int yylineno;
@@ -1993,10 +1994,10 @@ start_symbol: translation_unit
 	//cerr<<"-----------------"<<endl<<$1->code<<"----------------"<<endl;
     
 	print_errors();
-	cleanTAC($1->code);
-    cerr<<endl<<endl<<endl;
+	// cleanTAC($1->code);
+    // cerr<<endl<<endl<<endl;
     cleaned_TAC=clean_vector_TAC($1->final_code);
-    print_vector($1->final_code);
+	print_vector(cleaned_TAC);
 }
 ;
 translation_unit
@@ -2164,5 +2165,6 @@ int main() {
 	curr_scope->symbol_map["printf"]=new_symbol;
 	curr_scope->symbol_map["scanf"]=new_symbol;
 	yyparse();
+	codegen_main();
 	// print_scope_table(); 
 }

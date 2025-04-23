@@ -208,12 +208,12 @@ vector<pair<string, scoped_symtab*>> clean_vector_TAC(vector<pair<string, scoped
             continue;
 
         // Output for debug (optional)
-        cerr << lineno << ".  "<<scope<<"          ";
-        if (!line.empty() && (line.back() == ':' || line.substr(0, 4) == "FUNC")) {
-            cerr << line << endl;
-        } else {
-            cerr << "    " << line << endl;
-        }
+        // cerr << lineno << ".  "<<scope<<"          ";
+        // if (!line.empty() && (line.back() == ':' || line.substr(0, 4) == "FUNC")) {
+        //     cerr << line << endl;
+        // } else {
+        //     cerr << "    " << line << endl;
+        // }
 
         cleaned_TAC.emplace_back(line, scope);
         lineno++;
@@ -224,7 +224,7 @@ vector<pair<string, scoped_symtab*>> clean_vector_TAC(vector<pair<string, scoped
 
 void print_vector(const vector<pair<string,scoped_symtab*>>& vec) {
     for (const auto& pair : vec) {
-        cerr<<" "<<pair.first<<endl;
+        cerr<<pair.second<<" "<<pair.first<<endl;
     }
 }
 
