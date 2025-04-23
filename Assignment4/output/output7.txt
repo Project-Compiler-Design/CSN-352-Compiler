@@ -1,0 +1,248 @@
+======================================================================
+No Errors in the code
+Intermediate code generated successfully
+======================================================================
+1.      global_var:= 100
+2.  FUNC_BEGIN add
+3.      param0 := PARAM
+4.      param1 := PARAM
+5.      a := param0
+6.      b := param1
+7.      t0:=  a+b
+8.      RETURN t0
+9.  FUNC_END add
+10.  FUNC_BEGIN divide
+11.      param0 := PARAM
+12.      param1 := PARAM
+13.      a := param0
+14.      b := param1
+15.      t1:=  b==0
+16.      if(t1) goto LABEL0
+17.      goto LABEL1
+18.  LABEL0:
+19.      "Error: divide by zero\n"
+20.      PARAM "Error: divide by zero\n"
+21.      t2:= CALL printf,1
+22.      0.000000
+23.      RETURN 0.000000
+24.  LABEL1:
+25.      t3:=  a/b
+26.      RETURN t3
+27.  FUNC_END divide
+28.  FUNC_BEGIN max_in_array
+29.      param0 := PARAM
+30.      param1 := PARAM
+31.      arr := param0
+32.      size := param1
+33.      RETURN 0
+34.  FUNC_END max_in_array
+35.  FUNC_BEGIN print_array
+36.      param0 := PARAM
+37.      param1 := PARAM
+38.      arr := param0
+39.      size := param1
+40.      "\n"
+41.      PARAM "\n"
+42.      t4:= CALL printf,1
+43.      RETURN
+44.  FUNC_END print_array
+45.  FUNC_BEGIN initialize_array
+46.      param0 := PARAM
+47.      param1 := PARAM
+48.      param2 := PARAM
+49.      arr := param0
+50.      size := param1
+51.      value := param2
+52.      RETURN
+53.  FUNC_END initialize_array
+54.  FUNC_BEGIN factorial
+55.      param0 := PARAM
+56.      n := param0
+57.      t5:=  n<0
+58.      if(t5) goto LABEL2
+59.      goto LABEL3
+60.  LABEL2:
+61.      -1
+62.      RETURN -1
+63.  LABEL3:
+64.      t6:=  n==0
+65.      if(t6) goto LABEL4
+66.      goto LABEL5
+67.  LABEL4:
+68.      RETURN 1
+69.  LABEL5:
+70.      t7:=  n-1
+71.      PARAM t7
+72.      t8:= CALL factorial,1
+73.      t9:=  n*t8
+74.      RETURN t9
+75.  FUNC_END factorial
+76.  FUNC_BEGIN create_point
+77.      param0 := PARAM
+78.      param1 := PARAM
+79.      x := param0
+80.      y := param1
+81.      p:= alloc 8
+82.      t10:= p+0
+83.      *t10:= x
+84.      t11:= p+4
+85.      *t11:= y
+86.      RETURN p
+87.  FUNC_END create_point
+88.  FUNC_BEGIN print_point
+89.      param0 := PARAM
+90.      p := param0
+91.      "Point: (%d, %d)\n"
+92.      PARAM "Point: (%d, %d)\n"
+93.      PARAM p
+94.      PARAM p
+95.      t12:= CALL printf,3
+96.      RETURN
+97.  FUNC_END print_point
+98.  FUNC_BEGIN main
+99.      a:= 10
+100.      b:= 5
+101.      PARAM a
+102.      PARAM b
+103.      t13:= CALL add,2
+104.      sum:= t13
+105.      "Sum: %d\n"
+106.      PARAM "Sum: %d\n"
+107.      PARAM sum
+108.      t14:= CALL printf,2
+109.      PARAM a
+110.      PARAM b
+111.      t15:= CALL divide,2
+112.      result:= t15
+113.      "Division: %.2f\n"
+114.      PARAM "Division: %.2f\n"
+115.      PARAM result
+116.      t16:= CALL printf,2
+117.      arr:= alloc 20
+118.      t17:= 0*4
+119.      *( arr + t17 ):= 1
+120.      t18:= 1*4
+121.      *( arr + t18 ):= 7
+122.      t19:= 2*4
+123.      *( arr + t19 ):= 3
+124.      t20:= 3*4
+125.      *( arr + t20 ):= 9
+126.      t21:= 4*4
+127.      *( arr + t21 ):= 2
+128.      PARAM arr
+129.      PARAM 5
+130.      CALL print_array,2
+131.      PARAM arr
+132.      PARAM 5
+133.      t23:= CALL max_in_array,2
+134.      max_val:= t23
+135.      "Max value: %d\n"
+136.      PARAM "Max value: %d\n"
+137.      PARAM max_val
+138.      t24:= CALL printf,2
+139.      "Initialized global array (first 5 values): "
+140.      PARAM "Initialized global array (first 5 values): "
+141.      t25:= CALL printf,1
+142.      PARAM 5
+143.      t26:= CALL factorial,1
+144.      fact:= t26
+145.      "Factorial of 5: %d\n"
+146.      PARAM "Factorial of 5: %d\n"
+147.      PARAM fact
+148.      t27:= CALL printf,2
+149.      PARAM 3
+150.      PARAM 4
+151.      t28:= CALL create_point,2
+152.      pt:= t28
+153.      PARAM &pt
+154.      CALL print_point,1
+155.      i:= 100
+156.      i:=  0
+157.  LABEL6:
+158.      t30:=  i<3
+159.      if(t30) goto LABEL8
+160.      goto LABEL7
+161.  LABEL8:
+162.      "Loop i: %d\n"
+163.      PARAM "Loop i: %d\n"
+164.      PARAM i
+165.      t31:= CALL printf,2
+166.      i:=  i+1
+167.      goto LABEL6
+168.  LABEL7:
+169.      "Outer i: %d\n"
+170.      PARAM "Outer i: %d\n"
+171.      PARAM i
+172.      t32:= CALL printf,2
+173.      ptr:= &sum
+174.      "Value via pointer: %d\n"
+175.      PARAM "Value via pointer: %d\n"
+176.      PARAM *ptr
+177.      t33:= CALL printf,2
+178.      RETURN 0
+179.  FUNC_END main
+======================================================================
+Printing scope table
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| Point           | struct               | 0       | N/A        |
+| add             | int                  | 4       | N/A        |
+| create_point    | struct Point         | 0       | N/A        |
+| divide          | float                | 4       | N/A        |
+| factorial       | int                  | 4       | N/A        |
+| global_var      | int                  | 4       | 100        |
+| initialize_array | void                 | 0       | N/A        |
+| main            | int                  | 4       | N/A        |
+| max_in_array    | int                  | 4       | N/A        |
+| print_array     | void                 | 0       | N/A        |
+| print_point     | void                 | 0       | N/A        |
+| printf          |                      | 0       | N/A        |
+| scanf           |                      | 0       | N/A        |
+| x               | int                  | 4       | N/A        |
+| y               | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| a               | int                  | 4       | N/A        |
+| b               | int                  | 4       | N/A        |
+| t0              | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| t2              |                      | 0       | N/A        |
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| a               | int                  | 4       | N/A        |
+| b               | int                  | 4       | N/A        |
+| t1              | int                  | 4       | N/A        |
+| t3              | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| arr             | int                  | 4       | N/A        |
+| size            | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| arr             | int                  | 4       | N/A        |
+| size            | int                  | 4       | N/A        |
+| t4              |                      | 0       | N/A        |
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| arr             | int                  | 4       | N/A        |
+| size            | int                  | 4       | N/A        |
+| value           | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| n
