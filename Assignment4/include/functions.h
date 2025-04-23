@@ -175,6 +175,59 @@ void cleanTAC(string input) {
     // cout << "Cleaning complete! Check " << endl;
 }
 
+
+
+bool isSingleFloat(const string& line) {
+    return regex_match(line, regex("^[0-9]*\\.[0-9]+$"));
+}
+
+bool isSingleStringLiteral(const string& line) {
+    return regex_match(line, regex("^\".*\"$"));
+}
+
+
+
+vector<pair<string, scoped_symtab*>> clean_vector_TAC(vector<pair<string, scoped_symtab*>> input) {
+    vector<pair<string, scoped_symtab*>> cleaned_TAC;
+    int lineno = 1;
+
+    for (auto& entry : input) {
+        string line = entry.first;
+        scoped_symtab* scope = entry.second;
+
+        // Trim leading and trailing whitespace
+        while (!line.empty() && isspace(line.front())) line.erase(line.begin());
+        while (!line.empty() && isspace(line.back())) line.pop_back();
+
+        // Skip lines that are empty or contain only a number, float, or string literal
+        if (line.empty() || isSingleNumber(line) || isSingleFloat(line) || isSingleStringLiteral(line))
+            continue;
+
+        // Skip lines with only pointer/address-of expression and no assignment
+        if (startsWithPointerOrAddress(line) && line.find('=') == string::npos)
+            continue;
+
+        // Output for debug (optional)
+        cerr << lineno << ".  "<<scope<<"          ";
+        if (!line.empty() && (line.back() == ':' || line.substr(0, 4) == "FUNC")) {
+            cerr << line << endl;
+        } else {
+            cerr << "    " << line << endl;
+        }
+
+        cleaned_TAC.emplace_back(line, scope);
+        lineno++;
+    }
+
+    return cleaned_TAC;
+}
+
+void print_vector(const vector<pair<string,scoped_symtab*>>& vec) {
+    for (const auto& pair : vec) {
+        cerr<<" "<<pair.first<<endl;
+    }
+}
+
 string replace_break_continue(string original_code,string end_label,string update_label,int i){
     string new_code = original_code;
     int flag=0;
@@ -195,6 +248,36 @@ string replace_break_continue(string original_code,string end_label,string updat
         new_code.replace(pos, update_label.length()+1, "\n");
         flag=1;
     }
+    }
+    return new_code;
+}
+
+vector<pair<string,scoped_symtab*>> replace_break_continue_final(vector<pair<string,scoped_symtab*>> original_code,string end_label,string update_label,int i){
+    vector<pair<string,scoped_symtab*>> new_code;
+    for(int j=0;j<original_code.size();j++){
+        string code=original_code[j].first;
+        scoped_symtab* curr_scope2=original_code[j].second;
+        string new_code_str = code;
+        int flag=0;
+        size_t pos = 0;
+        while ((pos = new_code_str.find("break")) != std::string::npos) {
+            new_code_str.replace(pos, 5, "goto " + end_label + "\n");
+        }
+
+        pos = 0;
+        while ((pos = new_code_str.find("continue")) != std::string::npos) {
+            new_code_str.replace(pos, 8, "goto " + update_label + "\n");
+            flag=1;
+        }
+        if(flag==0 && i==0)
+        {
+            pos=0;
+            while ((pos = new_code_str.find(update_label)) != std::string::npos) {
+            new_code_str.replace(pos, update_label.length()+1, "\n");
+            flag=1;
+        }
+        }
+        new_code.push_back({new_code_str,curr_scope2});
     }
     return new_code;
 }
@@ -228,6 +311,24 @@ string remove_equal(string s) {
         }
     }
     string temp = s.substr(0, lastpos+1);
+    int index=lastpos;
+    while(s[index]!='=') index++;
+    index++;
+    while(index<s.length()){
+        temp+=s[index];
+        index++;
+    }
+    return temp;
+}
+
+string find_last_line(string s){
+    int lastpos=-1;
+    for(int i=0;i<s.length();i++){
+        if(s[i]=='\n'){
+            lastpos=i;
+        }
+    }
+    string temp = "";
     int index=lastpos;
     while(s[index]!='=') index++;
     index++;

@@ -11,6 +11,8 @@
     extern int yylineno;
     extern char *yytext; 
 
+    vector<pair<string,scoped_symtab*>> cleaned_TAC;
+
 	std::stack<std::string> parsing_stack;
     std::stack<int> pointer_info;
 	std::map<std::string,std::string> type_def_mapping;
@@ -135,7 +137,10 @@ primary_expression
 		new_symbol->place=newtemp($2->type,curr_scope);
 		new_symbol->type=$2->type;
 		// debug("here ",new_symbol->place.first);
-		new_symbol->code=$2->code+"\n"+new_symbol->place.first+":= ("+$2->place.first+")";
+        string temp=new_symbol->place.first+" := ( "+$2->place.first+" )";
+        new_symbol->final_code = $2->final_code;
+        new_symbol->final_code.push_back({temp,curr_scope});
+		new_symbol->code=$2->code+"\n"+temp;
 		$$=new_symbol;
 	}
 	;
@@ -159,18 +164,27 @@ postfix_expression
 			else{
                 string code=$3->code;
                 qid temp=newtemp(find_symbol->type,curr_scope);
+                string add_str="";
                 if(find_symbol->type=="int"){
-					code=code+"\n"+temp.first+":= "+"4 * "+$3->place.first;
+                    add_str=temp.first+" := "+"4 * "+$3->place.first;
+					// code=code+"\n"+temp.first+":= "+"4 * "+$3->place.first;
 				}
 				else if(find_symbol->type=="float"){
-					code=code+"\n"+temp.first+":= "+"4 * "+$3->place.first;
+                    add_str=temp.first+" := "+"4 * "+$3->place.first;
+					// code=code+"\n"+temp.first+":= "+"4 * "+$3->place.first;
 				}
 				else if(find_symbol->type=="char"){
-					code=code+"\n"+temp.first+":= "+"2 * "+$3->place.first;
+                    add_str=temp.first+" := "+"2 * "+$3->place.first;
+					// code=code+"\n"+temp.first+":= "+"2 * "+$3->place.first;
 				}
 
                 qid temp2=newtemp(find_symbol->type,curr_scope);
-                code=code+"\n"+temp2.first+":= *("+$1->place.first+" + "+temp.first+")";
+                $$->final_code = $3->final_code;
+                $$->final_code.push_back({add_str,curr_scope});
+                code = code + "\n" + add_str;
+                add_str = temp2.first+" := *( "+$1->place.first+" + "+temp.first+" )";
+                $$->final_code.push_back({add_str,curr_scope});
+                code=code+"\n"+add_str;
                 $$->code=code;
                 $$->place.first=temp2.first;
 			}
@@ -197,12 +211,18 @@ postfix_expression
         }
             qid temp=newtemp($1->type,curr_scope);
             if(find_symbol->type!="void"){
-                $$->code=$1->code + temp.first+":= CALL "+$1->place.first + "\n";
+                $$->final_code = $1->final_code;
+                string add_str=$1->code + temp.first+" := CALL "+$1->place.first;
+                $$->code=add_str + "\n";
+                $$->final_code.push_back({add_str,curr_scope});
                 $$->place=temp;
                 $$->type=find_symbol->type;
             }
             else{
-                $$->code=$1->code + "CALL "+$1->place.first + "\n";
+                $$->final_code = $1->final_code;
+                string add_str=$1->code + "CALL "+$1->place.first;
+                $$->code=add_str + "\n";
+                $$->final_code.push_back({add_str,curr_scope});
                 $$->type=find_symbol->type;
             }
 			
@@ -233,16 +253,28 @@ postfix_expression
 			}
 			qid temp=newtemp($1->type,curr_scope);
 			string middle="";
+            vector<pair<string,scoped_symtab*>> temp_list;
 			for(int i=0;i<$3->param_list.size();i++){
 				middle=middle+"PARAM "+$3->param_list[i]+"\n";
+                temp_list.push_back({"PARAM "+$3->param_list[i],curr_scope});                
 			}
             if(find_symbol->type!="void"){
-                // debug("idhar",$1->code);   
-                $$->code=$1->code + "\n"+ $3->code + "\n"+ middle + temp.first+":= CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
+                // debug("idhar",$1->code);  
+                $$->final_code = $1->final_code;
+                $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+                string add_str = middle + temp.first+" := CALL "+$1->place.first + ","+to_string($3->param_list.size());
+                $$->code=$1->code + "\n"+ $3->code + "\n"+ add_str + "\n";
+                $$->final_code.insert($$->final_code.end(), temp_list.begin(), temp_list.end());
+                $$->final_code.push_back({temp.first+" := CALL "+$1->place.first + ","+to_string($3->param_list.size()),curr_scope});
                 $$->place=temp;
                 $$->type=find_symbol->type;
             }else{
-                $$->code=$1->code + "\n"+ $3->code + "\n"+middle + "CALL "+$1->place.first + ","+to_string($3->param_list.size()) + "\n";
+                $$->final_code = $1->final_code;
+                $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+                string add_str = middle + "CALL "+$1->place.first + ","+to_string($3->param_list.size());   
+                $$->final_code.insert($$->final_code.end(), temp_list.begin(), temp_list.end());
+                $$->final_code.push_back({"CALL "+$1->place.first + ","+to_string($3->param_list.size()),curr_scope});
+                $$->code=$1->code + "\n"+ $3->code + "\n"+add_str + "\n";
                 $$->type=find_symbol->type;
             }
         }
@@ -322,18 +354,35 @@ postfix_expression
 	{
 		if($1->is_array==true){
 			string code = get_last_line($1->code);
-			$$->code=$1->code + "\n" + code + ":= "+code+"+1\n";
+			
+            string add_str=code+" := "+code+" + 1";
+            $$->code=$1->code + "\n" + add_str + "\n";
+            $$->final_code = $1->final_code;
+            $$->final_code.push_back({add_str,curr_scope});
 		}
-		else  $$->code=$1->code + "\n" + $1->place.first+":=  "+$1->place.first+"+1";
+		else  {
+            $$->final_code = $1->final_code;
+            string add_str= $1->place.first+" :=  "+$1->place.first+" + 1 ";
+            $$->code=$1->code + "\n" + add_str + "\n";
+            $$->final_code.push_back({add_str,curr_scope});
+        }
 		
 	}
 	| postfix_expression DECREMENT
 	{
 		if($1->is_array==true){
 			string code = get_last_line($1->code);
-			$$->code=$1->code + "\n" + code + ":= "+code+"-1\n";
+            string add_str=code + " := "+code+" - 1 ";
+			$$->code=$1->code + "\n" + add_str+"\n";
+            $$->final_code = $1->final_code;
+            $$->final_code.push_back({add_str,curr_scope});
 		}
-		else  $$->code=$1->code + "\n" + $1->place.first+":=  "+$1->place.first+"-1";
+		else  {
+            string add_str= $1->place.first+" :=  "+$1->place.first+" - 1 ";
+            $$->final_code = $1->final_code;
+            $$->code=$1->code + "\n" + add_str + "\n";
+            $$->final_code.push_back({add_str,curr_scope});
+        }
 	}
 	;
 
@@ -343,6 +392,7 @@ argument_expression_list
 		if($1->place.first!=""){
 			// debug("herrrr ", $1->code);
 			$$->code=$1->code;
+            $$->final_code = $1->final_code;
 			$$->param_types.push_back($1->type);
 			$$->param_list.push_back($1->place.first);
 		}
@@ -373,6 +423,8 @@ argument_expression_list
 
         { 
 			if($3->place.first!=""){
+                $$->final_code = $1->final_code;
+                $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
 				$$->code=$1->code + "\n" + $3->code;
 				//debug("herrrrrrrrrrr ", $3->place.first);
 				$$->param_types.push_back($1->type);
@@ -429,7 +481,10 @@ unary_expression
         }
 		
 		$$->name=$2->name;
-		$$->code=$2->code+"\n"+$1->code+$2->place.first;
+        string add_str=$1->code+$2->place.first;
+        $$->final_code = $2->final_code;
+        $$->final_code.push_back({add_str,curr_scope});
+		$$->code=$2->code+"\n"+add_str+"\n";
 		$$->place.first=$1->code+$2->place.first;
 	}
 	| SIZEOF unary_expression
@@ -500,7 +555,11 @@ multiplicative_expression
         $$ = $1;
         $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"*"+$3->place.first;
+        string add_str=var.first+" :=  "+$1->place.first+" * "+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        $$->final_code.push_back({add_str,curr_scope});
+		$$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
 		$$->place=var;
 	}
 	| multiplicative_expression DIVIDE cast_expression
@@ -508,7 +567,11 @@ multiplicative_expression
         $$ = $1;
         $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
         qid var=newtemp($1->type,curr_scope);
-        $$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"/"+$3->place.first;
+        string add_str=var.first+" :=  "+$1->place.first+" / "+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        $$->final_code.push_back({add_str,curr_scope});
+        $$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
         $$->place=var;
     }
 	| multiplicative_expression MODULO cast_expression
@@ -519,7 +582,11 @@ multiplicative_expression
             error_list.push_back("Line "+to_string(yylineno)+" : Modulo operator can only be used with int type");
         }
         qid var=newtemp($1->type,curr_scope);
-        $$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"%"+$3->place.first;
+        string add_str=var.first+" :=  "+$1->place.first+" % "+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        $$->final_code.push_back({add_str,curr_scope});
+        $$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
         $$->place=var;
     }
 	;
@@ -531,7 +598,11 @@ additive_expression
         $$ = $1;
         $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"+"+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        string add_str=var.first+" :=  "+$1->place.first+" + "+$3->place.first + "\n";
+        $$->final_code.push_back({add_str,curr_scope});
+		$$->code=$1->code + "\n" + $3->code +"\n" + add_str;
 		$$->place=var;
 	}
 	| additive_expression MINUS multiplicative_expression
@@ -539,7 +610,11 @@ additive_expression
         $$ = $1;
         $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"-"+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        string add_str=var.first+" :=  "+$1->place.first+" - "+$3->place.first + "\n";
+        $$->final_code.push_back({add_str,curr_scope});
+		$$->code=$1->code + "\n" + $3->code +"\n" + add_str;
 		$$->place=var;
 	}
 	;
@@ -554,7 +629,10 @@ shift_expression
             error_list.push_back("Line "+to_string(yylineno)+" : Left shift operator can only be used with int type");
         }
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"<<"+$3->place.first;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        string add_str=var.first+" :=  "+$1->place.first+" << "+$3->place.first;
+        $$->final_code.push_back({add_str,curr_scope});
+		$$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
 		$$->place=var;
 	}
 	| shift_expression RIGHT_SHIFT additive_expression
@@ -565,7 +643,10 @@ shift_expression
             error_list.push_back("Line "+to_string(yylineno)+" : Right shift operator can only be used with int type");
         }
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+">>"+$3->place.first;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        string add_str=var.first+" :=  "+$1->place.first+" >> "+$3->place.first;
+        $$->final_code.push_back({add_str,curr_scope});
+		$$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
 		$$->place=var;
 	}
 	;
@@ -577,7 +658,11 @@ relational_expression
         $$ = $1;
         $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"<"+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        string add_str=var.first+" :=  "+$1->place.first+" < "+$3->place.first;
+        $$->final_code.push_back({add_str,curr_scope});
+		$$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
 		$$->place=var;
 	}
 	| relational_expression GREATER_THAN shift_expression
@@ -585,7 +670,11 @@ relational_expression
         $$ = $1;
         $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];        
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+">"+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        string add_str=var.first+" :=  "+$1->place.first+" > "+$3->place.first;
+        $$->final_code.push_back({add_str,curr_scope});
+		$$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
 		$$->place=var;
 	}
 	| relational_expression LESS_EQUALS shift_expression
@@ -593,7 +682,11 @@ relational_expression
         $$ = $1;
         $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"<="+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        string add_str=var.first+" :=  "+$1->place.first+" <= "+$3->place.first;
+        $$->final_code.push_back({add_str,curr_scope});
+        $$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
 		$$->place=var;
 	
 	}
@@ -602,7 +695,11 @@ relational_expression
         $$ = $1;
         $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+">="+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        string add_str=var.first+" :=  "+$1->place.first+" >= "+$3->place.first;
+        $$->final_code.push_back({add_str,curr_scope});
+        $$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
 		$$->place=var;
 	}
 	;
@@ -614,7 +711,11 @@ equality_expression
         $$ = $1;
         $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"=="+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        string add_str=var.first+" :=  "+$1->place.first+" == "+$3->place.first;
+        $$->final_code.push_back({add_str,curr_scope});
+        $$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
 		$$->place=var;
 	}
 	| equality_expression REL_NOT_EQ relational_expression
@@ -622,7 +723,11 @@ equality_expression
         $$ = $1;
         $$->type = priority_to_type[max(type_priority[$1->type],type_priority[$3->type])];
 		qid var=newtemp($1->type,curr_scope);
-		$$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"!="+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        string add_str=var.first+" :=  "+$1->place.first+" != "+$3->place.first;
+        $$->final_code.push_back({add_str,curr_scope});
+        $$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
 		$$->place=var;
 	}
 	;
@@ -649,7 +754,11 @@ exclusive_or_expression
             error_list.push_back("Line "+to_string(yylineno)+" : XOR operator can only be used with int type");
         }
         qid var=newtemp($1->type,curr_scope);
-        $$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"^"+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        string add_str=var.first+" :=  "+$1->place.first+" ^ "+$3->place.first;
+        $$->final_code.push_back({add_str,curr_scope});
+        $$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
         $$->place=var;
     }
 	;
@@ -664,7 +773,11 @@ inclusive_or_expression
             error_list.push_back("Line "+to_string(yylineno)+" : OR operator can only be used with int type");
         }
         qid var=newtemp($1->type,curr_scope);
-        $$->code=$1->code + "\n" + $3->code +"\n" + var.first+":=  "+$1->place.first+"|"+$3->place.first;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        string add_str=var.first+" :=  "+$1->place.first+" | "+$3->place.first;
+        $$->final_code.push_back({add_str,curr_scope});
+        $$->code=$1->code + "\n" + $3->code +"\n" + add_str + "\n";
         $$->place=var;
     }
 	;
@@ -722,11 +835,17 @@ assignment_expression
                     //checkerror
 					//3AC code kabhi toh karenge
 					qid var=newtemp(find_symbol->type,curr_scope);
+                    $$->final_code = $1->final_code;
+                    $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+                    string add_str=var.first+" := "+$1->place.first+" + "+offset;
 					string tempo="";
 					tempo=tempo+$1->code;
 					tempo=tempo+"\n"+$3->code;
-					tempo=tempo+"\n"+var.first+":= "+$1->place.first+"+"+offset;
-					tempo=tempo+"\n*"+var.first+":= "+$3->place.first;
+					tempo=tempo+"\n"+add_str;
+                    $$->final_code.push_back({add_str,curr_scope});
+                    add_str="*"+var.first+" := "+$3->place.first;
+					tempo=tempo+"\n"+add_str + "\n";
+                    $$->final_code.push_back({add_str,curr_scope});
 					$$->code=$$->code + tempo;
 					$$->place=var;	
 				}
@@ -750,7 +869,11 @@ assignment_expression
 				
                 find_symbol->name=$1->name;
                 find_symbol->place=$1->place;
-                find_symbol->code=$1->code + "\n" + $3->code + "\n" + $1->place.first + ":=  " + $3->place.first;
+                find_symbol->final_code=$1->final_code;
+                find_symbol->final_code.insert(find_symbol->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+                string add_str=$1->place.first + ":=  " + $3->place.first;
+                find_symbol->final_code.push_back({add_str,curr_scope});
+                find_symbol->code=$1->code + "\n" + $3->code + "\n" + add_str + "\n";
 
                 //3AC code
 				if($3->place.first[0]!='t' && $3->place.first[0]!='&' && $3->place.first[0]!='*' && $3->place.first[0]!='+' && $3->place.first[0]!='-' && $3->place.first[0]!='~' && $3->place.first[0]!='!')
@@ -765,12 +888,19 @@ assignment_expression
 						string code="";
 						qid temp=newtemp($1->type,curr_scope);
 						string prev=($1->place.first).erase(0,count_init_starr);
+                        $$->final_code = $1->final_code;
+                        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+                        string add_str;
 						for(int i=0;i<count_init_starr-1;i++){
-							code=code+"\n"+temp.first+":= *"+prev;
+                            add_str=temp.first+" := *"+prev;
+							code=code+"\n"+add_str;
+                            $$->final_code.push_back({add_str,curr_scope});
 							prev=temp.first;
 							temp=newtemp($1->type,curr_scope);
 						}
-						code=code+"\n"+"*"+prev+":= "+$3->place.first;
+                        add_str="*"+prev+" := "+$3->place.first;
+						code=code+"\n"+add_str+"\n";
+                        $$->final_code.push_back({add_str,curr_scope});
 						$$->code=$1->code+"\n"+$3->code+"\n"+code;
 						$$->place=temp;
 					}
@@ -779,15 +909,21 @@ assignment_expression
 					int count_init_starr=count_init_star($3->place.first);
 					if(count_init_starr>1){
 						flag=1;
-						string code="";
+						string code="",add_str="";
 						qid temp=newtemp($3->type,curr_scope);
 						string prev=($3->place.first).erase(0,count_init_starr);
+                        $$->final_code = $1->final_code;
+                        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
 						for(int i=0;i<count_init_starr-1;i++){
-							code=code+"\n"+temp.first+":= *"+prev;
+                            add_str=temp.first+" := *"+prev;
+                            $$->final_code.push_back({add_str,curr_scope});
+							code=code+"\n"+add_str;
 							prev=temp.first;
 							temp=newtemp($3->type,curr_scope);
 						}
-						code=code+"\n"+$1->place.first+":= *"+temp.first;
+                        add_str=$1->place.first+" := *"+temp.first;
+						code=code+"\n"+add_str+"\n";
+                        $$->final_code.push_back({add_str,curr_scope});
 						$$->code=$1->code+"\n"+$3->code+"\n"+code;
 						$$->place=$1->place;
 					}
@@ -795,7 +931,12 @@ assignment_expression
                 if(flag==0){
                     if(find_symbol->is_array==true){
                         string code=remove_equal(first_code);
-                        $$->code=$3->code+"\n"+code+":= "+$3->place.first+"\n";
+                        string add_str = find_last_line(code);
+                        $$->final_code = $3->final_code;
+                        $$->final_code.push_back({add_str,curr_scope});
+                        add_str = code + " := " + $3->place.first;
+                        $$->final_code.push_back({add_str,curr_scope});
+                        $$->code=$3->code+"\n"+add_str+"\n";
                     }
                     else{
                         string op=$2->code;
@@ -804,6 +945,9 @@ assignment_expression
                         if(tcode=="error"){
                             error_list.push_back("Line "+to_string(yylineno)+" : Invalid assignment operator");
                         }
+                        $$->final_code = $1->final_code;
+                        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+                        $$->final_code.push_back({tcode,curr_scope});
                         $$->code=$1->code + "\n" + third_code + "\n" + tcode+"\n";
                         $$->place=$1->place;
                     }                   
@@ -838,6 +982,8 @@ expression
 	}	
 	| expression COMMA assignment_expression
 	{
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
 		$$->code=$1->code + "\n" + $3->code;
 	}
 	;
@@ -932,7 +1078,18 @@ declaration
 		}
 		// debug("declaration specifiers ", to_string(parsing_stack.size()));
 		$$->code=code;
-		
+		$$->final_code = {};
+        int index=0;
+        string temp="";
+        while(index<$$->code.size()){
+            while(index<$$->code.size() && $$->code[index]!='\n'){
+                temp+=$$->code[index];
+                index++;
+            }
+            $$->final_code.push_back({temp,curr_scope});
+            temp="";
+            index++;
+        }
 		//debug("Declaration: ",curr_scope->symbol_map["p"]->code);
     }
     ;
@@ -961,6 +1118,8 @@ init_declarator_list
     }
     | init_declarator_list COMMA init_declarator { 
 		$$=$3;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
 		$$->code = $1->code + "\n" + $3->code;
     }
     ;
@@ -978,11 +1137,13 @@ init_declarator
 			curr_scope->symbol_map[$1->name]->is_array=true;
 			curr_scope->symbol_map[$1->name]->array_length=$1->array_length;
 			 if($1->type=="int" || $1->type=="float"){
-				string code=$1->name+":= alloc " +to_string(4*$1->array_length);
+				string code=$1->name+" := alloc " +to_string(4*$1->array_length);
 				$$->code=code;
+                $$->final_code.push_back({code,curr_scope});
 			}
 			else if($1->type=="char"){
-				string code=$1->name+":= alloc " +to_string(2*$1->array_length);
+                string code=$1->name+" := alloc " +to_string(2*$1->array_length);
+                $$->final_code.push_back({code,curr_scope});
 				$$->code=code;
 			} 
 		}
@@ -1011,7 +1172,7 @@ init_declarator
 				$1->int_array = $3->int_array;
 				$1->type = $3->type;
 				curr_scope->symbol_map[$1->name]->is_array=true;
-				 string code=$1->name+":= alloc ";
+				string code=$1->name+" := alloc ";
 				if($1->type=="int" || $1->type=="float"){
 					code=code+to_string(4*$1->array_length);
 				}
@@ -1021,22 +1182,45 @@ init_declarator
 				for(int i=0;i<$1->array_length;i++){
 					qid temp=newtemp($1->type,curr_scope);
 					code=code+"\n"+temp.first+":= "+to_string(i)+"*";
-					if($1->type=="int") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ):= "+to_string(*(int*)($1->int_array[i]->ptr));
-					else if($1->type=="float") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ):= "+to_string(*(float*)($1->int_array[i]->ptr));
-					else if($1->type=="char") code=code+"2\n"+"*( "+$1->name+" + "+temp.first+" ):= "+char(*(char*)($1->int_array[i]->ptr));
-					else if($1->type=="char*") code=code+"2\n"+"*( "+$1->name+" + "+temp.first+" ):= "+$1->int_array[i]->str_val;
+					if($1->type=="int") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ) := "+to_string(*(int*)($1->int_array[i]->ptr));
+					else if($1->type=="float") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ) := "+to_string(*(float*)($1->int_array[i]->ptr));
+					else if($1->type=="char") code=code+"2\n"+"*( "+$1->name+" + "+temp.first+" ) := "+char(*(char*)($1->int_array[i]->ptr));
+					else if($1->type=="char*") code=code+"2\n"+"*( "+$1->name+" + "+temp.first+" ) := "+$1->int_array[i]->str_val;
 				} 
 				$$->code=code;
+                int index=0;
+                string temp="";
+                while(index<code.size()){
+                    while(index<code.size() && code[index]!='\n'){
+                        temp+=code[index];
+                        index++;
+                    }
+                    $$->final_code.push_back({temp,curr_scope});
+                    temp="";
+                    index++;
+                }
+
 			}
 		}
-        if($1->is_array==false){
+        if(!$1->is_array){
 			$$ = $1;
-		if($3->place.first[0]!='t' && $3->place.first[0]!='&' && $3->place.first[0]!='*' && $3->place.first[0]!='-' && $3->place.first[0]!='!'){
-			$3->code="";
-		}
-		
-		$$->code=$3->code+"\n"+$1->place.first+":= "+$3->place.first;
-		$$->place=$1->place;
+            if($3->place.first[0]!='t' && $3->place.first[0]!='&' && $3->place.first[0]!='*' && $3->place.first[0]!='-' && $3->place.first[0]!='!'){
+                $3->code="";
+            }
+            
+            $$->code=$3->code+"\n"+$1->place.first+":= "+$3->place.first;
+            int index=0;
+            string temp="";
+            while(index<$$->code.size()){
+                while(index<$$->code.size() && $$->code[index]!='\n'){
+                    temp+=$$->code[index];
+                    index++;
+                }
+                $$->final_code.push_back({temp,curr_scope});
+                temp="";
+                index++;
+            }
+            $$->place=$1->place;
 		}
     }
     ;
@@ -1392,14 +1576,17 @@ labeled_statement
 				
 				string label=goto_list[$1];
 				// debug("labellllll", $3->code);
+                $$->final_code.push_back({label + ":",curr_scope});
 				$$->code=label+":\n"+$3->code;
+                $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
 				// debug("label", $$->code);
 			}
 			else{
-				//debug("labellllll", $3->code);
+                //debug("labellllll", $3->code);
 				string label=newlabel();
+                $$->final_code.push_back({label + ":",curr_scope});
 				$$->code=label+":\n"+$3->code;
-				
+				$$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
 				goto_list[$1]=label;
 			}
 			curr_scope->symbol_map[$1]=new symbol_info();
@@ -1420,14 +1607,17 @@ labeled_statement
 				
 				string label=goto_list[$1];
 				// debug("labellllll", $3->code);
+                $$->final_code.push_back({label + ":",curr_scope});
 				$$->code=label+":\n"+$3->code;
+                $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
 				// debug("label", $$->code);
 			}
 			else{
 				//debug("labellllll", $3->code);
 				string label=newlabel();
+                $$->final_code.push_back({label + ":",curr_scope});
 				$$->code=label+":\n"+$3->code;
-				
+				$$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
 				goto_list[$1]=label;
 			}
 			curr_scope->symbol_map[$1]=new symbol_info();
@@ -1439,7 +1629,9 @@ labeled_statement
 	| CASE constant_expression COLON statement
 	{
 		string label=newlabel();
+        $$->final_code.push_back({label + ":",curr_scope});
 		$$->code = label +":\n"+ $4->code;
+        $$->final_code.insert($$->final_code.end(), $4->final_code.begin(), $4->final_code.end());
 		case_list.top().push({$2->code,label});
 		
 	}
@@ -1447,7 +1639,9 @@ labeled_statement
 	{
 		string label=newlabel();
 		case_list.top().push({"default",label});
+        $$->final_code.push_back({label + ":",curr_scope});
 		$$->code = label+":\n"+ $3->code;
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
 
 	}
 	;
@@ -1471,6 +1665,7 @@ compound_statement
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$3->code;
+        $$->final_code = $3->final_code;
 		$$->is_return=$3->is_return;
 		$$->return_type=$3->return_type;
 		all_scopes.push_back(curr_scope);curr_scope = curr_scope->parent;
@@ -1478,14 +1673,22 @@ compound_statement
 	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} statement_list RBRACE {symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$3->code;
+        $$->final_code = $3->final_code;
 		all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
 	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} declaration_list RBRACE {symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$3->code;
+        $$->final_code = $3->final_code;
 		all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
-	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} declaration_list statement_list RBRACE {symbol_info* new_symbol=new symbol_info();
-		$$=new_symbol;
-		$$->code=$3->code+"\n"+$4->code;all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;}
+	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} declaration_list statement_list RBRACE 
+        {
+            symbol_info* new_symbol=new symbol_info();
+		    $$=new_symbol;
+		    $$->code=$3->code+"\n"+$4->code;
+            $$->final_code = $3->final_code;
+            $$->final_code.insert($$->final_code.end(), $4->final_code.begin(), $4->final_code.end());
+            all_scopes.push_back(curr_scope); curr_scope = curr_scope->parent;
+        }
 	;
 
 statement_declaration_list
@@ -1493,6 +1696,8 @@ statement_declaration_list
 	{
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $2->final_code.begin(), $2->final_code.end());
 		$$->code=$1->code + "\n" + $2->code;
 		$$->is_return=($1->is_return)|($2->is_return);
 		// if($1->return_type!="") $$->return_type=$1->return_type;
@@ -1505,6 +1710,8 @@ statement_declaration_list
 	{
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $2->final_code.begin(), $2->final_code.end());
 		$$->code=$1->code + "\n" + $2->code;
 		$$->is_return=$2->is_return;
 		// $$->return_type=$2->return_type;
@@ -1517,6 +1724,7 @@ statement_declaration_list
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$1->code;
+        $$->final_code = $1->final_code;
 		$$->is_return=$1->is_return;
 		//dikkat badi hai
 		// $$->return_type=$1->return_type;
@@ -1533,11 +1741,14 @@ declaration_list
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=$1->code;
+        $$->final_code = $1->final_code;
 		//debug("declaration_list", $$->code);
 	}
 	| declaration_list declaration
 	{
 		$$->code=$1->code + "\n" + $2->code;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $2->final_code.begin(), $2->final_code.end());
 	}
 	| error SEMICOLON {yyerrok;}
 	;
@@ -1552,7 +1763,8 @@ statement_list
 		// if($1->return_type!="") $$->return_type=$1->return_type;
 		// else $$->return_type=$2->return_type;
 		$$->code=$1->code + "\n" + $2->code;
-		
+		$$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $2->final_code.begin(), $2->final_code.end());
 	}
 	| error SEMICOLON {yyerrok;}
 	;
@@ -1567,20 +1779,40 @@ selection_statement
 	{
 		string truelabel=newlabel();	
 		string falselabel=newlabel();
-		$$->code=$3->code+"\n"+"if("+ $3->place.first +") goto "+truelabel+"\n"+"goto "+falselabel+"\n"+truelabel+":\n"+$5->code+"\n"+falselabel+":\n";
+        symbol_info* new_symbol=new symbol_info();
+        $$=new_symbol;
+		$$->code=$3->code+"\n"+"if ("+ $3->place.first +") goto "+truelabel+"\n"+"goto "+falselabel+"\n"+truelabel+":\n"+$5->code+"\n"+falselabel+":\n";
+        $$->final_code = $3->final_code;
+        $$->final_code.push_back({"if ("+ $3->place.first +") goto "+truelabel,curr_scope});
+        $$->final_code.push_back({"goto "+falselabel,curr_scope});
+        $$->final_code.push_back({truelabel+":",curr_scope});
+        $$->final_code.insert($$->final_code.end(), $5->final_code.begin(), $5->final_code.end());
+        $$->final_code.push_back({falselabel+":",curr_scope});
 	}
 	| IF LPARENTHESES expression RPARENTHESES statement ELSE statement
 	{
 		string truelabel=newlabel();	
 		string falselabel=newlabel();
 		string endlabel=newlabel();
+        symbol_info* new_symbol=new symbol_info();
+        $$=new_symbol;
 		$$->code=$3->code+"\n"+"if("+ $3->place.first +") goto "+truelabel+"\n"+"goto "+falselabel+"\n"+truelabel+":\n"+$5->code+"\n"+"goto "+endlabel+"\n"+falselabel+":\n"+$7->code+"\n"+endlabel+":\n";
+        $$->final_code = $3->final_code;
+        $$->final_code.push_back({"if("+ $3->place.first +") goto "+truelabel,curr_scope});
+        $$->final_code.push_back({"goto "+falselabel,curr_scope});
+        $$->final_code.push_back({truelabel+":",curr_scope});
+        $$->final_code.insert($$->final_code.end(), $5->final_code.begin(), $5->final_code.end());
+        $$->final_code.push_back({"goto "+endlabel,curr_scope});
+        $$->final_code.push_back({falselabel+":",curr_scope});
+        $$->final_code.insert($$->final_code.end(), $7->final_code.begin(), $7->final_code.end());
+        $$->final_code.push_back({endlabel+":",curr_scope});
 	}      
 	| SWITCH{queue<std::pair<std::string, std::string>> q;
 		case_list.push(q);
 		}LPARENTHESES expression RPARENTHESES statement
 	{
 		string str="";
+        vector<pair<string,scoped_symtab*>> temp;
 		while(!case_list.top().empty()){
 			string label=case_list.top().front().second;
 			string case_value=case_list.top().front().first;
@@ -1588,12 +1820,22 @@ selection_statement
 			if(case_value=="default")
 			{
 				str+="goto "+label+"\n";
+                temp.push_back({"goto "+label,curr_scope});
 			}
-			else str+="if("+$4->place.first+"=="+case_value+") goto "+label+"\n";
+			else{
+                str+="if("+$4->place.first+"=="+case_value+") goto "+label+"\n";
+                temp.push_back({"if("+$4->place.first+"=="+case_value+") goto "+label,curr_scope});
+            }
 		}
 		string endlabel=newlabel();
+        $$=new symbol_info();
 		$$->code= $4->code+"\n"+str+"\n"+$6->code+"\n"+endlabel+":\n";
+        $$->final_code = $4->final_code;
+        $$->final_code.insert($$->final_code.end(), temp.begin(), temp.end());
+        $$->final_code.insert($$->final_code.end(), $6->final_code.begin(), $6->final_code.end());
+        $$->final_code.push_back({endlabel+":",curr_scope});
 		$$->code=replace_break_continue($$->code,endlabel," ",1);
+		$$->final_code=replace_break_continue_final($$->final_code,endlabel," ",1);
 		case_list.pop();
 	}			
 	;
@@ -1607,7 +1849,17 @@ iteration_statement
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code=startlabel+":\n"+$3->code+"\n"+"if("+$3->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+$5->code+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
+        $$->final_code.push_back({startlabel+":",curr_scope});
+        $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+        $$->final_code.push_back({"if("+$3->place.first+") goto "+truelabel,curr_scope});
+        $$->final_code.push_back({"goto "+endlabel,curr_scope});
+        $$->final_code.push_back({truelabel+":",curr_scope});
+        $$->final_code.insert($$->final_code.end(), $5->final_code.begin(), $5->final_code.end());
+        $$->final_code.push_back({"goto "+startlabel,curr_scope});
+        $$->final_code.push_back({endlabel+":",curr_scope});
+
 		$$->code=replace_break_continue($$->code,endlabel,startlabel,1);
+        $$->final_code=replace_break_continue_final($$->final_code,endlabel,startlabel,1);
 	}
 	| DO statement WHILE LPARENTHESES expression RPARENTHESES SEMICOLON
 	{
@@ -1616,8 +1868,16 @@ iteration_statement
 		string truelabel=newlabel();
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
+        $$->final_code.push_back({startlabel+":",curr_scope});
+        $$->final_code.insert($$->final_code.end(), $2->final_code.begin(), $2->final_code.end());
+        $$->final_code.push_back({truelabel+":",curr_scope});
+        $$->final_code.insert($$->final_code.end(), $5->final_code.begin(), $5->final_code.end());
+        $$->final_code.push_back({"if("+$5->place.first+") goto "+startlabel,curr_scope});
+        $$->final_code.push_back({"goto "+endlabel,curr_scope});
+        $$->final_code.push_back({endlabel+":",curr_scope});
 		$$->code=startlabel+":\n"+$2->code+"\n"+truelabel+":\n"+$5->code+"\n"+"\n"+"if("+$5->place.first+") goto "+startlabel+"\n"+"goto "+endlabel+"\n"+endlabel+":\n";
 		$$->code=replace_break_continue($$->code,endlabel,startlabel,1);
+        $$->final_code=replace_break_continue_final($$->final_code,endlabel,startlabel,1);
 	}
 	| FOR LPARENTHESES expression_statement expression_statement RPARENTHESES statement
 	{
@@ -1626,8 +1886,18 @@ iteration_statement
 		string truelabel=newlabel();
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
+        $$->final_code = $3->final_code;
+        $$->final_code.push_back({startlabel+":",curr_scope});
+        $$->final_code.insert($$->final_code.end(), $4->final_code.begin(), $4->final_code.end());
+        $$->final_code.push_back({"if("+$4->place.first+") goto "+truelabel,curr_scope});
+        $$->final_code.push_back({"goto "+endlabel,curr_scope});
+        $$->final_code.push_back({truelabel+":",curr_scope});
+        $$->final_code.insert($$->final_code.end(), $6->final_code.begin(), $6->final_code.end());
+        $$->final_code.push_back({"goto "+startlabel,curr_scope});
+        $$->final_code.push_back({endlabel+":",curr_scope});
 		$$->code=$3->code+"\n"+startlabel+":\n"+$4->code+"\n"+"if("+$4->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+$6->code+"\n"+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
-			$$->code=replace_break_continue($$->code,endlabel,startlabel,1);
+        $$->code=replace_break_continue($$->code,endlabel,startlabel,1);
+        $$->final_code=replace_break_continue_final($$->final_code,endlabel,startlabel,1);
 	}
 	| FOR LPARENTHESES expression_statement expression_statement expression RPARENTHESES statement   
 	{
@@ -1637,11 +1907,21 @@ iteration_statement
 		string updatelabel=newlabel();
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
-		
+		$$->final_code = $3->final_code;
+        $$->final_code.push_back({startlabel+":",curr_scope});
+        $$->final_code.insert($$->final_code.end(), $4->final_code.begin(), $4->final_code.end());
+        $$->final_code.push_back({"if("+$4->place.first+") goto "+truelabel,curr_scope});
+        $$->final_code.push_back({"goto "+endlabel,curr_scope});
+        $$->final_code.push_back({truelabel+":",curr_scope});
+        $$->final_code.insert($$->final_code.end(), $7->final_code.begin(), $7->final_code.end());
+        $$->final_code.push_back({updatelabel+":",curr_scope});
+        $$->final_code.insert($$->final_code.end(), $5->final_code.begin(), $5->final_code.end());
+        $$->final_code.push_back({"goto "+startlabel,curr_scope});
+        $$->final_code.push_back({endlabel+":",curr_scope});
 		$$->code=$3->code+"\n"+startlabel+":\n"+$4->code+"\n"+"if("+$4->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+$7->code+"\n"+updatelabel+":\n"+$5->code+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
-			$$->code=replace_break_continue($$->code,endlabel,updatelabel,0);
-
-		}
+        $$->code=replace_break_continue($$->code,endlabel,updatelabel,0);
+        $$->final_code=replace_break_continue_final($$->final_code,endlabel,updatelabel,0);
+	}
 	;
 
 jump_statement
@@ -1652,6 +1932,7 @@ jump_statement
 			string label=newlabel();
 			goto_list[$2]=label;
 			symbol_info* new_symbol=new symbol_info();
+            new_symbol->final_code.push_back({"goto "+label,curr_scope});
 			new_symbol->code="goto "+label+"\n";
 			$$=new_symbol;
 		}
@@ -1659,6 +1940,7 @@ jump_statement
 			symbol_info* new_symbol=new symbol_info();
 			$$=new_symbol;
 			string label=goto_list[$2];
+            $$->final_code.push_back({"goto "+label,curr_scope});
 			$$->code="goto "+label+"\n";
 			// debug("goto", $$->code);
 		}
@@ -1673,6 +1955,7 @@ jump_statement
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->is_continue=true;
+        $$->final_code.push_back({"continue",curr_scope});
 		$$->code="\n continue \n";
 	}
 	| BREAK SEMICOLON
@@ -1680,6 +1963,7 @@ jump_statement
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->is_break=true;
+        $$->final_code.push_back({"break",curr_scope});
 		$$->code="\n break \n";
 	}
 	| RETURN SEMICOLON
@@ -1688,6 +1972,7 @@ jump_statement
 		$$=new_symbol;
 		$$->is_return=true;
 		$$->return_type="void";
+        $$->final_code.push_back({"RETURN",curr_scope});
 		$$->code="\nRETURN\n";
 	}
 	| RETURN expression SEMICOLON
@@ -1696,6 +1981,8 @@ jump_statement
 		$$=new_symbol;
 		$$->is_return=true;
 		$$->return_type=$2->type;
+        $$->final_code = $2->final_code;
+        $$->final_code.push_back({"RETURN "+$2->place.first,curr_scope});
 		$$->code=$2->code + "\nRETURN "+$2->place.first+"\n";
 		//debug("return ",$$->code);
 	}
@@ -1707,16 +1994,22 @@ start_symbol: translation_unit
     
 	print_errors();
 	cleanTAC($1->code);
+    cerr<<endl<<endl<<endl;
+    cleaned_TAC=clean_vector_TAC($1->final_code);
+    print_vector($1->final_code);
 }
 ;
 translation_unit
 	: external_declaration 				 
 	{
 		$$->code=$1->code;
+        $$->final_code = $1->final_code;
 	} 
 	| translation_unit external_declaration 
 	{
 		$$->code=$1->code+$2->code;
+        $$->final_code = $1->final_code;
+        $$->final_code.insert($$->final_code.end(), $2->final_code.begin(), $2->final_code.end());
 	}
 	| 
 	;
@@ -1758,12 +2051,17 @@ function_definition
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
 		$$->code="\nFUNC_BEGIN "+$2->name+"\n";
+        $$->final_code.push_back({"FUNC_BEGIN "+$2->name,curr_scope});
 		for(int i=0;i<$2->param_list.size();i++){
+            $$->final_code.push_back({"param"+std::to_string(i)+" := PARAM",curr_scope});
 			$$->code=$$->code+"param"+std::to_string(i)+" := PARAM\n";
 		}
 		for(int i=0;i<$2->param_list.size();i++){
+            $$->final_code.push_back({$2->param_list[i]+" := param"+std::to_string(i),curr_scope});
 			$$->code=$$->code+$2->param_list[i]+" := param"+std::to_string(i)+"\n";
 		}
+        $$->final_code.insert($$->final_code.end(), $4->final_code.begin(), $4->final_code.end());
+        $$->final_code.push_back({"FUNC_END "+$2->name,curr_scope});
 		$$->code=$$->code+$4->code+"\nFUNC_END "+$2->name+"\n";
 
 	}   
@@ -1866,5 +2164,5 @@ int main() {
 	curr_scope->symbol_map["printf"]=new_symbol;
 	curr_scope->symbol_map["scanf"]=new_symbol;
 	yyparse();
-	print_scope_table();
+	// print_scope_table(); 
 }

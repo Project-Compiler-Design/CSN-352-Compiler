@@ -1,10 +1,4 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <unordered_map>
-#include <vector>
-#include <algorithm>
-#include <cctype>
+#include<bits/stdc++.h>
 
 using namespace std;
 

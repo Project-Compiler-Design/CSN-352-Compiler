@@ -2,25 +2,90 @@
 No Errors in the code
 Intermediate code generated successfully
 ======================================================================
-1.  FUNC_BEGIN main
-2.      a := 3
-3.      b := 4
-6.      RETURN 0
-7.  FUNC_END main
-======================================================================
-Printing scope table
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| main            | int                  | 4       | N/A        |
-| printf          |                      | 0       | N/A        |
-| scanf           |                      | 0       | N/A        |
------------------------------------------------------------------
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| a               | int                  | 4       | 3          |
-| b               | int                  | 4       | 4          |
-| c               | int                  | 4       | N/A        |
-| t0              | int                  | 4       | N/A        |
------------------------------------------------------------------
+1.  FUNC_BEGIN add
+2.      x:= 0
+3.      t0 :=  x + 6
+4.      y:= t0
+5.      t1 :=  x * y
+6.      t2 :=  t1 - 9
+7.      z:= t2
+8.      RETURN z
+9.  FUNC_END add
+10.  FUNC_BEGIN main
+11.      t3 := CALL add
+12.      k:= t3
+13.      t4 := CALL add
+14.      i:= t4
+15.      RETURN 0
+16.  LABEL0:
+17.      if(1) goto LABEL2
+18.      goto LABEL1
+19.  LABEL2:
+20.      i:= 0
+21.      i :=  i + 1
+22.      goto LABEL0
+23.  LABEL1:
+24.  FUNC_END main
+
+
+
+1.  0x55a03568b8b0          FUNC_BEGIN add
+2.  0x55a0356911f0              x:= 0
+3.  0x55a0356911f0              t0 :=  x + 6
+4.  0x55a0356911f0              y:= t0
+5.  0x55a0356911f0              t1 :=  x * y
+6.  0x55a0356911f0              t2 :=  t1 - 9
+7.  0x55a0356911f0              z:= t2
+8.  0x55a0356911f0              RETURN z
+9.  0x55a03568b8b0          FUNC_END add
+10.  0x55a03568b8b0          FUNC_BEGIN main
+11.  0x55a035696870              t3 := CALL add
+12.  0x55a035696870              k:= t3
+13.  0x55a035696870              t4 := CALL add
+14.  0x55a035696870              i:= t4
+15.  0x55a035696870              RETURN 0
+16.  0x55a035696870          LABEL0:
+17.  0x55a035696870              if(1) goto LABEL2
+18.  0x55a035696870              goto LABEL1
+19.  0x55a035696870          LABEL2:
+20.  0x55a035696ea0              i:= 0
+21.  0x55a035696ea0              i :=  i + 1
+22.  0x55a035696870              goto LABEL0
+23.  0x55a035696870          LABEL1:
+24.  0x55a03568b8b0          FUNC_END main
+ FUNC_BEGIN add
+ 
+ x:= 0
+ 
+ 6
+ t0 :=  x + 6
+ 
+ y:= t0
+ 
+ 
+ t1 :=  x * y
+ 
+ 9
+ t2 :=  t1 - 9
+ 
+ z:= t2
+ RETURN z
+ FUNC_END add
+ FUNC_BEGIN main
+ t3 := CALL add
+ 
+ k:= t3
+ t4 := CALL add
+ 
+ i:= t4
+ RETURN 0
+ LABEL0:
+ if(1) goto LABEL2
+ goto LABEL1
+ LABEL2:
+ 
+ i:= 0
+ i :=  i + 1 
+ goto LABEL0
+ LABEL1:
+ FUNC_END main

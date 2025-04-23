@@ -7,6 +7,7 @@
 #include<bits/stdc++.h>
 struct scoped_symtab;
 struct symbol_info;
+
 static symbol_info* lookup_symbol_local(const std::string& name, scoped_symtab* curr_scope);
 static symbol_info* lookup_symbol_global(const std::string& name, scoped_symtab* curr_scope);
 
@@ -46,6 +47,7 @@ struct symbol_info {
     std::vector<symbol_info*> struct_attr_values;
     int pointer_depth=0;
     qid place;
+    std::vector<std::pair<std::string, scoped_symtab*>> final_code;
     std::string code;
     
     bool is_return=false;
@@ -66,7 +68,12 @@ struct symbol_info {
           is_param_list(sym->is_param_list), parameter_no(sym->parameter_no),
           param_types(sym->param_types), param_list(sym->param_list),
           struct_attr_values(sym->struct_attr_values), pointer_depth(sym->pointer_depth),
-          place(sym->place), code(sym->code) {}
+          place(sym->place), code(sym->code) {
+                // Copy the final_code vector
+                for (const auto& item : sym->final_code) {
+                final_code.push_back(item);
+            }
+          }
 };
     
     symbol_info* lookup_symbol_local(const std::string& name, scoped_symtab* curr_scope){
