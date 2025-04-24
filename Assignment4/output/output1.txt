@@ -2,38 +2,75 @@
 No Errors in the code
 Intermediate code generated successfully
 ======================================================================
-0x59fb182984b0 FUNC_BEGIN main
-0x59fb1829e6b0 a:= 2
-0x59fb1829e6b0 t0 :=  a == 3
-0x59fb1829e6b0 if(t0) goto LABEL0
-0x59fb1829e6b0 goto LABEL1
-0x59fb1829e6b0 LABEL0:
-0x59fb1829f7b0 b:= 4
-0x59fb1829e6b0 goto LABEL2
-0x59fb1829e6b0 LABEL1:
-0x59fb182a03d0 c:= 5
-0x59fb1829e6b0 LABEL2:
-0x59fb1829e6b0 RETURN 0
-0x59fb182984b0 FUNC_END main
+0x55b864aa04b0 FUNC_BEGIN main
+0x55b864aa6630 a:= 2
+0x55b864aa6630 t0 :=  a == 3
+0x55b864aa6630 if(t0) goto LABEL0
+0x55b864aa6630 goto LABEL1
+0x55b864aa6630 LABEL0:
+0x55b864aa7730 b:= 4
+0x55b864aa6630 goto LABEL2
+0x55b864aa6630 LABEL1:
+0x55b864aa8350 c:= 5
+0x55b864aa6630 LABEL2:
+0x55b864aa6630 d:= 6
+0x55b864aa6630 e:= 7
+0x55b864aa6630 t1 :=  a + 8
+0x55b864aa6630 d:=  t1
+0x55b864aa6630 RETURN 0
+0x55b864aa04b0 FUNC_END main
 FUNC_BEGIN main
 a:= 2
 Handling assignment: a := 2
+Getting register for a
 t0 :=  a == 3
 Handling operation: t0 := a == 3
+Getting register for a
+Getting register for 3
+Getting register for t0
 Operation: a == 3
-Registers: $t9, $t8, $t7
-Loaded constant literal 3 into $t8
+Registers: $t5, $t4, $t3
+Loaded constant literal 3 into $t4
 if(t0) goto LABEL0
 Condition: t0, Label: LABEL0
+Getting register for t0
 goto LABEL1
 LABEL0:
 b:= 4
 Handling assignment: b := 4
+Getting register for b
 goto LABEL2
 LABEL1:
 c:= 5
 Handling assignment: c := 5
+Getting register for c
 LABEL2:
+d:= 6
+Handling assignment: d := 6
+Getting register for d
+e:= 7
+Handling assignment: e := 7
+Getting register for e
+Handling register spill for e
+Spilling 3 from $t4
+t1 :=  a + 8
+Handling operation: t1 := a + 8
+Getting register for a
+Getting register for 8
+Handling register spill for 8
+Spilling d from $t0
+Getting register for t1
+Handling register spill for t1
+Spilling 8 from $t0
+Operation: a + 8
+Registers: $t5, $t0, $t0
+Loaded constant literal 8 into $t0
+d:=  t1
+Handling assignment: d := t1
+Getting register for d
+Handling register spill for d
+Spilling a from $t5
+Getting register for t1
 RETURN 0
 FUNC_END main
 # MIPS Assembly Code:
@@ -42,17 +79,26 @@ main:
     sw   $ra, -504($sp)
     sw   $fp, -508($sp)
     move $fp, $sp
-    li $t9, 2
-    li $t8, 3
-    seq $t7, $t9, $t8
-    bnez $t7, LABEL0
+    li $t5, 2
+    li $t4, 3
+    seq $t3, $t5, $t4
+    bnez $t3, LABEL0
     j LABEL1
 LABEL0:
-    li $t6, 4
+    li $t2, 4
     j LABEL2
 LABEL1:
-    li $t5, 5
+    li $t1, 5
 LABEL2:
+    li $t0, 6
+    # Spilling 3 from $t4
+    li $t4, 7
+    # Spilling d from $t0
+    # Spilling 8 from $t0
+    li $t0, 8
+    add $t0, $t5, $t0
+    # Spilling a from $t5
+    move $t5, $t0
     li $v0, 0
     move $sp, $fp
     lw   $fp, -508($sp)

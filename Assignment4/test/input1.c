@@ -7,5 +7,8 @@ int main(){
     else{
         int c=5;
     }
+    int d=6;
+    int e=7;
+    d=a+8;
     return 0;
 }

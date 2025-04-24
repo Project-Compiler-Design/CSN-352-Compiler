@@ -14,7 +14,7 @@ using namespace std;
 
 
 // Symbol table type
-
+int currentInstructionIndex = -1;
 
 map<pair<scoped_symtab*,string>,string> var_to_reg;
 unordered_map<string,pair<scoped_symtab*,string>> reg_to_var;
@@ -22,10 +22,29 @@ map<string, int> funcStackSize;
 
 // --- Global Variables ---
 unordered_map<string, string> regMap;
-vector<string> availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7", "$t8", "$t9"};
+vector<string> availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5"};
 vector<string> mipsCode;
 unordered_map<string, bool> loadedConstants;
 unordered_map<string,string> reg_of_const;
+
+struct pair_hash {
+    template <typename T1, typename T2>
+    size_t operator()(const pair<T1, T2>& p) const {
+        return hash<T1>()(p.first) ^ (hash<T2>()(p.second) << 1);
+    }
+};
+
+
+struct LivenessInfo {
+    scoped_symtab* scope;
+    string code;
+    unordered_set<pair<scoped_symtab*, string>, pair_hash> use, def, live_in, live_out;
+    vector<int> successors;
+    int index;
+};
+
+vector<LivenessInfo> currentLiveness;
+
 
 vector<string> operators = {
     "==", "!=", "<=", ">=", "&&", "||", "+=", "-=", "*=", "/=", "%=",
@@ -43,14 +62,51 @@ bool isConstantLiteral(const string& s) {
     return !s.empty() && all_of(s.begin(), s.end(), ::isdigit);
 }
 
+void handleRegisterSpill(scoped_symtab* currentScope, const string& newVar) {
+    cout << "Handling register spill for " << newVar << endl;
+
+    for (auto it = var_to_reg.begin(); it != var_to_reg.end(); ++it) {
+        auto [vscope, vname] = it->first;
+        string reg = it->second;
+
+        bool isLiveInFuture = false;
+
+        // 1. Check future liveness
+        for (int i = currentInstructionIndex + 1; i < currentLiveness.size(); ++i) {
+            if (currentLiveness[i].live_in.count({vscope, vname})) {
+                isLiveInFuture = true;
+                break;
+            }
+        }
+
+        // 2. Check use in current instruction
+        bool isUsedNow = currentLiveness[currentInstructionIndex].use.count({vscope, vname});
+
+        if (!isLiveInFuture && !isUsedNow) {
+            cout<<"Spilling " << vname << " from " << reg << endl;
+            mipsCode.push_back("    # Spilling " + vname + " from " + reg);
+            availableRegs.push_back(reg);
+            reg_to_var.erase(reg);
+            var_to_reg.erase({vscope, vname});
+            return;
+        }
+    }
+
+    cerr << "Register spill failed: all registers are live or in use\n";
+    exit(1);
+}
+
+
+
+
 string getRegister(scoped_symtab* scope,const string& var) {
+    cout<<"Getting register for " << var << endl;
     if(var_to_reg.count({scope,var})) {
         return var_to_reg[{scope,var}];
     }
     // if (regMap.count(var)) return regMap[var];
     if (availableRegs.empty()) {
-        cerr << "Register spill not handled\n";
-        exit(1);
+        handleRegisterSpill(scope,var);
     }
     string reg = availableRegs.back();
     availableRegs.pop_back();
@@ -234,7 +290,9 @@ void pass1(vector<pair<string, scoped_symtab*>>& codeList){
 
 
 void pass2(vector<pair<string, scoped_symtab*>>& codeList){
-    for(auto &code : codeList){
+    for(int idx = 0; idx < codeList.size(); ++idx){
+        auto& code = codeList[idx];
+        currentInstructionIndex = idx;
         string t = trim(code.first);
         cout << t << "\n";
         if (t.empty()){
@@ -295,6 +353,84 @@ bool isAddress(const std::string& token) {
     return token.size() > 2 && token[0] == '0' && token[1] == 'x';
 }
 
+void compute_use_def(LivenessInfo& inst) {
+    const string& line = inst.code;
+    if (line.find(":=") != string::npos) {
+        size_t eq = line.find(":=");
+        string lhs = trim(line.substr(0, eq));
+        string rhs = trim(line.substr(eq + 2));
+        inst.def.insert({inst.scope, lhs});
+        istringstream iss(rhs);
+        string token;
+        while (iss >> token)
+            if (isalpha(token[0]) && token != lhs)
+                inst.use.insert({inst.scope, token});
+    } else if (line.find("if(") == 0) {
+        size_t start = line.find('(') + 1;
+        size_t end = line.find(')');
+        string cond = line.substr(start, end - start);
+        istringstream iss(cond);
+        string token;
+        while (iss >> token)
+            if (isalpha(token[0]))
+                inst.use.insert({inst.scope, token});
+    } else if (line.find("RETURN") == 0) {
+        string word, val;
+        istringstream iss(line);
+        iss >> word >> val;
+        inst.use.insert({inst.scope, val});
+    }
+}
+
+void compute_successors(vector<LivenessInfo>& program) {
+    for (int i = 0; i < program.size(); ++i) {
+        string line = trim(program[i].code);
+        if (line.find("goto") == 0) {
+            string label = trim(line.substr(4));
+            for (int j = 0; j < program.size(); ++j)
+                if (program[j].code == label + ":")
+                    program[i].successors = {j};
+        } else if (line.find("if(") == 0) {
+            string label = trim(line.substr(line.find("goto") + 4));
+            for (int j = 0; j < program.size(); ++j)
+                if (program[j].code == label + ":") {
+                    program[i].successors = {i + 1, j};
+                    break;
+                }
+        } else if (line.back() != ':') {
+            program[i].successors = {i + 1};
+        }
+    }
+}
+
+void run_liveness(vector<LivenessInfo>& program) {
+    compute_successors(program);
+    for (auto& inst : program)
+        compute_use_def(inst);
+
+    bool changed;
+    do {
+        changed = false;
+        for (int i = program.size() - 1; i >= 0; --i) {
+            auto old_in = program[i].live_in;
+            auto old_out = program[i].live_out;
+
+            program[i].live_out.clear();
+            for (int s : program[i].successors)
+                program[i].live_out.insert(program[s].live_in.begin(), program[s].live_in.end());
+
+            program[i].live_in = program[i].use;
+            for (auto& v : program[i].live_out)
+                if (!program[i].def.count(v))
+                    program[i].live_in.insert(v);
+
+            if (old_in != program[i].live_in || old_out != program[i].live_out)
+                changed = true;
+        }
+    } while (changed);
+}
+
+
 
 void codegen_main() {
 
@@ -326,6 +462,17 @@ void codegen_main() {
     }
 
     pass1(codeList);
+
+    currentLiveness.clear();
+    for (int i = 0; i < codeList.size(); ++i) {
+        currentLiveness.push_back({
+            codeList[i].second, // scope
+            codeList[i].first,  // code
+            {}, {}, {}, {}, {}, i
+        });
+    }
+    run_liveness(currentLiveness);
+
     pass2(codeList);
 
     cout << "# MIPS Assembly Code:\n";
