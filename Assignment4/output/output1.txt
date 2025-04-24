@@ -2,106 +2,144 @@
 No Errors in the code
 Intermediate code generated successfully
 ======================================================================
-0x55b864aa04b0 FUNC_BEGIN main
-0x55b864aa6630 a:= 2
-0x55b864aa6630 t0 :=  a == 3
-0x55b864aa6630 if(t0) goto LABEL0
-0x55b864aa6630 goto LABEL1
-0x55b864aa6630 LABEL0:
-0x55b864aa7730 b:= 4
-0x55b864aa6630 goto LABEL2
-0x55b864aa6630 LABEL1:
-0x55b864aa8350 c:= 5
-0x55b864aa6630 LABEL2:
-0x55b864aa6630 d:= 6
-0x55b864aa6630 e:= 7
-0x55b864aa6630 t1 :=  a + 8
-0x55b864aa6630 d:=  t1
-0x55b864aa6630 RETURN 0
-0x55b864aa04b0 FUNC_END main
-FUNC_BEGIN main
-a:= 2
-Handling assignment: a := 2
+0x5cd8d1a8c4b0 FUNC_BEGIN func
+0x5cd8d1a93140 param0 := PARAM
+0x5cd8d1a93140 param1 := PARAM
+0x5cd8d1a93140 a := param0
+0x5cd8d1a93140 b := param1
+0x5cd8d1a93140 t0 :=  a + b
+0x5cd8d1a93140 p:= t0
+0x5cd8d1a8c4b0 FUNC_END func
+0x5cd8d1a8c4b0 FUNC_BEGIN main
+0x5cd8d1a93cb0 a:= 5
+0x5cd8d1a93cb0 b:= 7
+0x5cd8d1a93cb0 t1 :=  a * b
+0x5cd8d1a93cb0 z:= t1
+0x5cd8d1a93cb0 PARAM z
+0x5cd8d1a93cb0 PARAM a
+0x5cd8d1a93cb0 CALL func,2
+0x5cd8d1a93cb0 RETURN 0
+0x5cd8d1a8c4b0 FUNC_END main
+Hiiiii
+a : int
+Hiiiii
+b : int
+Hiiiii
+p : int
+Hiiiii
+t0 : int
+Hiiiii
+a : int
+Hiiiii
+b : int
+Hiiiii
+t1 : int
+Hiiiii
+t2 : void
+Hiiiii
+z : int
+FUNC_BEGIN func
+param0 := PARAM
+Getting register for param0
+Assigned register $t5 to param0
+param1 := PARAM
+Getting register for param1
+Assigned register $t4 to param1
+a := param0
+Handling assignment: a := param0
 Getting register for a
-t0 :=  a == 3
-Handling operation: t0 := a == 3
-Getting register for a
-Getting register for 3
-Getting register for t0
-Operation: a == 3
-Registers: $t5, $t4, $t3
-Loaded constant literal 3 into $t4
-if(t0) goto LABEL0
-Condition: t0, Label: LABEL0
-Getting register for t0
-goto LABEL1
-LABEL0:
-b:= 4
-Handling assignment: b := 4
+Assigned register $t3 to a
+Getting register for param0
+Found register for param0 $t5
+b := param1
+Handling assignment: b := param1
 Getting register for b
-goto LABEL2
-LABEL1:
-c:= 5
-Handling assignment: c := 5
-Getting register for c
-LABEL2:
-d:= 6
-Handling assignment: d := 6
-Getting register for d
-e:= 7
-Handling assignment: e := 7
-Getting register for e
-Handling register spill for e
-Spilling 3 from $t4
-t1 :=  a + 8
-Handling operation: t1 := a + 8
+Assigned register $t2 to b
+Getting register for param1
+Found register for param1 $t4
+t0 :=  a + b
+Handling operation: t0 := a + b
 Getting register for a
-Getting register for 8
-Handling register spill for 8
-Spilling d from $t0
+Found register for a $t3
+Getting register for b
+Found register for b $t2
+Getting register for t0
+Assigned register $t1 to t0
+Operation: a + b
+Registers: $t3, $t2, $t1
+p:= t0
+Handling assignment: p := t0
+Getting register for p
+Assigned register $t0 to p
+Getting register for t0
+Found register for t0 $t1
+FUNC_END func
+FUNC_BEGIN main
+a:= 5
+Handling assignment: a := 5
+Getting register for a
+Assigned register $t4 to a
+b:= 7
+Handling assignment: b := 7
+Getting register for b
+Assigned register $t3 to b
+t1 :=  a * b
+Handling operation: t1 := a * b
+Getting register for a
+Found register for a $t4
+Getting register for b
+Found register for b $t3
 Getting register for t1
-Handling register spill for t1
-Spilling 8 from $t0
-Operation: a + 8
-Registers: $t5, $t0, $t0
-Loaded constant literal 8 into $t0
-d:=  t1
-Handling assignment: d := t1
-Getting register for d
-Handling register spill for d
-Spilling a from $t5
+Assigned register $t2 to t1
+Operation: a * b
+Registers: $t4, $t3, $t2
+z:= t1
+Handling assignment: z := t1
+Getting register for z
+Assigned register $t1 to z
 Getting register for t1
+Found register for t1 $t2
+PARAM z
+Getting register for z
+Found register for z $t1
+PARAM a
+Getting register for a
+Found register for a $t4
+CALL func,2
 RETURN 0
 FUNC_END main
 # MIPS Assembly Code:
-main:
-    addi $sp, $sp, --500
-    sw   $ra, -504($sp)
-    sw   $fp, -508($sp)
+func:
+    addi $sp, $sp, -24
+    sw   $ra, 20($sp)
+    sw   $fp, 16($sp)
     move $fp, $sp
-    li $t5, 2
-    li $t4, 3
-    seq $t3, $t5, $t4
-    bnez $t3, LABEL0
-    j LABEL1
-LABEL0:
-    li $t2, 4
-    j LABEL2
-LABEL1:
-    li $t1, 5
-LABEL2:
-    li $t0, 6
-    # Spilling 3 from $t4
-    li $t4, 7
-    # Spilling d from $t0
-    # Spilling 8 from $t0
-    li $t0, 8
-    add $t0, $t5, $t0
-    # Spilling a from $t5
-    move $t5, $t0
+    move $t5, $a0
+    move $t4, $a1
+    move $t3, $t5
+    move $t2, $t4
+    add $t1, $t3, $t2
+    move $t0, $t1
+    move $sp, $fp
+    lw   $fp, 16($sp)
+    lw   $ra, 20($sp)
+    addi $sp, $sp, 24
+    jr   $ra
+main:
+    addi $sp, $sp, -24
+    sw   $ra, 20($sp)
+    sw   $fp, 16($sp)
+    move $fp, $sp
+    li $t4, 5
+    li $t3, 7
+    mul $t2, $t4, $t3
+    move $t1, $t2
+    move $a0, $t1
+    move $a1, $t4
+    jal func,2
     li $v0, 0
     move $sp, $fp
-    lw   $fp, -508($sp)
-    lw   $ra, -504($sp)
-    addi $sp, $sp, -500
+    lw   $fp, 16($sp)
+    lw   $ra, 20($sp)
+    addi $sp, $sp, 24
     jr   $ra

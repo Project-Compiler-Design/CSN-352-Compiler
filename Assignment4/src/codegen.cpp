@@ -15,6 +15,9 @@ using namespace std;
 
 // Symbol table type
 int currentInstructionIndex = -1;
+static vector<string> argRegisters = {"$a0", "$a1", "$a2", "$a3"};
+static int paramCounter = 0;
+int paramReceiveCounter = 0;
 
 map<pair<scoped_symtab*,string>,string> var_to_reg;
 unordered_map<string,pair<scoped_symtab*,string>> reg_to_var;
@@ -96,12 +99,10 @@ void handleRegisterSpill(scoped_symtab* currentScope, const string& newVar) {
     exit(1);
 }
 
-
-
-
 string getRegister(scoped_symtab* scope,const string& var) {
     cout<<"Getting register for " << var << endl;
     if(var_to_reg.count({scope,var})) {
+        cout<<"Found register for " << var << " "<<var_to_reg[{scope,var}]<<endl;
         return var_to_reg[{scope,var}];
     }
     // if (regMap.count(var)) return regMap[var];
@@ -111,6 +112,7 @@ string getRegister(scoped_symtab* scope,const string& var) {
     string reg = availableRegs.back();
     availableRegs.pop_back();
     var_to_reg[{scope,var}] = reg;
+    cout<<"Assigned register " << reg << " to " << var << endl;
     return reg;
 }
 
@@ -258,8 +260,10 @@ int get_size_from_type(string type) {
 
 int calculate_function_stack_size(scoped_symtab* scope) {
     int size = 0;
-
+    // cout<<"Calculating stack size for function " << scope->symbol_map['a']->type << endl;
     for (const auto& [name, sym] : scope->symbol_map) {
+        cout<<"Hiiiii"<<endl;
+        cout<<name << " : " << sym->type << endl;
         if (!sym->is_param_list && !sym->is_return) {
             size += sym->type == "string" ? get_symbol_size(sym) : get_size_from_type(sym->type);
         }
@@ -268,21 +272,41 @@ int calculate_function_stack_size(scoped_symtab* scope) {
     return size;
 }
 
-void pass1(vector<pair<string, scoped_symtab*>>& codeList){
-    for(auto &code : codeList){
-        string t = trim(code.first);
-        if(t.empty()){
+// void pass1(vector<pair<string, scoped_symtab*>>& codeList){
+//     for(auto &code : codeList){
+//         string t = trim(code.first);
+//         if(t.empty()){
+//             cout << "empty codelist error" << endl;
+//         }
+//         else{
+//             if(t.rfind("FUNC_BEGIN", 0) == 0){
+//                 scoped_symtab* scope = code.second;
+//                 int stack_size = calculate_function_stack_size(scope);
+//                 istringstream iss(t);
+//                 string dummy, funcName;
+//                 iss >> dummy >> funcName;
+//                 int frameBytes = calculate_function_stack_size(scope);
+//                 funcStackSize[funcName] = frameBytes;
+//             }
+//         }
+//     }
+// }
+void pass1(vector<pair<string, scoped_symtab*>>& codeList) {
+    for (int i = 0; i < codeList.size(); ++i) {
+        string t = trim(codeList[i].first);
+        if (t.empty()) {
             cout << "empty codelist error" << endl;
-        }
-        else{
-            if(t.rfind("FUNC_BEGIN", 0) == 0){
-                scoped_symtab* scope = code.second;
-                int stack_size = calculate_function_stack_size(scope);
-                istringstream iss(t);
-                string dummy, funcName;
-                iss >> dummy >> funcName;
-                int frameBytes = calculate_function_stack_size(scope);
+        } else if (t.rfind("FUNC_BEGIN", 0) == 0) {
+            istringstream iss(t);
+            string dummy, funcName;
+            iss >> dummy >> funcName;
+
+            if (i + 1 < codeList.size()) {
+                scoped_symtab* nextScope = codeList[i + 1].second;
+                int frameBytes = calculate_function_stack_size(nextScope);
                 funcStackSize[funcName] = frameBytes;
+            } else {
+                cerr << "Warning: No scope found after FUNC_BEGIN for " << funcName << endl;
             }
         }
     }
@@ -304,6 +328,7 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 string dummy, funcName;
                 iss >> dummy >> funcName;
                 generate_func_begin_MIPS(funcName, funcStackSize[funcName]);
+                paramReceiveCounter = 0;
             }
             else if (t.rfind("FUNC_END",0) == 0) {
                 istringstream iss(t);
@@ -335,6 +360,56 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
             else if (t.back() == ':' && isalpha(t[0])) {
                 // Handle labels like LABEL0:
                 mipsCode.push_back(t);
+            }
+            else if (t.rfind("PARAM", 0) == 0) {
+                // e.g. PARAM z
+                string var = trim(t.substr(5)); // after "PARAM"
+                string srcReg = getRegister(code.second, var);
+                
+                // Allocate param register
+                if (paramCounter >= argRegisters.size()) {
+                    cerr << "Too many parameters! Only 4 supported via registers.\n";
+                    exit(1);
+                }
+            
+                mipsCode.push_back("    move " + argRegisters[paramCounter] + ", " + srcReg);
+                paramCounter++;
+                continue;
+            }
+            
+            else if (t.rfind("CALL", 0) == 0) {
+                // e.g. CALL func,2
+                istringstream iss(t);
+                string call, funcWithComma;
+                int argCount;
+                iss >> call >> funcWithComma;
+                iss.ignore(); // skip comma
+                iss >> argCount;
+            
+                string funcName = trim(funcWithComma);
+                if (funcName.back() == ',') funcName.pop_back(); // cleanup
+            
+                mipsCode.push_back("    jal " + funcName);
+                paramCounter = 0; // reset for next call
+                continue;
+            }
+            else if (t.find(":= PARAM") != string::npos) {
+                // E.g. param0 := PARAM
+                size_t assignPos = t.find(":=");
+                string lhs = trim(t.substr(0, assignPos));
+            
+                // Use next available $a0-$a3 for receiving
+                if (paramReceiveCounter >= argRegisters.size()) {
+                    cerr << "Too many parameters for this function (more than 4)\n";
+                    exit(1);
+                }
+            
+                string dst = getRegister(code.second, lhs);  // local register for param
+                string from = argRegisters[paramReceiveCounter];
+                mipsCode.push_back("    move " + dst + ", " + from);
+            
+                paramReceiveCounter++;
+                continue;
             }
             if (t.find(":=") != string::npos) {
                 size_t lhsEnd = t.find(":=");

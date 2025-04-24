@@ -22,7 +22,7 @@
     std::vector<scoped_symtab*> all_scopes={curr_scope};
 
     std::vector<std::string> error_list;
-		
+	vector<scoped_symtab*> scope_list;
     vector<string> type_list = {};
 	vector<string> var_name={};
 	map<string,string> goto_list;
@@ -1669,7 +1669,7 @@ compound_statement
         $$->final_code = $3->final_code;
 		$$->is_return=$3->is_return;
 		$$->return_type=$3->return_type;
-		all_scopes.push_back(curr_scope);curr_scope = curr_scope->parent;
+		all_scopes.push_back(curr_scope);scope_list.push_back(curr_scope); curr_scope = curr_scope->parent;
 	}
 	| LBRACE {curr_scope = new scoped_symtab(curr_scope);} statement_list RBRACE {symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
@@ -2054,16 +2054,17 @@ function_definition
 		$$->code="\nFUNC_BEGIN "+$2->name+"\n";
         $$->final_code.push_back({"FUNC_BEGIN "+$2->name,curr_scope});
 		for(int i=0;i<$2->param_list.size();i++){
-            $$->final_code.push_back({"param"+std::to_string(i)+" := PARAM",curr_scope});
+            $$->final_code.push_back({"param"+std::to_string(i)+" := PARAM",scope_list[0]});
 			$$->code=$$->code+"param"+std::to_string(i)+" := PARAM\n";
 		}
 		for(int i=0;i<$2->param_list.size();i++){
-            $$->final_code.push_back({$2->param_list[i]+" := param"+std::to_string(i),curr_scope});
+            $$->final_code.push_back({$2->param_list[i]+" := param"+std::to_string(i),scope_list[0]});
 			$$->code=$$->code+$2->param_list[i]+" := param"+std::to_string(i)+"\n";
 		}
         $$->final_code.insert($$->final_code.end(), $4->final_code.begin(), $4->final_code.end());
         $$->final_code.push_back({"FUNC_END "+$2->name,curr_scope});
 		$$->code=$$->code+$4->code+"\nFUNC_END "+$2->name+"\n";
+		scope_list.pop_back();
 
 	}   
 	| declarator declaration_list compound_statement
