@@ -26,6 +26,8 @@ map<string, int> funcStackSize;
 // --- Global Variables ---
 unordered_map<string, string> regMap;
 vector<string> availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5"};
+vector<string> availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7"};
+map<pair<scoped_symtab*, string>, string> floatVarToReg;
 vector<string> mipsCode;
 unordered_map<string, bool> loadedConstants;
 unordered_map<string,string> reg_of_const;
@@ -61,8 +63,20 @@ string trim(const string& s) {
     return (start == string::npos) ? "" : s.substr(start, end - start + 1);
 }
 
-bool isConstantLiteral(const string& s) {
+bool isIntLiteral(const string& s) {
     return !s.empty() && all_of(s.begin(), s.end(), ::isdigit);
+}
+
+bool isFloatLiteral(const string& s) {
+    size_t dotPos = s.find('.');
+    if (dotPos == string::npos) return false;
+
+    string intPart = s.substr(0, dotPos);
+    string fracPart = s.substr(dotPos + 1);
+
+    return !intPart.empty() && !fracPart.empty() &&
+           all_of(intPart.begin(), intPart.end(), ::isdigit) &&
+           all_of(fracPart.begin(), fracPart.end(), ::isdigit);
 }
 
 void handleRegisterSpill(scoped_symtab* currentScope, const string& newVar) {
@@ -97,6 +111,21 @@ void handleRegisterSpill(scoped_symtab* currentScope, const string& newVar) {
 
     cerr << "Register spill failed: all registers are live or in use\n";
     exit(1);
+}
+
+string getFloatRegister(scoped_symtab* scope, const string& var) {
+    if (floatVarToReg.count({scope, var}))
+        return floatVarToReg[{scope, var}];
+    
+    if (availableFloatRegs.empty()) {
+        cerr << "No available float registers (spilling not implemented for float yet)\n";
+        exit(1);
+    }
+
+    string freg = availableFloatRegs.back();
+    availableFloatRegs.pop_back();
+    floatVarToReg[{scope, var}] = freg;
+    return freg;
 }
 
 string getRegister(scoped_symtab* scope,const string& var) {
@@ -145,6 +174,8 @@ void generate_func_end_MIPS(const string &func, int stackSize) {
     mipsCode.push_back("    jr   $ra");
     regMap.clear();
     availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4"};
+    floatVarToReg.clear();
+    availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7"};
     loadedConstants.clear();
 }
 
@@ -156,33 +187,86 @@ void generate_return_MIPS(string val) {
 // --- Operation/Assignment Handlers ---
 void load_if_constant(scoped_symtab* scope, const string& var, const string& reg) {
     if (loadedConstants[var]) return;
-    if(isConstantLiteral(var)) {
-        if(reg_of_const.count(var)) {
+
+    // Handle integer literal
+    if (isIntLiteral(var)) {
+        if (reg_of_const.count(var)) {
             mipsCode.push_back("    move " + reg + ", " + reg_of_const[var]);
-            cout << "Loaded constant literal " << var << " into " << reg << endl;
+            cout << "Loaded integer constant (cached) " << var << " into " << reg << endl;
             return;
         }
         mipsCode.push_back("    li " + reg + ", " + var);
         loadedConstants[var] = true;
-        reg_of_const[var]=reg;
-        cout << "Loaded constant literal " << var << " into " << reg << endl;
+        reg_of_const[var] = reg;
+        cout << "Loaded integer constant " << var << " into " << reg << endl;
         return;
     }
-    
-    symbol_info* sym = scope->symbol_map[var];
-    if (sym && sym->ptr && sym->type == "int") {
-        int* val = static_cast<int*>(sym->ptr);
-        mipsCode.push_back("    li " + reg + ", " + to_string(*val));
+
+    // Handle float literal
+    if (isFloatLiteral(var)) {
+        string floatLabel = "float_const_" + var;  // like float_const_3.14
+
+        // Emit float literal to .data segment
+        static set<string> emittedFloats;
+        if (!emittedFloats.count(var)) {
+            emittedFloats.insert(var);
+            mipsCode.insert(mipsCode.begin(), ".data");
+            mipsCode.insert(mipsCode.begin() + 1, floatLabel + ": .float " + var);
+            mipsCode.insert(mipsCode.begin() + 2, ".text");
+        }
+
+        // Load float from memory
+        mipsCode.push_back("    la " + reg + ", " + floatLabel);
+        mipsCode.push_back("    l.s " + reg + ", 0(" + reg + ")");
         loadedConstants[var] = true;
-        cout << "Loaded constant " << var << " into " << reg << endl;
+        reg_of_const[var] = reg;
+        cout << "Loaded float constant " << var << " into " << reg << endl;
+        return;
     }
-    
+
+    // Fallback to value from symbol table
+    symbol_info* sym = scope->symbol_map[var];
+    if (sym && sym->ptr) {
+        if (sym->type == "int") {
+            int* val = static_cast<int*>(sym->ptr);
+            mipsCode.push_back("    li " + reg + ", " + to_string(*val));
+            loadedConstants[var] = true;
+            cout << "Loaded symbol (int) " << var << " into " << reg << endl;
+        } else if (sym->type == "float") {
+            float* val = static_cast<float*>(sym->ptr);
+            string valStr = to_string(*val);
+            string floatLabel = "float_sym_" + var;
+
+            mipsCode.insert(mipsCode.begin(), ".data");
+            mipsCode.insert(mipsCode.begin() + 1, floatLabel + ": .float " + valStr);
+            mipsCode.insert(mipsCode.begin() + 2, ".text");
+
+            mipsCode.push_back("    la " + reg + ", " + floatLabel);
+            mipsCode.push_back("    l.s " + reg + ", 0(" + reg + ")");
+            loadedConstants[var] = true;
+            cout << "Loaded symbol (float) " << var << " into " << reg << endl;
+        }
+    }
 }
+
 
 void handle_operation(string lhs, string rhs, size_t operator_pos, const string& opp, scoped_symtab* scope) {
     cout<<"Handling operation: " << lhs << " := " << rhs << endl;
+    bool isFloat = (scope->symbol_map[lhs]->type == "float");
     string op1 = trim(rhs.substr(0, operator_pos));
     string op2 = trim(rhs.substr(operator_pos + opp.size()));
+    if (isFloat) {
+        string r1 = getFloatRegister(scope, op1);
+        string r2 = getFloatRegister(scope, op2);
+        string rd = getFloatRegister(scope, lhs);
+        
+        if (opp == "+") mipsCode.push_back("    add.s " + rd + ", " + r1 + ", " + r2);
+        else if (opp == "-") mipsCode.push_back("    sub.s " + rd + ", " + r1 + ", " + r2);
+        else if (opp == "*") mipsCode.push_back("    mul.s " + rd + ", " + r1 + ", " + r2);
+        else if (opp == "/") mipsCode.push_back("    div.s " + rd + ", " + r1 + ", " + r2);
+        return;
+    }
+    
     string r1 = getRegister(scope,op1);
     string r2 = getRegister(scope,op2);
     string rd = getRegister(scope,lhs);
@@ -217,8 +301,23 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
 
 void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
     cout<<"Handling assignment: " << lhs << " := " << rhs << endl;
+    symbol_info* lhsInfo = scope->symbol_map[lhs];
+    bool isFloat = (lhsInfo && lhsInfo->type == "float");
+
+    if (isFloat) {
+        string dst = getFloatRegister(scope, lhs);
+        if (isFloatLiteral(rhs)) {
+            // Assume float literal loading (mock behavior)
+            mipsCode.push_back("    li.s " + dst + ", " + rhs);
+        } 
+        else {
+            string src = getFloatRegister(scope, rhs);
+            mipsCode.push_back("    mov.s " + dst + ", " + src);
+        }
+        return;
+    }
     string dst = getRegister(scope,lhs);
-    if (isConstantLiteral(rhs)) {
+    if (isIntLiteral(rhs)) {
         if(reg_of_const.count(rhs)) {
             mipsCode.push_back("    move " + dst + ", " + reg_of_const[rhs]);
             loadedConstants[lhs] = true;
@@ -271,6 +370,88 @@ int calculate_function_stack_size(scoped_symtab* scope) {
     size += 8; // Space for old FP and RA
     return size;
 }
+
+void handle_param_pass(const string& line, scoped_symtab* scope) {
+    string var = trim(line.substr(5)); // after "PARAM"
+    string srcReg = getRegister(scope, var);
+
+    symbol_info* sym = scope->symbol_map[var];
+    if (!sym) {
+        cerr << "Unknown symbol in handle_param_pass: " << var << endl;
+        exit(1);
+    }
+
+    if (sym->type == "float") {
+        if (paramCounter == 0)
+            mipsCode.push_back("    mov.s $f12, " + srcReg);
+        else if (paramCounter == 1)
+            mipsCode.push_back("    mov.s $f14, " + srcReg);
+        else {
+            cerr << "Too many float parameters! Only 2 supported via $f12, $f14.\n";
+            exit(1);
+        }
+    } else {
+        if (paramCounter >= argRegisters.size()) {
+            cerr << "Too many integer parameters! Only 4 supported via $a0–$a3.\n";
+            exit(1);
+        }
+        mipsCode.push_back("    move " + argRegisters[paramCounter] + ", " + srcReg);
+    }
+
+    paramCounter++;
+}
+
+void handle_function_call(const string& line) {
+    istringstream iss(line);
+    string call, funcWithComma;
+    int argCount;
+    iss >> call >> funcWithComma;
+    iss.ignore(); // skip comma
+    iss >> argCount;
+
+    string funcName = trim(funcWithComma);
+    if (!funcName.empty() && funcName.back() == ',') funcName.pop_back();
+
+    mipsCode.push_back("    jal " + funcName);
+    paramCounter = 0; // Reset after call
+}
+
+
+void handle_param_receive(const string& line, scoped_symtab* scope) {
+    size_t assignPos = line.find(":=");
+    string lhs = trim(line.substr(0, assignPos));
+
+    symbol_info* sym = scope->symbol_map[lhs];
+    if (!sym) {
+        cerr << "Unknown symbol in handle_param_receive: " << lhs << endl;
+        exit(1);
+    }
+
+    string dst = getRegister(scope, lhs);
+
+    if (sym->type == "float") {
+        if (paramReceiveCounter == 0)
+            mipsCode.push_back("    mov.s " + dst + ", $f12");
+        else if (paramReceiveCounter == 1)
+            mipsCode.push_back("    mov.s " + dst + ", $f14");
+        else {
+            cerr << "Too many float parameters received! Only $f12 and $f14 supported.\n";
+            exit(1);
+        }
+    } else {
+        if (paramReceiveCounter >= argRegisters.size()) {
+            cerr << "Too many integer parameters received! Only $a0–$a3 supported.\n";
+            exit(1);
+        }
+
+        string from = argRegisters[paramReceiveCounter];
+        mipsCode.push_back("    move " + dst + ", " + from);
+    }
+
+    paramReceiveCounter++;
+}
+
+
 
 // void pass1(vector<pair<string, scoped_symtab*>>& codeList){
 //     for(auto &code : codeList){
@@ -362,53 +543,15 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 mipsCode.push_back(t);
             }
             else if (t.rfind("PARAM", 0) == 0) {
-                // e.g. PARAM z
-                string var = trim(t.substr(5)); // after "PARAM"
-                string srcReg = getRegister(code.second, var);
-                
-                // Allocate param register
-                if (paramCounter >= argRegisters.size()) {
-                    cerr << "Too many parameters! Only 4 supported via registers.\n";
-                    exit(1);
-                }
-            
-                mipsCode.push_back("    move " + argRegisters[paramCounter] + ", " + srcReg);
-                paramCounter++;
+                handle_param_pass(t, code.second);
                 continue;
             }
-            
             else if (t.rfind("CALL", 0) == 0) {
-                // e.g. CALL func,2
-                istringstream iss(t);
-                string call, funcWithComma;
-                int argCount;
-                iss >> call >> funcWithComma;
-                iss.ignore(); // skip comma
-                iss >> argCount;
-            
-                string funcName = trim(funcWithComma);
-                if (funcName.back() == ',') funcName.pop_back(); // cleanup
-            
-                mipsCode.push_back("    jal " + funcName);
-                paramCounter = 0; // reset for next call
+                handle_function_call(t);
                 continue;
             }
             else if (t.find(":= PARAM") != string::npos) {
-                // E.g. param0 := PARAM
-                size_t assignPos = t.find(":=");
-                string lhs = trim(t.substr(0, assignPos));
-            
-                // Use next available $a0-$a3 for receiving
-                if (paramReceiveCounter >= argRegisters.size()) {
-                    cerr << "Too many parameters for this function (more than 4)\n";
-                    exit(1);
-                }
-            
-                string dst = getRegister(code.second, lhs);  // local register for param
-                string from = argRegisters[paramReceiveCounter];
-                mipsCode.push_back("    move " + dst + ", " + from);
-            
-                paramReceiveCounter++;
+                handle_param_receive(t, code.second);
                 continue;
             }
             if (t.find(":=") != string::npos) {
@@ -504,8 +647,6 @@ void run_liveness(vector<LivenessInfo>& program) {
         }
     } while (changed);
 }
-
-
 
 void codegen_main() {
 

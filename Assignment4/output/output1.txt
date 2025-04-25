@@ -1,145 +1,38 @@
+=====================LIST OF ERRORS===================================
+Line 5 : Missing return statement
 ======================================================================
-No Errors in the code
-Intermediate code generated successfully
-======================================================================
-0x5cd8d1a8c4b0 FUNC_BEGIN func
-0x5cd8d1a93140 param0 := PARAM
-0x5cd8d1a93140 param1 := PARAM
-0x5cd8d1a93140 a := param0
-0x5cd8d1a93140 b := param1
-0x5cd8d1a93140 t0 :=  a + b
-0x5cd8d1a93140 p:= t0
-0x5cd8d1a8c4b0 FUNC_END func
-0x5cd8d1a8c4b0 FUNC_BEGIN main
-0x5cd8d1a93cb0 a:= 5
-0x5cd8d1a93cb0 b:= 7
-0x5cd8d1a93cb0 t1 :=  a * b
-0x5cd8d1a93cb0 z:= t1
-0x5cd8d1a93cb0 PARAM z
-0x5cd8d1a93cb0 PARAM a
-0x5cd8d1a93cb0 CALL func,2
-0x5cd8d1a93cb0 RETURN 0
-0x5cd8d1a8c4b0 FUNC_END main
+0x5ba0f2ed24b0 FUNC_BEGIN main
+0x5ba0f2ed87d0 a:= 3
+0x5ba0f2ed87d0 b:= 4.500000
+0x5ba0f2ed87d0 c:= 5.500000
+0x5ba0f2ed24b0 FUNC_END main
 Hiiiii
 a : int
 Hiiiii
-b : int
+b : float
 Hiiiii
-p : int
-Hiiiii
-t0 : int
-Hiiiii
-a : int
-Hiiiii
-b : int
-Hiiiii
-t1 : int
-Hiiiii
-t2 : void
-Hiiiii
-z : int
-FUNC_BEGIN func
-param0 := PARAM
-Getting register for param0
-Assigned register $t5 to param0
-param1 := PARAM
-Getting register for param1
-Assigned register $t4 to param1
-a := param0
-Handling assignment: a := param0
-Getting register for a
-Assigned register $t3 to a
-Getting register for param0
-Found register for param0 $t5
-b := param1
-Handling assignment: b := param1
-Getting register for b
-Assigned register $t2 to b
-Getting register for param1
-Found register for param1 $t4
-t0 :=  a + b
-Handling operation: t0 := a + b
-Getting register for a
-Found register for a $t3
-Getting register for b
-Found register for b $t2
-Getting register for t0
-Assigned register $t1 to t0
-Operation: a + b
-Registers: $t3, $t2, $t1
-p:= t0
-Handling assignment: p := t0
-Getting register for p
-Assigned register $t0 to p
-Getting register for t0
-Found register for t0 $t1
-FUNC_END func
+c : float
 FUNC_BEGIN main
-a:= 5
-Handling assignment: a := 5
+a:= 3
+Handling assignment: a := 3
 Getting register for a
-Assigned register $t4 to a
-b:= 7
-Handling assignment: b := 7
-Getting register for b
-Assigned register $t3 to b
-t1 :=  a * b
-Handling operation: t1 := a * b
-Getting register for a
-Found register for a $t4
-Getting register for b
-Found register for b $t3
-Getting register for t1
-Assigned register $t2 to t1
-Operation: a * b
-Registers: $t4, $t3, $t2
-z:= t1
-Handling assignment: z := t1
-Getting register for z
-Assigned register $t1 to z
-Getting register for t1
-Found register for t1 $t2
-PARAM z
-Getting register for z
-Found register for z $t1
-PARAM a
-Getting register for a
-Found register for a $t4
-CALL func,2
-RETURN 0
+Assigned register $t5 to a
+b:= 4.500000
+Handling assignment: b := 4.500000
+c:= 5.500000
+Handling assignment: c := 5.500000
 FUNC_END main
 # MIPS Assembly Code:
-func:
-    addi $sp, $sp, -24
-    sw   $ra, 20($sp)
-    sw   $fp, 16($sp)
-    move $fp, $sp
-    move $t5, $a0
-    move $t4, $a1
-    move $t3, $t5
-    move $t2, $t4
-    add $t1, $t3, $t2
-    move $t0, $t1
-    move $sp, $fp
-    lw   $fp, 16($sp)
-    lw   $ra, 20($sp)
-    addi $sp, $sp, 24
-    jr   $ra
 main:
-    addi $sp, $sp, -24
-    sw   $ra, 20($sp)
-    sw   $fp, 16($sp)
+    addi $sp, $sp, -20
+    sw   $ra, 16($sp)
+    sw   $fp, 12($sp)
     move $fp, $sp
-    li $t4, 5
-    li $t3, 7
-    mul $t2, $t4, $t3
-    move $t1, $t2
-    move $a0, $t1
-    move $a1, $t4
-    jal func,2
-    li $v0, 0
+    li $t5, 3
+    li.s $f7, 4.500000
+    li.s $f6, 5.500000
     move $sp, $fp
-    lw   $fp, 16($sp)
-    lw   $ra, 20($sp)
-    addi $sp, $sp, 24
+    lw   $fp, 12($sp)
+    lw   $ra, 16($sp)
+    addi $sp, $sp, 20
     jr   $ra
