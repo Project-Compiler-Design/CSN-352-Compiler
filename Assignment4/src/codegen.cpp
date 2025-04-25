@@ -1,13 +1,6 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <unordered_map>
-#include <vector>
-#include <algorithm>
-#include <cctype>
-#include <map>
+#include<bits/stdc++.h>
 
-#include "../include/utility.h" // Include your utility header
+#include <utility.h> // Include your utility header
 using namespace std;
 
 // Simulated symbol table structure
@@ -15,7 +8,6 @@ using namespace std;
 
 // Symbol table type
 int currentInstructionIndex = -1;
-static vector<string> argRegisters = {"$a0", "$a1", "$a2", "$a3"};
 static int paramCounter = 0;
 int paramReceiveCounter = 0;
 
@@ -25,6 +17,7 @@ map<string, int> funcStackSize;
 
 // --- Global Variables ---
 unordered_map<string, string> regMap;
+static vector<string> argRegisters = {"$a0", "$a1", "$a2", "$a3"};
 vector<string> availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5"};
 vector<string> availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7"};
 map<pair<scoped_symtab*, string>, string> floatVarToReg;
@@ -367,7 +360,16 @@ int calculate_function_stack_size(scoped_symtab* scope) {
             size += sym->type == "string" ? get_symbol_size(sym) : get_size_from_type(sym->type);
         }
     }
-    size += 8; // Space for old FP and RA
+    return size;
+}
+
+int space_for_extra_params(symbol_info* sym) {
+    int size = 0;
+    if (sym->param_list.size() > 4) {
+        for (int i=4; i < sym->param_list.size(); ++i) {
+            size += get_size_from_type(sym->param_types[i]);
+        }
+    }
     return size;
 }
 
@@ -440,7 +442,7 @@ void handle_param_receive(const string& line, scoped_symtab* scope) {
         }
     } else {
         if (paramReceiveCounter >= argRegisters.size()) {
-            cerr << "Too many integer parameters received! Only $a0–$a3 supported.\n";
+            cerr << "Too many integer parameters received! Only $a0-$a3 supported.\n";
             exit(1);
         }
 
@@ -450,8 +452,6 @@ void handle_param_receive(const string& line, scoped_symtab* scope) {
 
     paramReceiveCounter++;
 }
-
-
 
 // void pass1(vector<pair<string, scoped_symtab*>>& codeList){
 //     for(auto &code : codeList){
@@ -473,21 +473,35 @@ void handle_param_receive(const string& line, scoped_symtab* scope) {
 //     }
 // }
 void pass1(vector<pair<string, scoped_symtab*>>& codeList) {
-    for (int i = 0; i < codeList.size(); ++i) {
+    for (int i = 0; i < codeList.size(); i++) {
         string t = trim(codeList[i].first);
         if (t.empty()) {
-            cout << "empty codelist error" << endl;
+            cout << "empty codelist error at line: "<< i+1 << endl;
         } else if (t.rfind("FUNC_BEGIN", 0) == 0) {
             istringstream iss(t);
             string dummy, funcName;
             iss >> dummy >> funcName;
-
-            if (i + 1 < codeList.size()) {
-                scoped_symtab* nextScope = codeList[i + 1].second;
-                int frameBytes = calculate_function_stack_size(nextScope);
-                funcStackSize[funcName] = frameBytes;
-            } else {
-                cerr << "Warning: No scope found after FUNC_BEGIN for " << funcName << endl;
+            int size=0;
+            i++;
+            map<scoped_symtab*,int> visited_scopes;
+            while(i<codeList.size()){
+                string t = trim(codeList[i].first);
+                if(t.empty()){
+                    cout << "empty codelist error at line: "<< i+1 <<endl;
+                }
+                else if (t.rfind("FUNC_END", 0) == 0){
+                    size+=space_for_extra_params(codeList[i].second->symbol_map[funcName]);  
+                    funcStackSize[funcName] = size+8;// 8 bytes for $ra and $fp
+                    cout << "Function " << funcName << " stack size: " << funcStackSize[funcName] << endl;  
+                    break;
+                }else{
+                    scoped_symtab* scope = codeList[i].second;
+                    if(visited_scopes.find(scope)==visited_scopes.end()){
+                        visited_scopes[scope]=1;
+                        size+=calculate_function_stack_size(scope);
+                    }
+                }
+                i++;
             }
         }
     }
@@ -656,30 +670,12 @@ void codegen_main() {
         return;
     }
 
-    std::vector<std::pair<std::string,scoped_symtab*>> codeList;
-    std::string line;
-
-    while (std::getline(infile, line)) {
-        std::istringstream iss(line);
-        std::string addressStr;
-        if (!(iss >> addressStr) || !isAddress(addressStr)) {
-            continue; // skip invalid address
-        }
-
-        // Convert hex string to pointer
-        scoped_symtab* address = reinterpret_cast<scoped_symtab*>(std::stoull(addressStr, nullptr, 16));
-
-        std::string restOfLine;
-        std::getline(iss, restOfLine);
-        if (!restOfLine.empty() && restOfLine[0] == ' ')
-            restOfLine = restOfLine.substr(1); // remove leading space
-
-        codeList.emplace_back(restOfLine, address);
-    }
+    std::vector<std::pair<std::string,scoped_symtab*>> codeList=cleaned_TAC;
 
     pass1(codeList);
 
     currentLiveness.clear();
+
     for (int i = 0; i < codeList.size(); ++i) {
         currentLiveness.push_back({
             codeList[i].second, // scope
@@ -690,7 +686,7 @@ void codegen_main() {
     run_liveness(currentLiveness);
 
     pass2(codeList);
-
+    // cout<<cleaned_TAC.size()<<endl;
     cout << "# MIPS Assembly Code:\n";
     for (const string& line : mipsCode) {
         cout << line << endl;

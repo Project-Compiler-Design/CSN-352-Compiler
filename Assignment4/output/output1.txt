@@ -1,17 +1,22 @@
 =====================LIST OF ERRORS===================================
-Line 5 : Missing return statement
+Line 9 : Missing return statement
 ======================================================================
-0x5ba0f2ed24b0 FUNC_BEGIN main
-0x5ba0f2ed87d0 a:= 3
-0x5ba0f2ed87d0 b:= 4.500000
-0x5ba0f2ed87d0 c:= 5.500000
-0x5ba0f2ed24b0 FUNC_END main
+0x5628f4d668b0 FUNC_BEGIN main
+0x5628f4d6cbd0 a:= 3
+0x5628f4d6cbd0 b:= 4.500000
+0x5628f4d6cbd0 c:= 5.500000
+0x5628f4d6e910 a:=  4
+0x5628f4d6e910 d:= 6
+0x5628f4d668b0 FUNC_END main
 Hiiiii
 a : int
 Hiiiii
 b : float
 Hiiiii
 c : float
+Hiiiii
+d : int
+Function main stack size: 24
 FUNC_BEGIN main
 a:= 3
 Handling assignment: a := 3
@@ -21,18 +26,28 @@ b:= 4.500000
 Handling assignment: b := 4.500000
 c:= 5.500000
 Handling assignment: c := 5.500000
+a:=  4
+Handling assignment: a := 4
+Getting register for a
+Assigned register $t4 to a
+d:= 6
+Handling assignment: d := 6
+Getting register for d
+Assigned register $t3 to d
 FUNC_END main
 # MIPS Assembly Code:
 main:
-    addi $sp, $sp, -20
-    sw   $ra, 16($sp)
-    sw   $fp, 12($sp)
+    addi $sp, $sp, -24
+    sw   $ra, 20($sp)
+    sw   $fp, 16($sp)
     move $fp, $sp
     li $t5, 3
     li.s $f7, 4.500000
     li.s $f6, 5.500000
+    li $t4, 4
+    li $t3, 6
     move $sp, $fp
-    lw   $fp, 12($sp)
-    lw   $ra, 16($sp)
-    addi $sp, $sp, 20
+    lw   $fp, 16($sp)
+    lw   $ra, 20($sp)
+    addi $sp, $sp, 24
     jr   $ra

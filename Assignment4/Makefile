@@ -11,14 +11,19 @@ EXEC = parser
 LEX_FILE = src/scanner.l
 YACC_FILE = src/parser.y
 
+INCLUDE_DIR = include
+
 # Default target
-all: $(EXEC)
+all: run
 
 # Rule to compile the parser and scanner
-$(EXEC): $(YACC_FILE) $(LEX_FILE)
+$(EXEC): clean $(YACC_FILE) $(LEX_FILE)
 	$(BISON) -d -Wno-all $(YACC_FILE)
 	$(LEX) $(LEX_FILE)
-	$(CC) $(CFLAGS) parser.tab.c lex.yy.c src/codegen.cpp -o $(EXEC) -ll
+	$(CC) $(CFLAGS) -I$(INCLUDE_DIR) parser.tab.c lex.yy.c src/codegen.cpp -o $(EXEC) -ll
+
+run: $(EXEC)
+	./run.sh
 
 # Clean build files
 clean:

@@ -5,11 +5,14 @@
 #include <vector>
 #include<map>
 #include<bits/stdc++.h>
+
+using namespace std;
 struct scoped_symtab;
 struct symbol_info;
 
 static symbol_info* lookup_symbol_local(const std::string& name, scoped_symtab* curr_scope);
 static symbol_info* lookup_symbol_global(const std::string& name, scoped_symtab* curr_scope);
+extern vector<pair<string,scoped_symtab*>> cleaned_TAC;
 
 struct scoped_symtab{
     scoped_symtab* parent = nullptr;
