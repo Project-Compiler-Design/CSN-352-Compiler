@@ -25,6 +25,7 @@ map<pair<scoped_symtab*, string>, string> floatVarToReg;
 vector<string> mipsCode;
 map<string, bool> loadedConstants;
 map<string,string> reg_of_const;
+int get_size_from_type(string type);
 
 struct pair_hash {
     template <typename T1, typename T2>
@@ -72,42 +73,62 @@ bool isFloatLiteral(const string& s) {
            all_of(intPart.begin(), intPart.end(), ::isdigit) &&
            all_of(fracPart.begin(), fracPart.end(), ::isdigit);
 }
-int cnt=0,cnt2=0;
+
 scoped_symtab* getScope(scoped_symtab* scope, string& var) {
-    cnt++;
-    cnt2++;
-    cerr<<"YOOOOOOOOOOOOO1 "<<cnt<<" "<<var<<endl;
     while(scope != nullptr) {
         if (scope->symbol_map.count(var)) {
             return scope;
         }
         scope = scope->parent;
     }
-    cerr<<"YOOOOOOOOOOOOO2 "<<cnt2<<"  "<<var<<endl;
+    cerr<<"Error!!!! Variable " << var << " not found in any scope\n";
     return nullptr;
+}
+
+void push_into_stack(pair<scoped_symtab*, string> varPair){
+    scoped_symtab* scope = varPair.first;
+    string var = varPair.second;
+    symbol_info* sym = scope->symbol_map[var];
+    string reg = var_to_reg[{scope, var}];
+    cerr<<"pls"<<endl;
+    if(scope->symbol_map[var]->offset == -1){
+        sym->offset = last_offset.top();
+        last_offset.top()+=get_size_from_type(sym->type);
+        mipsCode.push_back("    sw " + reg + ", " + to_string(sym->offset) + "($sp)");
+    }else{
+        mipsCode.push_back("    sw " + reg + ", " + to_string(sym->offset) + "($sp)");
+    }
+    cout << "Pushed " << var << " from " << reg << " to stack at offset " << sym->offset << endl;
+    availableRegs.push_back(reg);
+    var_to_reg.erase({scope, var});
+    reg_to_var.erase(reg);
 }
 
 void handleRegisterSpill(scoped_symtab* currentScope, string& newVar) {
     currentScope = getScope(currentScope, newVar);
     cout << "Handling register spill for " << newVar << endl;
 
+    int maxdist=0;
+    string regi="$t0";
     for (auto it = var_to_reg.begin(); it != var_to_reg.end(); ++it) {
         auto [vscope, vname] = it->first;
         string reg = it->second;
 
+        // 1. Check use in current instruction
+        bool isUsedNow = currentLiveness[currentInstructionIndex].use.count({vscope, vname});
         bool isLiveInFuture = false;
 
-        // 1. Check future liveness
+        // 2. Check future liveness
         for (int i = currentInstructionIndex + 1; i < currentLiveness.size(); ++i) {
             if (currentLiveness[i].live_in.count({vscope, vname})) {
+                if (currentLiveness[i].index - currentInstructionIndex > maxdist && !isUsedNow) {
+                    maxdist = currentLiveness[i].index - currentInstructionIndex;
+                    regi = reg;
+                }
                 isLiveInFuture = true;
                 break;
             }
         }
-
-        // 2. Check use in current instruction
-        bool isUsedNow = currentLiveness[currentInstructionIndex].use.count({vscope, vname});
-
         if (!isLiveInFuture && !isUsedNow) {
             cout<<"Spilling " << vname << " from " << reg << endl;
             mipsCode.push_back("    # Spilling " + vname + " from " + reg);
@@ -117,9 +138,11 @@ void handleRegisterSpill(scoped_symtab* currentScope, string& newVar) {
             return;
         }
     }
-
-    cerr << "Register spill failed: all registers are live or in use\n";
-    exit(1);
+    //if everyone busy, we'll have to save any, so always choosing the first one
+    pair<scoped_symtab*, string> varPair = reg_to_var[regi];
+    cerr<<"Spilling " << varPair.second << " from " << regi << endl;
+    push_into_stack(varPair);
+    cerr<<"hi"<<endl;
 }
 
 string getFloatRegister(scoped_symtab* scope, string& var) {
@@ -152,6 +175,7 @@ string getRegister(scoped_symtab* scope, string& var) {
     string reg = availableRegs.back();
     availableRegs.pop_back();
     var_to_reg[{scope,var}] = reg;
+    reg_to_var[reg] = {scope,var};
     cout<<"Assigned register " << reg << " to " << var << endl;
     return reg;
 }
@@ -370,6 +394,7 @@ int get_size_from_type(string type) {
     else if (type == "float") return 4;
     else if(type == "char")return 1;
     else if(type == "bool")return 1;
+    return 4;
 }
 
 int calculate_function_stack_size(scoped_symtab* scope) {

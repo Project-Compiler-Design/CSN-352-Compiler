@@ -58,11 +58,10 @@ struct symbol_info {
     bool is_array_access=false;
     bool is_continue=false;
     bool is_break=false;
-    
-    
+    int offset=-1;
     
     symbol_info(std::string name="", std::string type="", void* ptr=nullptr, int symbol_size=0, bool is_array=false, int array_length=0, std::vector<int> int_array={},bool is_param_list=false,std::vector<std::string> param_types={},std::vector<std::string> param_list={},int parameter_no=0,int pointer_depth=0, qid place = {"", nullptr}, std::string code = "",
-        std::vector<symbol_info*> struct_attr_values = {})
+        std::vector<symbol_info*> struct_attr_values = {}, int offset=-1)
         : name(name), type(type), ptr(ptr), symbol_size(symbol_size){}
 
     symbol_info(symbol_info* sym)
@@ -71,7 +70,7 @@ struct symbol_info {
           is_param_list(sym->is_param_list), parameter_no(sym->parameter_no),
           param_types(sym->param_types), param_list(sym->param_list),
           struct_attr_values(sym->struct_attr_values), pointer_depth(sym->pointer_depth),
-          place(sym->place), code(sym->code) {
+          place(sym->place), code(sym->code), offset(sym->offset) {
                 // Copy the final_code vector
                 for (const auto& item : sym->final_code) {
                 final_code.push_back(item);
