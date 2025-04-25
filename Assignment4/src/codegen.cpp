@@ -12,18 +12,19 @@ static int paramCounter = 0;
 int paramReceiveCounter = 0;
 
 map<pair<scoped_symtab*,string>,string> var_to_reg;
-unordered_map<string,pair<scoped_symtab*,string>> reg_to_var;
+map<string,pair<scoped_symtab*,string>> reg_to_var;
 map<string, int> funcStackSize;
+stack<int> last_offset;
 
 // --- Global Variables ---
-unordered_map<string, string> regMap;
+map<string, string> regMap;
 static vector<string> argRegisters = {"$a0", "$a1", "$a2", "$a3"};
-vector<string> availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5"};
+vector<string> availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5","$t6", "$t7", "$t8", "$t9"};
 vector<string> availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7"};
 map<pair<scoped_symtab*, string>, string> floatVarToReg;
 vector<string> mipsCode;
-unordered_map<string, bool> loadedConstants;
-unordered_map<string,string> reg_of_const;
+map<string, bool> loadedConstants;
+map<string,string> reg_of_const;
 
 struct pair_hash {
     template <typename T1, typename T2>
@@ -71,8 +72,23 @@ bool isFloatLiteral(const string& s) {
            all_of(intPart.begin(), intPart.end(), ::isdigit) &&
            all_of(fracPart.begin(), fracPart.end(), ::isdigit);
 }
+int cnt=0,cnt2=0;
+scoped_symtab* getScope(scoped_symtab* scope, string& var) {
+    cnt++;
+    cnt2++;
+    cerr<<"YOOOOOOOOOOOOO1 "<<cnt<<" "<<var<<endl;
+    while(scope != nullptr) {
+        if (scope->symbol_map.count(var)) {
+            return scope;
+        }
+        scope = scope->parent;
+    }
+    cerr<<"YOOOOOOOOOOOOO2 "<<cnt2<<"  "<<var<<endl;
+    return nullptr;
+}
 
-void handleRegisterSpill(scoped_symtab* currentScope, const string& newVar) {
+void handleRegisterSpill(scoped_symtab* currentScope, string& newVar) {
+    currentScope = getScope(currentScope, newVar);
     cout << "Handling register spill for " << newVar << endl;
 
     for (auto it = var_to_reg.begin(); it != var_to_reg.end(); ++it) {
@@ -106,7 +122,8 @@ void handleRegisterSpill(scoped_symtab* currentScope, const string& newVar) {
     exit(1);
 }
 
-string getFloatRegister(scoped_symtab* scope, const string& var) {
+string getFloatRegister(scoped_symtab* scope, string& var) {
+    scope = getScope(scope, var);
     if (floatVarToReg.count({scope, var}))
         return floatVarToReg[{scope, var}];
     
@@ -121,7 +138,8 @@ string getFloatRegister(scoped_symtab* scope, const string& var) {
     return freg;
 }
 
-string getRegister(scoped_symtab* scope,const string& var) {
+string getRegister(scoped_symtab* scope, string& var) {
+    scope = getScope(scope, var);
     cout<<"Getting register for " << var << endl;
     if(var_to_reg.count({scope,var})) {
         cout<<"Found register for " << var << " "<<var_to_reg[{scope,var}]<<endl;
@@ -157,6 +175,7 @@ void generate_func_begin_MIPS(const string &func, int stackSize) {
     mipsCode.push_back("    sw   $ra, " + to_string(stackSize - 4) + "($sp)");
     mipsCode.push_back("    sw   $fp, " + to_string(stackSize - 8) + "($sp)");
     mipsCode.push_back("    move $fp, $sp");
+    last_offset.push(0);
 }
 
 void generate_func_end_MIPS(const string &func, int stackSize) {
@@ -166,19 +185,20 @@ void generate_func_end_MIPS(const string &func, int stackSize) {
     mipsCode.push_back("    addi $sp, $sp, " + to_string(stackSize));
     mipsCode.push_back("    jr   $ra");
     regMap.clear();
-    availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4"};
+    availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5","$t6", "$t7", "$t8", "$t9"};
     floatVarToReg.clear();
     availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7"};
     loadedConstants.clear();
+    last_offset.pop();
 }
 
 void generate_return_MIPS(string val) {
-
     mipsCode.push_back("    li $v0, " + val);
 }
 
 // --- Operation/Assignment Handlers ---
-void load_if_constant(scoped_symtab* scope, const string& var, const string& reg) {
+void load_if_constant(scoped_symtab* scope, string& var, const string& reg) {
+    scope = getScope(scope, var);
     if (loadedConstants[var]) return;
 
     // Handle integer literal
@@ -245,10 +265,10 @@ void load_if_constant(scoped_symtab* scope, const string& var, const string& reg
 
 void handle_operation(string lhs, string rhs, size_t operator_pos, const string& opp, scoped_symtab* scope) {
     cout<<"Handling operation: " << lhs << " := " << rhs << endl;
-    bool isFloat = (scope->symbol_map[lhs]->type == "float");
+    bool isFloat = (getScope(scope,lhs)->symbol_map[lhs]->type == "float");
     string op1 = trim(rhs.substr(0, operator_pos));
     string op2 = trim(rhs.substr(operator_pos + opp.size()));
-    if (isFloat) {
+    if (isFloat){
         string r1 = getFloatRegister(scope, op1);
         string r2 = getFloatRegister(scope, op2);
         string rd = getFloatRegister(scope, lhs);
@@ -294,7 +314,8 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
 
 void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
     cout<<"Handling assignment: " << lhs << " := " << rhs << endl;
-    symbol_info* lhsInfo = scope->symbol_map[lhs];
+
+    symbol_info* lhsInfo = getScope(scope,lhs)->symbol_map[lhs];
     bool isFloat = (lhsInfo && lhsInfo->type == "float");
 
     if (isFloat) {
@@ -326,6 +347,7 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
         mipsCode.push_back("    move " + dst + ", " + src);
     }
 }
+
 int get_symbol_size(symbol_info* sym) {
     if (sym->is_array) {
         return sym->symbol_size * sym->array_length;
@@ -377,7 +399,7 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
     string var = trim(line.substr(5)); // after "PARAM"
     string srcReg = getRegister(scope, var);
 
-    symbol_info* sym = scope->symbol_map[var];
+    symbol_info* sym = getScope(scope, var)->symbol_map[var];
     if (!sym) {
         cerr << "Unknown symbol in handle_param_pass: " << var << endl;
         exit(1);
@@ -394,7 +416,7 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
         }
     } else {
         if (paramCounter >= argRegisters.size()) {
-            cerr << "Too many integer parameters! Only 4 supported via $a0–$a3.\n";
+            cerr << "Too many integer parameters! Only 4 supported via $a0-$a3.\n";
             exit(1);
         }
         mipsCode.push_back("    move " + argRegisters[paramCounter] + ", " + srcReg);
@@ -423,7 +445,7 @@ void handle_param_receive(const string& line, scoped_symtab* scope) {
     size_t assignPos = line.find(":=");
     string lhs = trim(line.substr(0, assignPos));
 
-    symbol_info* sym = scope->symbol_map[lhs];
+    symbol_info* sym = getScope(scope, lhs)->symbol_map[lhs];
     if (!sym) {
         cerr << "Unknown symbol in handle_param_receive: " << lhs << endl;
         exit(1);
@@ -472,6 +494,7 @@ void handle_param_receive(const string& line, scoped_symtab* scope) {
 //         }
 //     }
 // }
+
 void pass1(vector<pair<string, scoped_symtab*>>& codeList) {
     for (int i = 0; i < codeList.size(); i++) {
         string t = trim(codeList[i].first);
@@ -513,11 +536,11 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
         auto& code = codeList[idx];
         currentInstructionIndex = idx;
         string t = trim(code.first);
-        cout << t << "\n";
         if (t.empty()){
-            cout << "empty codelist error" << endl;
+            continue;
         }
         else{
+            cout << t << "\n";
             if(t.rfind("FUNC_BEGIN", 0) == 0){
                 istringstream iss(t);
                 string dummy, funcName;
@@ -591,12 +614,15 @@ void compute_use_def(LivenessInfo& inst) {
         size_t eq = line.find(":=");
         string lhs = trim(line.substr(0, eq));
         string rhs = trim(line.substr(eq + 2));
-        inst.def.insert({inst.scope, lhs});
+        //here
+        inst.def.insert({getScope(inst.scope,lhs), lhs});
         istringstream iss(rhs);
         string token;
         while (iss >> token)
-            if (isalpha(token[0]) && token != lhs)
-                inst.use.insert({inst.scope, token});
+            if (isalpha(token[0]) && token != lhs){
+                //here
+                inst.use.insert({getScope(inst.scope,token), token});
+            }
     } else if (line.find("if(") == 0) {
         size_t start = line.find('(') + 1;
         size_t end = line.find(')');
@@ -604,13 +630,16 @@ void compute_use_def(LivenessInfo& inst) {
         istringstream iss(cond);
         string token;
         while (iss >> token)
-            if (isalpha(token[0]))
-                inst.use.insert({inst.scope, token});
+            if (isalpha(token[0])){
+                //here
+                inst.use.insert({getScope(inst.scope,token), token});
+            }
     } else if (line.find("RETURN") == 0) {
         string word, val;
         istringstream iss(line);
         iss >> word >> val;
-        inst.use.insert({inst.scope, val});
+        //here
+        if(isalpha(val[0])) inst.use.insert({getScope(inst.scope,val), val});
     }
 }
 
@@ -664,18 +693,12 @@ void run_liveness(vector<LivenessInfo>& program) {
 
 void codegen_main() {
 
-    std::ifstream infile("output/output1.txt");  // Replace with your file path
-    if (!infile.is_open()) {
-        std::cerr << "Failed to open the file.\n";
-        return;
-    }
-
     std::vector<std::pair<std::string,scoped_symtab*>> codeList=cleaned_TAC;
 
     pass1(codeList);
-
+    cerr<<"Pass 1 done"<<endl;
     currentLiveness.clear();
-
+ 
     for (int i = 0; i < codeList.size(); ++i) {
         currentLiveness.push_back({
             codeList[i].second, // scope
@@ -684,8 +707,9 @@ void codegen_main() {
         });
     }
     run_liveness(currentLiveness);
-
+    cerr<<"Liveness analysis done"<<endl;
     pass2(codeList);
+    cerr<<"Pass 2 done"<<endl;
     // cout<<cleaned_TAC.size()<<endl;
     cout << "# MIPS Assembly Code:\n";
     for (const string& line : mipsCode) {
