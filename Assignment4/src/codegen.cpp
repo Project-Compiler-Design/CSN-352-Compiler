@@ -9,9 +9,10 @@ using namespace std;
 // Symbol table type
 int currentInstructionIndex = -1;
 static int paramCounter = 0;
+static int paramFloatCounter = 0;
 int paramReceiveCounter = 0;
 int param_receive_offset=0;
-
+int paramFloatReceiveCounter = 0;
 map<pair<scoped_symtab*,string>,string> var_to_reg;
 map<string,pair<scoped_symtab*,string>> reg_to_var;
 map<string, int> funcStackSize;
@@ -95,18 +96,38 @@ void push_into_stack(pair<scoped_symtab*, string> varPair){
     scoped_symtab* scope = varPair.first;
     string var = varPair.second;
     symbol_info* sym = scope->symbol_map[var];
-    string reg = var_to_reg[{scope, var}];
-    cerr<<"pls"<<endl;
+    string type=sym->type;
+    string reg;
+    if(type=="int") reg = var_to_reg[{scope, var}];
+    else if(type=="float") reg = floatVarToReg[{scope, var}];
+    else{
+        cerr<<"Error: Type not supported for push into stack\n";
+        return;
+    }
     if(scope->symbol_map[var]->offset == -1){
         sym->offset = last_offset.top();
         last_offset.top()+=get_size_from_type(sym->type);
-        mipsCode.push_back("    sw " + reg + ", " + to_string(sym->offset) + "($sp)");
+        if(type=="int")
+            mipsCode.push_back("    sw " + reg + ", " + to_string(sym->offset) + "($sp)");
+        else if(type=="float")
+            mipsCode.push_back("    s.s " + reg + ", " + to_string(sym->offset) + "($sp)");
     }else{
-        mipsCode.push_back("    sw " + reg + ", " + to_string(sym->offset) + "($sp)");
+        if(type=="int")
+            mipsCode.push_back("    sw " + reg + ", " + to_string(sym->offset) + "($sp)");
+        else if(type=="float")
+            mipsCode.push_back("    s.s " + reg + ", " + to_string(sym->offset) + "($sp)");
     }
-    cout << "Pushed " << var << " from " << reg << " to stack at offset " << sym->offset << endl;
-    availableRegs.push_back(reg);
-    var_to_reg.erase({scope, var});
+    if(type=="int")
+    {
+        availableRegs.push_back(reg);
+        var_to_reg.erase({scope, var});
+    }
+    else if(type=="float")
+    {
+        availableFloatRegs.push_back(reg);
+        floatVarToReg.erase({scope, var});
+    }
+   
     reg_to_var.erase(reg);
 }
 
@@ -453,7 +474,7 @@ int space_for_extra_params(symbol_info* sym) {
 
 void handle_param_pass(const string& line, scoped_symtab* scope) {
     string var = trim(line.substr(5)); // after "PARAM"
-    string srcReg = getRegister(scope, var);
+    string srcReg;
     symbol_info* sym = getScope(scope, var)->symbol_map[var];
     if (!sym) {
         cerr << "Unknown symbol in handle_param_pass: " << var << endl;
@@ -461,16 +482,20 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
     }
 
     if (sym->type == "float") {
-        if (paramCounter == 0)
+        srcReg = getFloatRegister(scope, var);
+        if (paramFloatCounter == 0)
             mipsCode.push_back("    mov.s $f12, " + srcReg);
-        else if (paramCounter == 1)
+        else if (paramFloatCounter == 1)
             mipsCode.push_back("    mov.s $f14, " + srcReg);
         else {
-            cerr << "Too many float parameters! Only 2 supported via $f12, $f14.\n";
-            exit(1);
+            functionparams.push_back("    addi $sp, $sp, -4 \n    s.s " + srcReg + ", " + to_string(0) + "($sp)");
+            // cerr << "Too many float parameters! Only 2 supported via $f12, $f14.\n";
+            // exit(1);
         }
+        paramFloatCounter++;
     } 
     else {
+        srcReg = getRegister(scope, var);
         if (paramCounter >= argRegisters.size()) {
             functionparams.push_back("    addi $sp, $sp, -4 \n    sw " + srcReg + ", " + to_string(0) + "($sp)");
             // mipsCode.push_back("    addi $sp, $sp, -4");
@@ -483,9 +508,10 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
             param_receive_offset=0;
         }
         else mipsCode.push_back("    move " + argRegisters[paramCounter] + ", " + srcReg);
+        paramCounter++;
     }
 
-    paramCounter++;
+    
 }
 
 void handle_function_call(const string& line) {
@@ -513,6 +539,7 @@ void handle_function_call(const string& line) {
     //cerr<<"Function name: " << funcName << endl;
     mipsCode.push_back("    jal " + funcName);
     paramCounter = 0; // Reset after call
+    paramFloatCounter = 0;
 }
 
 
@@ -526,18 +553,27 @@ void handle_param_receive(const string& line, scoped_symtab* scope) {
         exit(1);
     }
 
-    string dst = getRegister(scope, lhs);
+    string dst;
 
     if (sym->type == "float") {
+        dst= getFloatRegister(scope, lhs);
         if (paramReceiveCounter == 0)
             mipsCode.push_back("    mov.s " + dst + ", $f12");
         else if (paramReceiveCounter == 1)
             mipsCode.push_back("    mov.s " + dst + ", $f14");
         else {
-            cerr << "Too many float parameters received! Only $f12 and $f14 supported.\n";
-            exit(1);
+            mipsCode.push_back("    #popping from stack to " + dst);
+            mipsCode.push_back("    l.s " + dst + ", " +to_string(param_receive_offset) + "($fp)");
+            param_receive_offset+=4;
+            mipsCode.push_back("    #pushing into function stack");
+            sym->offset = last_offset.top();
+            last_offset.top()+=get_size_from_type(sym->type);
+            mipsCode.push_back("    s.s " + dst + ", " + to_string(sym->offset) + "($sp)");
         }
+        paramFloatReceiveCounter++;
     } else {
+
+        dst= getRegister(scope, lhs);
         if (paramReceiveCounter >= argRegisters.size()) {
             mipsCode.push_back("    #popping from stack to " + dst);
             mipsCode.push_back("    lw " + dst + ", " +to_string(param_receive_offset) + "($fp)");
@@ -553,10 +589,11 @@ void handle_param_receive(const string& line, scoped_symtab* scope) {
             string from = argRegisters[paramReceiveCounter];
             mipsCode.push_back("    move " + dst + ", " + from);
         }
+        paramReceiveCounter++;
         
     }
 
-    paramReceiveCounter++;
+    
 }
 
 // void pass1(vector<pair<string, scoped_symtab*>>& codeList){
@@ -631,12 +668,14 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 iss >> dummy >> funcName;
                 generate_func_begin_MIPS(funcName, funcStackSize[funcName]);
                 paramReceiveCounter = 0;
+                paramFloatReceiveCounter = 0;
             }
             else if (t.rfind("FUNC_END",0) == 0) {
                 istringstream iss(t);
                 string dummy, funcName;
                 iss >> dummy >> funcName;
                 generate_func_end_MIPS(funcName, funcStackSize[funcName]);
+
                 continue;
             }
             else if(t.rfind("RETURN",0) == 0){
