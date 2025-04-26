@@ -48,6 +48,9 @@ main:
 
         jal     func                # call
         addi    $sp, $sp, 8         # pop q,r
+        move $a0, $v0           # move result into $a0
+        li   $v0, 1             # syscall 1 = print integer
+        syscall                 # print the integer
 
         # ($v0 holds the return)
 

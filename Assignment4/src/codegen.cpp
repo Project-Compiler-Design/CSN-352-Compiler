@@ -17,7 +17,7 @@ map<string,pair<scoped_symtab*,string>> reg_to_var;
 map<string, int> funcStackSize;
 map<string,int> size_of_extra_parameters;
 stack<int> last_offset;
-
+vector<string> functionparams;
 // --- Global Variables ---
 map<string, string> regMap;
 static vector<string> argRegisters = {"$a0", "$a1", "$a2", "$a3"};
@@ -25,6 +25,7 @@ vector<string> availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5","$t6", 
 vector<string> availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7"};
 map<pair<scoped_symtab*, string>, string> floatVarToReg;
 vector<string> mipsCode;
+
 map<string, bool> loadedConstants;
 map<string,string> reg_of_const;
 int get_size_from_type(string type);
@@ -217,13 +218,13 @@ void generate_func_begin_MIPS(const string &func, int stackSize) {
     last_offset.push(0);
 }
 
-void generate_func_end_MIPS(const string &func, int stackSize) {
-    mipsCode.push_back("    move $sp, $fp");
+void generate_func_end_MIPS( string &func, int stackSize) {
+    // mipsCode.push_back("    move $sp, $fp");
     mipsCode.push_back("    lw   $fp, " + to_string(stackSize - 8) + "($sp)");
     mipsCode.push_back("    lw   $ra, " + to_string(stackSize - 4) + "($sp)");
     mipsCode.push_back("    addi $sp, $sp, " + to_string(stackSize));
-    mipsCode.push_back("    jr   $ra");
-    regMap.clear();
+    if(func!="main") mipsCode.push_back("    jr   $ra");
+    // regMap.clear();
     // availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5","$t6", "$t7", "$t8", "$t9"};
     // floatVarToReg.clear();
     // availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7"};
@@ -232,7 +233,11 @@ void generate_func_end_MIPS(const string &func, int stackSize) {
 }
 
 void generate_return_MIPS(scoped_symtab* scope,string val) {
-    if(isIntLiteral(val) || isFloatLiteral(val)) mipsCode.push_back("    li $v0, " + val);
+    if(isIntLiteral(val) || isFloatLiteral(val)) 
+    {
+        mipsCode.push_back("\t move $a0, $v0 \n \t li   $v0, 1 \n \t syscall");
+        mipsCode.push_back("    li $v0, " + val);
+    }
     else{
         string reg=getRegister(scope,val);
         mipsCode.push_back("    move $v0, " + reg);
@@ -467,9 +472,9 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
     } 
     else {
         if (paramCounter >= argRegisters.size()) {
-            mipsCode.push_back("    #pushing " + srcReg + " to stack");
-            mipsCode.push_back("    addi $sp, $sp, -4");
-            mipsCode.push_back("    sw " + srcReg + ", " + to_string(0) + "($sp)");
+            functionparams.push_back("    addi $sp, $sp, -4 \n    sw " + srcReg + ", " + to_string(0) + "($sp)");
+            // mipsCode.push_back("    addi $sp, $sp, -4");
+            // mipsCode.push_back("    sw " + srcReg + ", " + to_string(0) + "($sp)");
             // cerr << "Too many integer parameters! Only 4 supported via $a0-$a3.\n";
             // exit(1);
         }
@@ -494,7 +499,18 @@ void handle_function_call(const string& line) {
 
     string funcName = trim(funcWithComma);
     if (!funcName.empty() && funcName.back() == ',') funcName.pop_back();
-
+    if(funcName.find(",")!=string::npos){
+        funcName = funcName.substr(0,funcName.find(","));
+    }
+    if(functionparams.size() > 0){
+        reverse(functionparams.begin(), functionparams.end());
+    for(auto &param : functionparams){
+        mipsCode.push_back(param);
+    }
+    functionparams.clear();
+    }
+    
+    //cerr<<"Function name: " << funcName << endl;
     mipsCode.push_back("    jal " + funcName);
     paramCounter = 0; // Reset after call
 }
@@ -524,7 +540,7 @@ void handle_param_receive(const string& line, scoped_symtab* scope) {
     } else {
         if (paramReceiveCounter >= argRegisters.size()) {
             mipsCode.push_back("    #popping from stack to " + dst);
-            mipsCode.push_back("    lw " + dst + ", " + "-"+to_string(param_receive_offset) + "($fp)");
+            mipsCode.push_back("    lw " + dst + ", " +to_string(param_receive_offset) + "($fp)");
             param_receive_offset+=4;
             mipsCode.push_back("    #pushing into function stack");
             sym->offset = last_offset.top();
@@ -760,7 +776,8 @@ void run_liveness(vector<LivenessInfo>& program) {
 }
 
 void codegen_main() {
-
+    mipsCode.push_back(".text");
+    mipsCode.push_back(".globl main");
     std::vector<std::pair<std::string,scoped_symtab*>> codeList=cleaned_TAC;
 
     pass1(codeList);
@@ -779,6 +796,8 @@ void codegen_main() {
     pass2(codeList);
     cerr<<"Pass 2 done"<<endl;
     // cout<<cleaned_TAC.size()<<endl;
+    mipsCode.push_back("    li $v0, 10");
+    mipsCode.push_back("    syscall");
     cerr << "################ MIPS Assembly Code ################ \n";
     for (const string& line : mipsCode) {
         cerr << line << endl;
