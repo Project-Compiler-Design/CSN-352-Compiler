@@ -1,505 +1,295 @@
-=====================LIST OF ERRORS===================================
-Line 28 : Missing return statement
 ======================================================================
-0x55fde60838b0 FUNC_BEGIN main
-0x55fde6089eb0 a:= 4
-0x55fde6089eb0 b:= 5
-0x55fde6089eb0 c:= 6
-0x55fde6089eb0 d:= 7
-0x55fde6089eb0 e:= 8
-0x55fde6089eb0 f:= 9
-0x55fde6089eb0 g:= 10
-0x55fde6089eb0 h:= 11
-0x55fde6089eb0 i:= 12
-0x55fde6089eb0 j:= 13
-0x55fde6089eb0 k:= 14
-0x55fde6089eb0 l:= 15
-0x55fde6089eb0 m:= 16
-0x55fde6089eb0 n:= 17
-0x55fde6089eb0 o:= 18
-0x55fde6089eb0 t0 :=  a + a
-0x55fde6089eb0 aa:= t0
-0x55fde6089eb0 t1 :=  b + b
-0x55fde6089eb0 bb:= t1
-0x55fde6089eb0 t2 :=  c + c
-0x55fde6089eb0 cc:= t2
-0x55fde6089eb0 t3 :=  d + d
-0x55fde6089eb0 dd:= t3
-0x55fde6089eb0 t4 :=  e + e
-0x55fde6089eb0 ee:= t4
-0x55fde6089eb0 t5 :=  f + f
-0x55fde6089eb0 ff:= t5
-0x55fde6089eb0 t6 :=  g + g
-0x55fde6089eb0 gg:= t6
-0x55fde6089eb0 t7 :=  h + h
-0x55fde6089eb0 hh:= t7
-0x55fde6089eb0 t8 :=  i + i
-0x55fde6089eb0 ii:= t8
-0x55fde6089eb0 t9 :=  j + j
-0x55fde6089eb0 jj:= t9
-0x55fde6089eb0 t10 :=  k + k
-0x55fde6089eb0 kk:= t10
-0x55fde60838b0 FUNC_END main
+No Errors in the code
+Intermediate code generated successfully
+======================================================================
+0x5611931764b0 FUNC_BEGIN func
+0x56119317e7a0 a := PARAM
+0x56119317e7a0 b := PARAM
+0x56119317e7a0 c := PARAM
+0x56119317e7a0 d := PARAM
+0x56119317e7a0 e := PARAM
+0x56119317e7a0 f := PARAM
+0x56119317e7a0 t0 :=  d + e
+0x56119317e7a0 sum:= t0
+0x56119317e7a0 RETURN sum
+0x5611931764b0 FUNC_END func
+0x5611931764b0 FUNC_BEGIN main
+0x56119317fa00 x:= 10
+0x56119317fa00 y:= 20
+0x56119317fa00 z:= 30
+0x56119317fa00 p:= 40
+0x56119317fa00 q:= 50
+0x56119317fa00 r:= 60
+0x56119317fa00 PARAM x
+0x56119317fa00 PARAM y
+0x56119317fa00 PARAM z
+0x56119317fa00 PARAM p
+0x56119317fa00 PARAM q
+0x56119317fa00 PARAM r
+0x56119317fa00 t1 := CALL func,6
+0x56119317fa00 result:= t1
+0x56119317fa00 RETURN 0
+0x5611931764b0 FUNC_END main
+======================================================================
+Printing scope table
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| func            | int                  | 4       | N/A        |
+| main            | int                  | 4       | N/A        |
+| printf          |                      | 0       | N/A        |
+| scanf           |                      | 0       | N/A        |
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| a               | int                  | 4       | N/A        |
+| b               | int                  | 4       | N/A        |
+| c               | int                  | 4       | N/A        |
+| d               | int                  | 4       | N/A        |
+| e               | int                  | 4       | N/A        |
+| f               | int                  | 4       | N/A        |
+| sum             | int                  | 4       | N/A        |
+| t0              | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| p               | int                  | 4       | 40         |
+| q               | int                  | 4       | 50         |
+| r               | int                  | 4       | 60         |
+| result          | int                  | 4       | N/A        |
+| t1              | int                  | 4       | N/A        |
+| x               | int                  | 4       | 10         |
+| y               | int                  | 4       | 20         |
+| z               | int                  | 4       | 30         |
+-----------------------------------------------------------------
 Hiiiii
 a : int
-Hiiiii
-aa : int
+current size: 4
 Hiiiii
 b : int
-Hiiiii
-bb : int
+current size: 8
 Hiiiii
 c : int
-Hiiiii
-cc : int
+current size: 12
 Hiiiii
 d : int
-Hiiiii
-dd : int
+current size: 16
 Hiiiii
 e : int
-Hiiiii
-ee : int
+current size: 20
 Hiiiii
 f : int
+current size: 24
 Hiiiii
-ff : int
-Hiiiii
-g : int
-Hiiiii
-gg : int
-Hiiiii
-h : int
-Hiiiii
-hh : int
-Hiiiii
-i : int
-Hiiiii
-ii : int
-Hiiiii
-j : int
-Hiiiii
-jj : int
-Hiiiii
-k : int
-Hiiiii
-kk : int
-Hiiiii
-l : int
-Hiiiii
-m : int
-Hiiiii
-n : int
-Hiiiii
-o : int
+sum : int
+current size: 28
 Hiiiii
 t0 : int
+current size: 32
+Function func stack size: 40
+Hiiiii
+p : int
+current size: 4
+Hiiiii
+q : int
+current size: 8
+Hiiiii
+r : int
+current size: 12
+Hiiiii
+result : int
+current size: 16
 Hiiiii
 t1 : int
+current size: 20
 Hiiiii
-t10 : int
+x : int
+current size: 24
 Hiiiii
-t2 : int
+y : int
+current size: 28
 Hiiiii
-t3 : int
-Hiiiii
-t4 : int
-Hiiiii
-t5 : int
-Hiiiii
-t6 : int
-Hiiiii
-t7 : int
-Hiiiii
-t8 : int
-Hiiiii
-t9 : int
-Function main stack size: 156
+z : int
+current size: 32
+Function main stack size: 40
 Pass 1 done
+Error!!!! Variable func,6 not found in any scope
 Liveness analysis done
-FUNC_BEGIN main
-a:= 4
-Handling assignment: a := 4
+FUNC_BEGIN func
+a := PARAM
+Handling param receive: a := PARAM
 Getting register for a
 Assigned register $t9 to a
-b:= 5
-Handling assignment: b := 5
+b := PARAM
+Handling param receive: b := PARAM
 Getting register for b
 Assigned register $t8 to b
-c:= 6
-Handling assignment: c := 6
+c := PARAM
+Handling param receive: c := PARAM
 Getting register for c
 Assigned register $t7 to c
-d:= 7
-Handling assignment: d := 7
+d := PARAM
+Handling param receive: d := PARAM
 Getting register for d
 Assigned register $t6 to d
-e:= 8
-Handling assignment: e := 8
+e := PARAM
+Handling param receive: e := PARAM
 Getting register for e
 Assigned register $t5 to e
-f:= 9
-Handling assignment: f := 9
+f := PARAM
+Handling param receive: f := PARAM
 Getting register for f
 Assigned register $t4 to f
-g:= 10
-Handling assignment: g := 10
-Getting register for g
-Assigned register $t3 to g
-h:= 11
-Handling assignment: h := 11
-Getting register for h
-Assigned register $t2 to h
-i:= 12
-Handling assignment: i := 12
-Getting register for i
-Assigned register $t1 to i
-j:= 13
-Handling assignment: j := 13
-Getting register for j
-Assigned register $t0 to j
-k:= 14
-Handling assignment: k := 14
-Getting register for k
-Handling register spill for k
+t0 :=  d + e
+Handling operation: t0 := d + e
+Getting register for d
+Found register for d $t6
+Getting register for e
+Found register for e $t5
+Getting register for t0
+Assigned register $t3 to t0
+Operation: d + e
+Registers: $t6, $t5, $t3
+sum:= t0
+Handling assignment: sum := t0
+Getting register for sum
+Assigned register $t2 to sum
+Getting register for t0
+Found register for t0 $t3
+RETURN sum
+Getting register for sum
+Found register for sum $t2
+FUNC_END func
+FUNC_BEGIN main
+x:= 10
+Handling assignment: x := 10
+Getting register for x
+Assigned register $t1 to x
+y:= 20
+Handling assignment: y := 20
+Getting register for y
+Assigned register $t0 to y
+z:= 30
+Handling assignment: z := 30
+Getting register for z
+Handling register spill for z
 Spilling a from $t9
-pls
-Pushed a from $t9 to stack at offset 0
-hi
-Assigned register $t9 to k
-l:= 15
-Handling assignment: l := 15
-Getting register for l
-Handling register spill for l
+Assigned register $t9 to z
+p:= 40
+Handling assignment: p := 40
+Getting register for p
+Handling register spill for p
 Spilling b from $t8
-pls
-Pushed b from $t8 to stack at offset 4
-hi
-Assigned register $t8 to l
-m:= 16
-Handling assignment: m := 16
-Getting register for m
-Handling register spill for m
-Spilling l from $t8
-Assigned register $t8 to m
-n:= 17
-Handling assignment: n := 17
-Getting register for n
-Handling register spill for n
-Spilling m from $t8
-Assigned register $t8 to n
-o:= 18
-Handling assignment: o := 18
-Getting register for o
-Handling register spill for o
-Spilling n from $t8
-Assigned register $t8 to o
-t0 :=  a + a
-Handling operation: t0 := a + a
-Getting register for a
-Handling register spill for a
-Spilling o from $t8
-Assigned register $t8 to a
-Getting register for a
-Found register for a $t8
-Getting register for t0
-Handling register spill for t0
+Assigned register $t8 to p
+q:= 50
+Handling assignment: q := 50
+Getting register for q
+Handling register spill for q
 Spilling c from $t7
-pls
-Pushed c from $t7 to stack at offset 8
-hi
-Assigned register $t7 to t0
-Operation: a + a
-Registers: $t8, $t8, $t7
-aa:= t0
-Handling assignment: aa := t0
-Getting register for aa
-Handling register spill for aa
-Spilling a from $t8
-Assigned register $t8 to aa
-Getting register for t0
-Found register for t0 $t7
-t1 :=  b + b
-Handling operation: t1 := b + b
-Getting register for b
-Handling register spill for b
-Spilling aa from $t8
-Assigned register $t8 to b
-Getting register for b
-Found register for b $t8
+Assigned register $t7 to q
+r:= 60
+Handling assignment: r := 60
+Getting register for r
+Handling register spill for r
+Spilling d from $t6
+Assigned register $t6 to r
+PARAM x
+Getting register for x
+Found register for x $t1
+PARAM y
+Getting register for y
+Found register for y $t0
+PARAM z
+Getting register for z
+Found register for z $t9
+PARAM p
+Getting register for p
+Found register for p $t8
+PARAM q
+Getting register for q
+Found register for q $t7
+PARAM r
+Getting register for r
+Found register for r $t6
+t1 := CALL func,6
+Handling assignment: t1 := CALL func,6
 Getting register for t1
 Handling register spill for t1
-Spilling t0 from $t7
-Assigned register $t7 to t1
-Operation: b + b
-Registers: $t8, $t8, $t7
-bb:= t1
-Handling assignment: bb := t1
-Getting register for bb
-Handling register spill for bb
-Spilling b from $t8
-Assigned register $t8 to bb
-Getting register for t1
-Found register for t1 $t7
-t2 :=  c + c
-Handling operation: t2 := c + c
-Getting register for c
-Handling register spill for c
-Spilling bb from $t8
-Assigned register $t8 to c
-Getting register for c
-Found register for c $t8
-Getting register for t2
-Handling register spill for t2
-Spilling t1 from $t7
-Assigned register $t7 to t2
-Operation: c + c
-Registers: $t8, $t8, $t7
-cc:= t2
-Handling assignment: cc := t2
-Getting register for cc
-Handling register spill for cc
-Spilling c from $t8
-Assigned register $t8 to cc
-Getting register for t2
-Found register for t2 $t7
-t3 :=  d + d
-Handling operation: t3 := d + d
-Getting register for d
-Found register for d $t6
-Getting register for d
-Found register for d $t6
-Getting register for t3
-Handling register spill for t3
-Spilling cc from $t8
-Assigned register $t8 to t3
-Operation: d + d
-Registers: $t6, $t6, $t8
-dd:= t3
-Handling assignment: dd := t3
-Getting register for dd
-Handling register spill for dd
-Spilling d from $t6
-Assigned register $t6 to dd
-Getting register for t3
-Found register for t3 $t8
-t4 :=  e + e
-Handling operation: t4 := e + e
-Getting register for e
-Found register for e $t5
-Getting register for e
-Found register for e $t5
-Getting register for t4
-Handling register spill for t4
-Spilling dd from $t6
-Assigned register $t6 to t4
-Operation: e + e
-Registers: $t5, $t5, $t6
-ee:= t4
-Handling assignment: ee := t4
-Getting register for ee
-Handling register spill for ee
 Spilling e from $t5
-Assigned register $t5 to ee
-Getting register for t4
-Found register for t4 $t6
-t5 :=  f + f
-Handling operation: t5 := f + f
-Getting register for f
-Found register for f $t4
-Getting register for f
-Found register for f $t4
-Getting register for t5
-Handling register spill for t5
-Spilling ee from $t5
-Assigned register $t5 to t5
-Operation: f + f
-Registers: $t4, $t4, $t5
-ff:= t5
-Handling assignment: ff := t5
-Getting register for ff
-Handling register spill for ff
+Assigned register $t5 to t1
+Handling function call: CALL func,6
+result:= t1
+Handling assignment: result := t1
+Getting register for result
+Handling register spill for result
 Spilling f from $t4
-Assigned register $t4 to ff
-Getting register for t5
-Found register for t5 $t5
-t6 :=  g + g
-Handling operation: t6 := g + g
-Getting register for g
-Found register for g $t3
-Getting register for g
-Found register for g $t3
-Getting register for t6
-Handling register spill for t6
-Spilling ff from $t4
-Assigned register $t4 to t6
-Operation: g + g
-Registers: $t3, $t3, $t4
-gg:= t6
-Handling assignment: gg := t6
-Getting register for gg
-Handling register spill for gg
-Spilling g from $t3
-Assigned register $t3 to gg
-Getting register for t6
-Found register for t6 $t4
-t7 :=  h + h
-Handling operation: t7 := h + h
-Getting register for h
-Found register for h $t2
-Getting register for h
-Found register for h $t2
-Getting register for t7
-Handling register spill for t7
-Spilling gg from $t3
-Assigned register $t3 to t7
-Operation: h + h
-Registers: $t2, $t2, $t3
-hh:= t7
-Handling assignment: hh := t7
-Getting register for hh
-Handling register spill for hh
-Spilling h from $t2
-Assigned register $t2 to hh
-Getting register for t7
-Found register for t7 $t3
-t8 :=  i + i
-Handling operation: t8 := i + i
-Getting register for i
-Found register for i $t1
-Getting register for i
-Found register for i $t1
-Getting register for t8
-Handling register spill for t8
-Spilling hh from $t2
-Assigned register $t2 to t8
-Operation: i + i
-Registers: $t1, $t1, $t2
-ii:= t8
-Handling assignment: ii := t8
-Getting register for ii
-Handling register spill for ii
-Spilling i from $t1
-Assigned register $t1 to ii
-Getting register for t8
-Found register for t8 $t2
-t9 :=  j + j
-Handling operation: t9 := j + j
-Getting register for j
-Found register for j $t0
-Getting register for j
-Found register for j $t0
-Getting register for t9
-Handling register spill for t9
-Spilling ii from $t1
-Assigned register $t1 to t9
-Operation: j + j
-Registers: $t0, $t0, $t1
-jj:= t9
-Handling assignment: jj := t9
-Getting register for jj
-Handling register spill for jj
-Spilling j from $t0
-Assigned register $t0 to jj
-Getting register for t9
-Found register for t9 $t1
-t10 :=  k + k
-Handling operation: t10 := k + k
-Getting register for k
-Found register for k $t9
-Getting register for k
-Found register for k $t9
-Getting register for t10
-Handling register spill for t10
-Spilling jj from $t0
-Assigned register $t0 to t10
-Operation: k + k
-Registers: $t9, $t9, $t0
-kk:= t10
-Handling assignment: kk := t10
-Getting register for kk
-Handling register spill for kk
-Spilling k from $t9
-Assigned register $t9 to kk
-Getting register for t10
-Found register for t10 $t0
+Assigned register $t4 to result
+Getting register for t1
+Found register for t1 $t5
+RETURN 0
 FUNC_END main
 Pass 2 done
-# MIPS Assembly Code:
-main:
-    addi $sp, $sp, -156
-    sw   $ra, 152($sp)
-    sw   $fp, 148($sp)
+################ MIPS Assembly Code ################ 
+func:
     move $fp, $sp
-    li $t9, 4
-    li $t8, 5
-    li $t7, 6
-    li $t6, 7
-    li $t5, 8
-    li $t4, 9
-    li $t3, 10
-    li $t2, 11
-    li $t1, 12
-    li $t0, 13
-    sw $t9, 0($sp)
-    li $t9, 14
-    sw $t8, 4($sp)
-    li $t8, 15
-    # Spilling l from $t8
-    li $t8, 16
-    # Spilling m from $t8
-    li $t8, 17
-    # Spilling n from $t8
-    li $t8, 18
-    # Spilling o from $t8
-    sw $t7, 8($sp)
-    add $t7, $t8, $t8
-    # Spilling a from $t8
-    move $t8, $t7
-    # Spilling aa from $t8
-    # Spilling t0 from $t7
-    add $t7, $t8, $t8
+    addi $sp, $sp, -40
+    sw   $ra, 36($sp)
+    sw   $fp, 32($sp)
+    move $t9, $a0
+    move $t8, $a1
+    move $t7, $a2
+    move $t6, $a3
+    #popping from stack to $t5
+    lw $t5, -0($fp)
+    #pushing into function stack
+    sw $t5, 0($sp)
+    #popping from stack to $t4
+    lw $t4, -4($fp)
+    #pushing into function stack
+    sw $t4, 4($sp)
+    add $t3, $t6, $t5
+    move $t2, $t3
+    move $v0, $t2
+    move $sp, $fp
+    lw   $fp, 32($sp)
+    lw   $ra, 36($sp)
+    addi $sp, $sp, 40
+    jr   $ra
+main:
+    move $fp, $sp
+    addi $sp, $sp, -40
+    sw   $ra, 36($sp)
+    sw   $fp, 32($sp)
+    li $t1, 10
+    li $t0, 20
+    # Spilling a from $t9
+    li $t9, 30
     # Spilling b from $t8
-    move $t8, $t7
-    # Spilling bb from $t8
-    # Spilling t1 from $t7
-    add $t7, $t8, $t8
-    # Spilling c from $t8
-    move $t8, $t7
-    # Spilling cc from $t8
-    add $t8, $t6, $t6
+    li $t8, 40
+    # Spilling c from $t7
+    li $t7, 50
     # Spilling d from $t6
-    move $t6, $t8
-    # Spilling dd from $t6
-    add $t6, $t5, $t5
+    li $t6, 60
+    move $a0, $t1
+    move $a1, $t0
+    move $a2, $t9
+    move $a3, $t8
+    #pushing $t7 to stack
+    addi $sp, $sp, -4
+    sw $t7, 0($sp)
+    #pushing $t6 to stack
+    addi $sp, $sp, -4
+    sw $t6, 0($sp)
     # Spilling e from $t5
-    move $t5, $t6
-    # Spilling ee from $t5
-    add $t5, $t4, $t4
+    jal func,6
+    move $t5, $v0
     # Spilling f from $t4
     move $t4, $t5
-    # Spilling ff from $t4
-    add $t4, $t3, $t3
-    # Spilling g from $t3
-    move $t3, $t4
-    # Spilling gg from $t3
-    add $t3, $t2, $t2
-    # Spilling h from $t2
-    move $t2, $t3
-    # Spilling hh from $t2
-    add $t2, $t1, $t1
-    # Spilling i from $t1
-    move $t1, $t2
-    # Spilling ii from $t1
-    add $t1, $t0, $t0
-    # Spilling j from $t0
-    move $t0, $t1
-    # Spilling jj from $t0
-    add $t0, $t9, $t9
-    # Spilling k from $t9
-    move $t9, $t0
+    li $v0, 0
     move $sp, $fp
-    lw   $fp, 148($sp)
-    lw   $ra, 152($sp)
-    addi $sp, $sp, 156
+    lw   $fp, 32($sp)
+    lw   $ra, 36($sp)
+    addi $sp, $sp, 40
     jr   $ra

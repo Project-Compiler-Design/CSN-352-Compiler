@@ -1998,6 +1998,7 @@ start_symbol: translation_unit
     // cerr<<endl<<endl<<endl;
     cleaned_TAC=clean_vector_TAC($1->final_code);
 	print_vector(cleaned_TAC);
+	
 }
 ;
 translation_unit
@@ -2166,6 +2167,7 @@ int main() {
 	curr_scope->symbol_map["printf"]=new_symbol;
 	curr_scope->symbol_map["scanf"]=new_symbol;
 	yyparse();
+	print_scope_table();
 	codegen_main();
-	// print_scope_table(); 
+	 
 }

@@ -185,42 +185,79 @@ bool isSingleStringLiteral(const string& line) {
     return regex_match(line, regex("^\".*\"$"));
 }
 
-
-
-vector<pair<string, scoped_symtab*>> clean_vector_TAC(vector<pair<string, scoped_symtab*>> input) {
+string trimm(const string& s) {
+    size_t start = s.find_first_not_of(" \t\r\n");
+    size_t end = s.find_last_not_of(" \t\r\n");
+    return (start == string::npos) ? "" : s.substr(start, end - start + 1);
+}
+template<typename T>
+std::string pointer_to_string(T* ptr) {
+    std::ostringstream oss;
+    oss << ptr;             // streams the address in hex (e.g. 0x7ffc1234abcd)
+    return oss.str();
+}
+vector<pair<string, scoped_symtab*>> clean_vector_TAC(const vector<pair<string, scoped_symtab*>>& input) {
     vector<pair<string, scoped_symtab*>> cleaned_TAC;
-    int lineno = 1;
+    unordered_set<string> paramVars;  // to remember param0, param1, …
 
-    for (auto& entry : input) {
-        string line = entry.first;
+    for (const auto& entry : input) {
+        const string& line = entry.first;
         scoped_symtab* scope = entry.second;
-
-        // Trim leading and trailing whitespace
-        while (!line.empty() && isspace(line.front())) line.erase(line.begin());
-        while (!line.empty() && isspace(line.back())) line.pop_back();
-
-        // Skip lines that are empty or contain only a number, float, or string literal
-        if (line.empty() || isSingleNumber(line) || isSingleFloat(line) || isSingleStringLiteral(line))
+        string address=pointer_to_string(entry.second);
+        //cout<<"fullLine: " << fullLine << endl;
+        // 1) Split off the address
+        // auto spacePos = fullLine.find(' ');
+        // if (spacePos == string::npos) continue;
+        // string address = fullLine.substr(0, spacePos);
+        // string line    = trimm(fullLine.substr(spacePos + 1));
+        // cout<<"line: " << line << endl;
+        // 2) Skip trivial or empty lines
+        if (line.empty() ||
+            isSingleNumber(line) ||
+            isSingleFloat(line) ||
+            isSingleStringLiteral(line) ||
+            (startsWithPointerOrAddress(line) && line.find('=') == string::npos))
+        {
             continue;
+        }
 
-        // Skip lines with only pointer/address-of expression and no assignment
-        if (startsWithPointerOrAddress(line) && line.find('=') == string::npos)
-            continue;
+        // 3) Param logic (handles both ":=" and "=")
+        auto eqPos = line.find('=');
+        if (eqPos != string::npos) {
+            string lhs = trimm(line.substr(0, eqPos-1));
+            //cout<<"lhs: " << lhs << endl;
+            string rhs = trimm(line.substr(eqPos + 1));
 
-        // Output for debug (optional)
-        // cerr << lineno << ".  "<<scope<<"          ";
-        // if (!line.empty() && (line.back() == ':' || line.substr(0, 4) == "FUNC")) {
-        //     cerr << line << endl;
-        // } else {
-        //     cerr << "    " << line << endl;
-        // }
+            // normalize leading ":=" if present
+            if (!rhs.empty() && rhs[0] == ':') {
+                auto p = rhs.find_first_not_of(":=");
+                if (p != string::npos) rhs = trimm(rhs.substr(p));
+            }
 
+            // 3a) collect & drop param declarations
+            if (rhs == "PARAM") {
+                paramVars.insert(lhs);
+                continue;
+            }
+
+            // 3b) replace var := paramX → var := PARAM
+            if (paramVars.count(rhs)) {
+                cleaned_TAC.emplace_back(
+                     lhs + " := PARAM",
+                    scope
+                );
+                continue;
+            }
+        }
+
+        // 4) otherwise, keep the line verbatim (with its address)
         cleaned_TAC.emplace_back(line, scope);
-        lineno++;
     }
 
     return cleaned_TAC;
 }
+
+
 
 void print_vector(const vector<pair<string,scoped_symtab*>>& vec) {
     for (const auto& pair : vec) {
