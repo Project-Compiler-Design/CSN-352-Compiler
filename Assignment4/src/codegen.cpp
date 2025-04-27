@@ -105,6 +105,9 @@ void push_into_stack(pair<scoped_symtab*, string> varPair){
     string reg;
     if(type=="int") reg = var_to_reg[{scope, var}];
     else if(type=="float") reg = floatVarToReg[{scope, var}];
+    else if(type=="double"){
+        reg = doubleVarToReg[{scope, var}];
+    }
     else{
         cerr<<"Error: Type not supported for push into stack\n";
         return;
@@ -116,11 +119,23 @@ void push_into_stack(pair<scoped_symtab*, string> varPair){
             mipsCode.push_back("    sw " + reg + ", " + to_string(sym->offset) + "($sp)");
         else if(type=="float")
             mipsCode.push_back("    s.s " + reg + ", " + to_string(sym->offset) + "($sp)");
+        else if(type=="double")
+            mipsCode.push_back("    s.d " + reg + ", " + to_string(sym->offset) + "($sp)");
+        else{
+            cerr<<"Error: Type not supported for push into stack\n";
+            return;
+        }
     }else{
         if(type=="int")
             mipsCode.push_back("    sw " + reg + ", " + to_string(sym->offset) + "($sp)");
         else if(type=="float")
             mipsCode.push_back("    s.s " + reg + ", " + to_string(sym->offset) + "($sp)");
+        else if(type=="double")
+            mipsCode.push_back("    s.d " + reg + ", " + to_string(sym->offset) + "($sp)");
+        else{
+            cerr<<"Error: Type not supported for push into stack\n";
+            return;
+        }
     }
     if(type=="int")
     {
@@ -129,12 +144,249 @@ void push_into_stack(pair<scoped_symtab*, string> varPair){
     }
     else if(type=="float")
     {
-        availableFloatRegs.push_back(reg);
+        
         floatVarToReg.erase({scope, var});
+    }
+    else if(type=="double")
+    {
+        
+        doubleVarToReg.erase({scope, var});
+    }
+    else{
+        cerr<<"Error: Type not supported for push into stack\n";
+        return;
     }
    
     reg_to_var.erase(reg);
 }
+
+void handleDoubleRegisterSpill(scoped_symtab* currentScope, const string& newVar) {
+    cout << "Handling double register spill for " << newVar << endl;
+    
+    // 1) Spill any dead double‐mapped var immediately
+    for (auto it = doubleVarToReg.begin(); it != doubleVarToReg.end(); ++it) {
+        auto [vscope, vname] = it->first;
+        string reg = it->second;
+
+        bool usedNow = currentLiveness[currentInstructionIndex]
+                           .use.count({vscope, vname});
+        bool liveFuture = false;
+        for (int i = currentInstructionIndex + 1;
+                 i < (int)currentLiveness.size(); ++i) {
+            if (currentLiveness[i].live_in.count({vscope, vname})) {
+                liveFuture = true;
+                break;
+            }
+        }
+
+        if (!usedNow && !liveFuture) {
+            cout << "Spilling double " << vname << " from " << reg << endl;
+            mipsCode.push_back("    # Spilling " + vname + " from " + reg);
+            // free even reg for doubles and its buddy in float pool
+            availableDoubleRegs.push_back(reg);
+            availableFloatRegs.push_back(reg);
+            int num = stoi(reg.substr(2));
+            string odd = "$f" + to_string(num + 1);
+            availableFloatRegs.push_back(odd);
+            doubleVarToReg.erase(it);
+            return;
+        }
+    }
+
+    // 2) Try to carve out a contiguous pair by spilling a dead float var + its buddy
+    for (auto fit = floatVarToReg.begin(); fit != floatVarToReg.end(); ++fit) {
+        auto [vscope, vname] = fit->first;
+        string reg = fit->second;
+
+        bool usedNow = currentLiveness[currentInstructionIndex]
+                           .use.count({vscope, vname});
+        bool liveFuture = false;
+        for (int i = currentInstructionIndex + 1;
+                 i < (int)currentLiveness.size(); ++i) {
+            if (currentLiveness[i].live_in.count({vscope, vname})) {
+                liveFuture = true;
+                break;
+            }
+        }
+        if (usedNow || liveFuture) 
+            continue;  // candidate must be dead
+
+        // identify buddy register
+        int num = stoi(reg.substr(2));
+        bool regIsEven = (num % 2 == 0);
+        string buddy = "$f" + to_string(regIsEven ? num + 1 : num - 1);
+
+        // find the buddy's var
+        auto budIt = find_if(
+            floatVarToReg.begin(), floatVarToReg.end(),
+            [&](auto const& kv){ return kv.second == buddy; }
+        );
+        if (budIt == floatVarToReg.end())
+            continue;  // buddy not mapped → skip
+
+        // check buddy's liveness
+        auto [bScope, bName] = budIt->first;
+        bool budUsedNow = currentLiveness[currentInstructionIndex]
+                              .use.count({bScope, bName});
+        bool budLiveFuture = false;
+        for (int i = currentInstructionIndex + 1;
+                 i < (int)currentLiveness.size(); ++i) {
+            if (currentLiveness[i].live_in.count({bScope, bName})) {
+                budLiveFuture = true;
+                break;
+            }
+        }
+        if (budUsedNow || budLiveFuture)
+            continue;  // buddy is live → can't form pair here
+
+        // spill both the float var and its buddy
+        cout << "Spilling float " << vname << " from " << reg << endl;
+        mipsCode.push_back("    # Spilling " + vname + " from " + reg);
+        availableFloatRegs.push_back(reg);
+        floatVarToReg.erase(fit);
+
+        cout << "Spilling buddy " << bName << " from " << buddy << endl;
+        mipsCode.push_back("    # Spilling " + bName + " from " + buddy);
+        availableFloatRegs.push_back(buddy);
+        floatVarToReg.erase(budIt);
+
+        // choose the even‐numbered reg for our new double
+        string evenReg = regIsEven ? reg : buddy;
+        // remove it from the double pool
+        auto dit = find(availableDoubleRegs.begin(),
+                        availableDoubleRegs.end(), evenReg);
+        if (dit != availableDoubleRegs.end())
+            availableDoubleRegs.erase(dit);
+
+        // allocate new double
+        doubleVarToReg[{currentScope, newVar}] = evenReg;
+        return;
+    }
+
+
+    // 3) Last resort: spill an existing double var to stack
+    auto dit = doubleVarToReg.begin();
+    auto varPair = dit->first;
+    string regToSpill = dit->second;
+    cerr << "Spilling to stack " << varPair.second
+         << " from " << regToSpill << endl;
+    mipsCode.push_back("    # Spilling " + varPair.second
+                       + " from " + regToSpill);
+    availableDoubleRegs.push_back(regToSpill);
+    int n = stoi(regToSpill.substr(2));
+    string odd2 = "$f" + to_string(n + 1);
+    availableFloatRegs.push_back(regToSpill);
+    availableFloatRegs.push_back(odd2);
+    doubleVarToReg.erase(dit);
+    push_into_stack(varPair);
+}
+
+
+void handleFloatRegisterSpill(scoped_symtab* currentScope, const string& newVar) {
+    cout << "Handling float register spill for " << newVar << endl;
+
+    // 1) Try to spill a dead float‐mapped var
+    for (auto it = floatVarToReg.begin(); it != floatVarToReg.end(); ++it) {
+        auto [vscope, vname] = it->first;
+        string reg = it->second;
+
+        bool usedNow = currentLiveness[currentInstructionIndex]
+                           .use.count({vscope, vname});
+        bool liveFuture = false;
+        for (int i = currentInstructionIndex + 1;
+                 i < (int)currentLiveness.size(); ++i) {
+            if (currentLiveness[i].live_in.count({vscope, vname})) {
+                liveFuture = true;
+                break;
+            }
+        }
+
+        if (!usedNow && !liveFuture) {
+            cout << "Spilling " << vname << " from " << reg << endl;
+            mipsCode.push_back("    # Spilling " + vname + " from " + reg);
+            availableFloatRegs.push_back(reg);
+            int reg_num = stoi(reg.substr(2));
+            if(reg_num%2==1)
+            {
+                string pair=reg.substr(0,2)+to_string(reg_num-1);
+                if(find(availableFloatRegs.begin(), availableFloatRegs.end(), pair) != availableFloatRegs.end())
+                {
+                    availableDoubleRegs.push_back(pair);
+                }
+                
+            }
+            else{
+                string pair=reg.substr(0,2)+to_string(reg_num+1);
+                if(find(availableFloatRegs.begin(), availableFloatRegs.end(), pair) != availableFloatRegs.end())
+                {
+                    availableDoubleRegs.push_back(reg);
+                }
+            }
+            floatVarToReg.erase(it);
+            return;
+        }
+    }
+
+    // 2) Then try to spill a dead double‐mapped var
+    for (auto it = doubleVarToReg.begin(); it != doubleVarToReg.end(); ++it) {
+        auto [vscope, vname] = it->first;
+        string reg = it->second;
+
+        bool usedNow = currentLiveness[currentInstructionIndex]
+                           .use.count({vscope, vname});
+        bool liveFuture = false;
+        for (int i = currentInstructionIndex + 1;
+                 i < (int)currentLiveness.size(); ++i) {
+            if (currentLiveness[i].live_in.count({vscope, vname})) {
+                liveFuture = true;
+                break;
+            }
+        }
+
+        if (!usedNow && !liveFuture) {
+            cout << "Spilling double " << vname << " from " << reg << endl;
+            mipsCode.push_back("    # Spilling double " + vname + " from " + reg);
+            // free both the even‐reg slot and the float reg pool
+            string pair=reg.substr(0,2)+to_string(stoi(reg.substr(2))+1);
+            availableDoubleRegs.push_back(reg);
+            availableFloatRegs.push_back(reg);
+            availableFloatRegs.push_back(pair);
+            doubleVarToReg.erase(it);
+            return;
+        }
+    }
+
+    // 3) Everyone’s live → just pick any float‐mapped var and spill it
+    auto it      = floatVarToReg.begin();
+    auto varPair = it->first;            // (scope, varName)
+    string reg   = it->second;
+
+    cerr << "Spilling to stack " << varPair.second
+         << " from " << reg << endl;
+    mipsCode.push_back("    # Spilling " + varPair.second + " from " + reg);
+    availableFloatRegs.push_back(reg);
+    int reg_num = stoi(reg.substr(2));
+    if(reg_num%2==1)
+    {
+        string pair=reg.substr(0,2)+to_string(reg_num-1);
+        if(find(availableFloatRegs.begin(), availableFloatRegs.end(), pair) != availableFloatRegs.end())
+        {
+            availableDoubleRegs.push_back(pair);
+        }
+        
+    }
+    else{
+        string pair=reg.substr(0,2)+to_string(reg_num+1);
+        if(find(availableFloatRegs.begin(), availableFloatRegs.end(), pair) != availableFloatRegs.end())
+        {
+            availableDoubleRegs.push_back(reg);
+        }
+    }
+    floatVarToReg.erase(it);
+
+    push_into_stack(varPair);
+}
+
 
 void handleRegisterSpill(scoped_symtab* currentScope, string& newVar) {
     // currentScope = getScope(currentScope, newVar);
@@ -185,32 +437,40 @@ string getFloatRegister(scoped_symtab* scope, string& var,string type="float") {
     }
     if(type=="float")
     {
-        if (floatVarToReg.count({scope, var}))
-        return floatVarToReg[{scope, var}];
+        if (floatVarToReg.count({scope, var})) return floatVarToReg[{scope, var}];
+        
         string freg = availableFloatRegs.back();
+        cout<<"Assigning float register " << freg << " to " << var << endl;
         availableFloatRegs.pop_back();
+        string correspondingdreg=freg;
         if(stoi(freg.substr(2))%2==1)
         {
-            availableDoubleRegs.pop_back();
+            correspondingdreg="$f"+to_string(stoi(freg.substr(2))-1);
         }
+        cout<<correspondingdreg<<endl;
+        auto it = find(availableDoubleRegs.begin(), availableDoubleRegs.end(), correspondingdreg);
+        if (it != availableDoubleRegs.end())  availableDoubleRegs.erase(it);
         floatVarToReg[{scope, var}] = freg;
         return freg;
     }
     else if(type=="double")
     {
-        if (doubleVarToReg.count({scope, var}))
-        {
-            return floatVarToReg[{scope, var}];
-        }
+        if (doubleVarToReg.count({scope, var})) return doubleVarToReg[{scope, var}];
+    
         string freg = availableDoubleRegs.back();
+        cout<<"Assigning double register " << freg << " to " << var << endl;
         availableDoubleRegs.pop_back();
-        availableFloatRegs.pop_back();
-        availableFloatRegs.pop_back();
+        cout<<"$f"+to_string(stoi(freg.substr(2))+1)<<endl;
+        string s="$f"+to_string(stoi(freg.substr(2))+1);
+        auto it = find(availableFloatRegs.begin(), availableFloatRegs.end(), freg);
+        if (it != availableFloatRegs.end())  availableFloatRegs.erase(it);
+        auto it2=find(availableFloatRegs.begin(), availableFloatRegs.end(), s);
+        if(it2 != availableFloatRegs.end()) availableFloatRegs.erase(it2);
         doubleVarToReg[{scope, var}] = freg;
         return freg;
     }
     
-}
+} 
 
 string getRegister(scoped_symtab* scope, string& var) {
     scope = getScope(scope, var);
