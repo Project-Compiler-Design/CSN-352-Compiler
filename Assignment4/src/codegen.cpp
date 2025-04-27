@@ -559,6 +559,40 @@ void handle_param_receive(const string& line, scoped_symtab* scope) {
     paramReceiveCounter++;
 }
 
+
+
+
+void handle_pointer(const string& line, scoped_symtab* scope) {
+    // scope=getScope(scope, line);
+    cerr<<"Handling pointer arrays: " << line << endl;
+    size_t assignPos = line.find(":=");
+    string lhs = trim(line.substr(0, assignPos));
+    string rhs = trim(line.substr(assignPos + 2));
+    cout << lhs << " " << rhs << endl;
+    size_t amppos = rhs.find("&");
+    if(lhs[0] == '*'){
+        lhs = lhs.substr(1);
+    }
+    string dst = getRegister(scope, lhs);
+    if (amppos != string::npos) 
+        rhs = rhs.substr(amppos + 1);
+    if(isIntLiteral(rhs)){
+        if(reg_of_const.count(rhs)) {
+            mipsCode.push_back("    move " + dst + ", " + reg_of_const[rhs]);
+        }
+        else{
+            mipsCode.push_back("    li " + dst + ", " + rhs);
+        }
+    }
+    else{
+        symbol_info* rhsInfo = getScope(scope, rhs)->symbol_map[rhs];
+        if(var_to_reg.count({scope, rhs})){
+            push_into_stack({scope, rhs});
+        }
+        mipsCode.push_back("    addi " + dst + ", $sp, " + to_string(rhsInfo->offset));
+    }
+}
+
 // void pass1(vector<pair<string, scoped_symtab*>>& codeList){
 //     for(auto &code : codeList){
 //         string t = trim(code.first);
@@ -673,6 +707,11 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
             }
             else if (t.find(":= PARAM") != string::npos) {
                 handle_param_receive(t, code.second);
+                continue;
+            }
+            else if(t[0] == '*' || t.find("&") != string::npos){
+                cout << "HERE\n";
+                handle_pointer(t, code.second);
                 continue;
             }
             if (t.find(":=") != string::npos) {
