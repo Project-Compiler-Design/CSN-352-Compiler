@@ -16,3 +16,4 @@ main:
     addi $sp, $sp, 20
     li $v0, 10
     syscall
+

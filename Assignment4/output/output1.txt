@@ -36,7 +36,10 @@ current size: 8
 Hiiiii
 t0 : struct A
 current size: 12
-Function main stack size: 20
+Hiiiii
+val : float
+current size: 16
+Function main stack size: 24
 Pass 1 done
 Error!!!! Variable alloc not found in any scope
 Error!!!! Variable *t0 not found in any scope
