@@ -196,21 +196,17 @@ std::string pointer_to_string(T* ptr) {
     oss << ptr;             // streams the address in hex (e.g. 0x7ffc1234abcd)
     return oss.str();
 }
-vector<pair<string, scoped_symtab*>> clean_vector_TAC(const vector<pair<string, scoped_symtab*>>& input) {
+vector<pair<string, scoped_symtab*>> clean_vector_TAC(vector<pair<string, scoped_symtab*>>& input) {
     vector<pair<string, scoped_symtab*>> cleaned_TAC;
     unordered_set<string> paramVars;  // to remember param0, param1, …
 
-    for (const auto& entry : input) {
-        const string& line = entry.first;
+    for (auto& entry : input) {
+        string& line = entry.first;
         scoped_symtab* scope = entry.second;
+        while(line.back() == '\n'){
+            line.pop_back();
+        }
         string address=pointer_to_string(entry.second);
-        //cout<<"fullLine: " << fullLine << endl;
-        // 1) Split off the address
-        // auto spacePos = fullLine.find(' ');
-        // if (spacePos == string::npos) continue;
-        // string address = fullLine.substr(0, spacePos);
-        // string line    = trimm(fullLine.substr(spacePos + 1));
-        // cout<<"line: " << line << endl;
         // 2) Skip trivial or empty lines
         if (line.empty() ||
             isSingleNumber(line) ||

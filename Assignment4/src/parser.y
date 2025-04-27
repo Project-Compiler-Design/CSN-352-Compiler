@@ -932,11 +932,20 @@ assignment_expression
                 if(flag==0){
                     if(find_symbol->is_array==true){
                         string code=remove_equal(first_code);
-                        string add_str = find_last_line(code);
                         $$->final_code = $3->final_code;
                         $$->final_code.push_back({add_str,curr_scope});
                         add_str = code + " := " + $3->place.first;
-                        $$->final_code.push_back({add_str,curr_scope});
+                        int index=0;
+                        string temp="";
+                        while(index<add_str.length()){
+                            while(index<add_str.length() && add_str[index]!='\n'){
+                                temp+=add_str[index];
+                                index++;
+                            }
+                            index++;
+                            $$->final_code.push_back({temp,curr_scope});
+                            temp="";
+                        }
                         $$->code=$3->code+"\n"+add_str+"\n";
                     }
                     else{
@@ -1997,8 +2006,8 @@ start_symbol: translation_unit
 	// cleanTAC($1->code);
     // cerr<<endl<<endl<<endl;
     cleaned_TAC=clean_vector_TAC($1->final_code);
-	print_vector(cleaned_TAC);
-	
+    // print_vector($1->final_code);
+	print_vector(cleaned_TAC);	
 }
 ;
 translation_unit

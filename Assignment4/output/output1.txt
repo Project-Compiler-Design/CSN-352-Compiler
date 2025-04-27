@@ -2,20 +2,17 @@
 No Errors in the code
 Intermediate code generated successfully
 ======================================================================
-0x605fc3da34b0 FUNC_BEGIN main
-0x605fc3da9ab0 a:= 1
-0x605fc3da9ab0 b:= 2
-0x605fc3da9ab0 t0 :=  a == b
-0x605fc3da9ab0 if(t0) goto LABEL0
-0x605fc3da9ab0 goto LABEL1
-0x605fc3da9ab0 LABEL0:
-0x605fc3dab3c0 a:=  3
-0x605fc3da9ab0 goto LABEL2
-0x605fc3da9ab0 LABEL1:
-0x605fc3dabfe0 a:=  4
-0x605fc3da9ab0 LABEL2:
-0x605fc3da9ab0 RETURN a
-0x605fc3da34b0 FUNC_END main
+0x5606836e08b0 FUNC_BEGIN main
+0x5606836e6eb0 a := alloc 4
+0x5606836e6eb0 t0:= 0*4
+0x5606836e6eb0 *( a + t0 ) := 1
+0x5606836e6eb0 t3 :=  1 + 2
+0x5606836e6eb0 t4 :=  t3 + 3
+0x5606836e6eb0 t2:=  t4
+0x5606836e6eb0 t1 := 4 * 0
+0x5606836e6eb0  *( a + t1 ) := t4
+0x5606836e6eb0 RETURN 0
+0x5606836e08b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
@@ -28,93 +25,41 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
------------------------------------------------------------------
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
 | a               | int                  | 4       | 1          |
-| b               | int                  | 4       | 2          |
 | t0              | int                  | 4       | N/A        |
+| t1              | int                  | 4       | N/A        |
+| t2              | int                  | 4       | N/A        |
+| t3              | int                  | 4       | N/A        |
+| t4              | int                  | 4       | N/A        |
 -----------------------------------------------------------------
 Hiiiii
 a : int
 current size: 4
 Hiiiii
-b : int
+t0 : int
 current size: 8
 Hiiiii
-t0 : int
+t1 : int
 current size: 12
-Function main stack size: 20
+Hiiiii
+t2 : int
+current size: 16
+Hiiiii
+t3 : int
+current size: 20
+Hiiiii
+t4 : int
+current size: 24
+Function main stack size: 32
 Pass 1 done
+Error!!!! Variable alloc not found in any scope
+Error!!!! Variable *( a + t0 ) not found in any scope
+Error!!!! Variable *( a + t1 ) not found in any scope
 Liveness analysis done
 FUNC_BEGIN main
-a:= 1
-Handling assignment: a := 1
+a := alloc 4
+Handling assignment: a := alloc 4
 Getting register for a
 Assigned register $t9 to a
-b:= 2
-Handling assignment: b := 2
-Getting register for b
-Assigned register $t8 to b
-t0 :=  a == b
-Handling operation: t0 := a == b
-Getting register for a
-Found register for a $t9
-Getting register for b
-Found register for b $t8
-Getting register for t0
-Assigned register $t7 to t0
-Operation: a == b
-Registers: $t9, $t8, $t7
-if(t0) goto LABEL0
-Condition: t0, Label: LABEL0
-Getting register for t0
-Found register for t0 $t7
-goto LABEL1
-LABEL0:
-a:=  3
-Handling assignment: a := 3
-Getting register for a
-Found register for a $t9
-goto LABEL2
-LABEL1:
-a:=  4
-Handling assignment: a := 4
-Getting register for a
-Found register for a $t9
-LABEL2:
-RETURN a
-Getting register for a
-Found register for a $t9
-FUNC_END main
-Pass 2 done
-################ MIPS Assembly Code ################ 
-.text
-.globl main
-main:
-    move $fp, $sp
-    addi $sp, $sp, -20
-    sw   $ra, 16($sp)
-    sw   $fp, 12($sp)
-    li $t9, 1
-    li $t8, 2
-    seq $t7, $t9, $t8
-    bnez $t7, LABEL0
-    j LABEL1
-LABEL0:
-    li $t9, 3
-    j LABEL2
-LABEL1:
-    li $t9, 4
-LABEL2:
-    move $v0, $t9
-    lw   $fp, 12($sp)
-    lw   $ra, 16($sp)
-    addi $sp, $sp, 20
-    li $v0, 10
-    syscall
+Error!!!! Variable alloc 4 not found in any scope
+Getting register for alloc 4
