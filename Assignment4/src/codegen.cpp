@@ -494,7 +494,15 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
         reg_of_const[rhs]=dst;
     }
     else {
-        
+        cout << rhs << endl;
+        if (rhs.find("alloc") != string::npos)
+        {
+            int rest=stoi(rhs.substr(rhs.find("alloc")+6));
+            lhsInfo->offset=last_offset.top();
+            last_offset.top()+=rest;
+            cerr<<"Allocating " << rest << " bytes for " << lhs << " at offset " << lhsInfo->offset << endl;
+            return;
+        }
         string src = getRegister(scope,rhs);
         mipsCode.push_back("    move " + dst + ", " + src);
     }
@@ -743,8 +751,45 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
         }
     }
 }
+bool check_struct(const string& line, scoped_symtab* scope) {
+    auto pos = line.find(":=");
+    string lhs = trim(line.substr(0, pos));
+    string rhs = trim(line.substr(pos + 2));
+    auto ppos = rhs.find("+");
+    cout << "Checking struct: " << lhs << " " << rhs << endl;
+    if(ppos == string::npos) return false;
+    string structName = trim(rhs.substr(0, ppos));
+    cout << "Struct name: " << structName << endl;
+    symbol_info* sym = getScope(scope, structName)->symbol_map[structName];
+    cout << sym->type << endl;
+    if(sym->type.substr(0,6) == "struct"){
+        return true;
+    }
+    return false;
+}
 
 
+void handle_struct(const string& line, scoped_symtab* scope) {
+    auto pos = line.find(":=");
+    string lhs = trim(line.substr(0, pos));
+    string rhs = trim(line.substr(pos + 2));
+    auto ppos = rhs.find("+");
+    string structName = trim(rhs.substr(0, ppos));
+    int offset = stoi(trim(rhs.substr(ppos + 2)));
+    cout << lhs << " " << rhs << " " << structName << " " << offset << endl;
+    int symoffset = scope->symbol_map[structName]->offset;
+    string dst = getRegister(scope, lhs);
+    if (var_to_reg.count({scope, structName})) {
+        push_into_stack({scope, structName});
+    }
+      
+    if(symoffset == -1){
+        push_into_stack({scope, structName});
+    }
+    symoffset = scope->symbol_map[structName]->offset;
+    int totoffset = symoffset + offset;
+    mipsCode.push_back("    addi " + dst + ", $sp, " + to_string(totoffset));
+}
 
 void pass1(vector<pair<string, scoped_symtab*>>& codeList) {
     for (int i = 0; i < codeList.size(); i++) {
@@ -845,8 +890,11 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 continue;
             }
             else if(t[0] == '*' || t.find("&") != string::npos || t.find("*") != string::npos){
-                cout << "HERE\n";
                 handle_pointer(t, code.second);
+                continue;
+            }
+            else if(check_struct(t, code.second)){
+                handle_struct(t, code.second);
                 continue;
             }
             if (t.find(":=") != string::npos) {

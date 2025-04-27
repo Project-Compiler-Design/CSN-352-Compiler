@@ -1,17 +1,20 @@
 =====================LIST OF ERRORS===================================
-Line 3 : Type mismatch in declaration
-Line 5 : Missing return statement
+Line 12 : Missing return statement
 ======================================================================
-0x557a37fca4b0 FUNC_BEGIN main
-0x557a37fd0ab0 a:= 5.500000
-0x557a37fd0ab0 t0 :=  a + 6.500000
-0x557a37fd0ab0 b:= t0
-0x557a37fca4b0 FUNC_END main
+0x564e64b968b0 FUNC_BEGIN main
+0x564e64b9df50 a:= 4
+0x564e64b9df50 b:= alloc 8
+0x564e64b9df50 t0 := b + 0
+0x564e64b9df50 *t0 := 5
+0x564e64b968b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+| A               | struct               | 0       | N/A        |
+| c               | int                  | 4       | N/A        |
+| d               | int                  | 4       | N/A        |
 | main            | int                  | 4       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
@@ -19,37 +22,55 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | float                | 4       | 5.500000   |
-| b               | float                | 4       | N/A        |
-| t0              | float                | 4       | N/A        |
+| a               | int                  | 4       | 4          |
+| b               | struct A             | 0       | N/A        |
+| b.c             | int                  | 4       | 5          |
+| t0              | struct A             | 0       | N/A        |
 -----------------------------------------------------------------
 Hiiiii
-a : float
+a : int
 current size: 4
 Hiiiii
-b : float
+b : struct A
 current size: 8
 Hiiiii
-t0 : float
+t0 : struct A
 current size: 12
 Function main stack size: 20
 Pass 1 done
+Error!!!! Variable alloc not found in any scope
+Error!!!! Variable *t0 not found in any scope
 Liveness analysis done
 FUNC_BEGIN main
-a:= 5.500000
-Handling assignment: a := 5.500000
-t0 :=  a + 6.500000
-Handling operation: t0 := a + 6.500000
-Error!!!! Variable 6.500000 not found in any scope
-Loaded float constant 6.500000 into $f6
-b:= t0
-Handling assignment: b := t0
+a:= 4
+Checking struct: a 4
+Handling assignment: a := 4
+Getting register for a
+Assigned register $t9 to a
+b:= alloc 8
+Checking struct: b alloc 8
+Handling assignment: b := alloc 8
+Getting register for b
+Assigned register $t8 to b
+alloc 8
+Allocating 8 bytes for b at offset 0
+t0 := b + 0
+Checking struct: t0 b + 0
+Struct name: b
+struct A
+t0 b + 0 b 0
+Getting register for t0
+Assigned register $t7 to t0
+Error: Type not supported for push into stack
+*t0 := 5
+Handling pointer arrays: *t0 := 5
+*t0 5
+Getting register for t0
+Found register for t0 $t7
+lhs t0
 FUNC_END main
 Pass 2 done
 ################ MIPS Assembly Code ################ 
-.data
-float_const_6.500000: .float 6.500000
-.text
 .text
 .globl main
 main:
@@ -57,11 +78,12 @@ main:
     addi $sp, $sp, -20
     sw   $ra, 16($sp)
     sw   $fp, 12($sp)
-    li.s $f7, 5.500000
-    la $t9, float_const_6.500000
-    l.s $f6, 0($t9)
-    add.s $f5, $f7, $f6
-    mov.s $f4, $f5
+    li $t9, 4
+    #Pushing b to stack
+    addi $t7, $sp, 0
+    #Loading constant 5 into register
+    li $t6, 5
+    sw $t6, 0($t7)
     lw   $fp, 12($sp)
     lw   $ra, 16($sp)
     addi $sp, $sp, 20

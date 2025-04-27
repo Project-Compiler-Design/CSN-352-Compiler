@@ -1,5 +1,12 @@
+struct A {
+    int c;
+    int d;
+};
+
+
 int main(){
-    float a = 5.5;
-    int b=a+6.5;
-    
+    int a = 4;
+
+    struct A b;
+    b.c = 5;
 }
