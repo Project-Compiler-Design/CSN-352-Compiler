@@ -1,5 +1,6 @@
-int main(){
-    float a = 5.5;
-    int b=a+6.5;
-    
+int main()
+{
+    int i=5;
+    float f=5.3;
+    float val=f+i;
 }

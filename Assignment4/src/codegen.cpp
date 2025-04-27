@@ -633,7 +633,13 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
             load_if_constant(scope, op1, r1);
         }
         else{
+            
             r1 = getFloatRegister(scope,op1);
+            if(var_to_reg.count({scope,op1})){
+                string tempr = var_to_reg[{scope,op1}];
+                mipsCode.push_back("mtc1 " + tempr + ", " + r1);
+                mipsCode.push_back("cvt.s.w " + r1+ ", " + r1);
+            }
         }
         if(isFloatLiteral(op2)){
             if(availableFloatRegs.empty()) handleRegisterSpill(scope,op1);
@@ -643,6 +649,11 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
         }
         else{
             r2 = getFloatRegister(scope,op2);
+            if(var_to_reg.count({scope,op2})){
+                string tempr = var_to_reg[{scope,op2}];
+                mipsCode.push_back("mtc1 " + tempr + ", " + r2);
+                mipsCode.push_back("cvt.s.w " + r2+ ", " + r2);
+            }
         }
         rd = getFloatRegister(scope,lhs);
         
@@ -717,6 +728,10 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
             // Assume float literal loading (mock behavior)
             mipsCode.push_back("    li.s " + dst + ", " + rhs);
         } 
+        else if (isIntLiteral(rhs)) {
+            // Assume float literal loading (mock behavior)
+            mipsCode.push_back("    li.s " + dst + ", " + rhs+".0");  // Load float literal
+        } 
         else {
             string src = getFloatRegister(scope, rhs);
             mipsCode.push_back("    mov.s " + dst + ", " + src);
@@ -729,9 +744,13 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
         if (isFloatLiteral(rhs)) {
             // Assume double literal loading (mock behavior)
             mipsCode.push_back("    li.d " + dst + ", " + rhs);  // Load double literal
-        } 
+        }
+        else if (isIntLiteral(rhs)) {
+            // Assume float literal loading (mock behavior)
+            mipsCode.push_back("    li.d " + dst + ", " + rhs+".0");  // Load float literal
+        }
         else {
-            string src = getFloatRegister(scope, rhs);  // Get source double register
+            string src = getFloatRegister(scope, rhs,"double");  // Get source double register
             mipsCode.push_back("    mov.d " + dst + ", " + src);  // Move value from src to dst
         }
         return;

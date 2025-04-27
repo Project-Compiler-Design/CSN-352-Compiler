@@ -1,12 +1,12 @@
 =====================LIST OF ERRORS===================================
-Line 3 : Type mismatch in declaration
-Line 5 : Missing return statement
+Line 6 : Missing return statement
 ======================================================================
-0x557a37fca4b0 FUNC_BEGIN main
-0x557a37fd0ab0 a:= 5.500000
-0x557a37fd0ab0 t0 :=  a + 6.500000
-0x557a37fd0ab0 b:= t0
-0x557a37fca4b0 FUNC_END main
+0x62ec5f87c4b0 FUNC_BEGIN main
+0x62ec5f882fc0 i:= 5
+0x62ec5f882fc0 f:= 5.300000
+0x62ec5f882fc0 t0 :=  f + i
+0x62ec5f882fc0 val:= t0
+0x62ec5f87c4b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
@@ -19,51 +19,63 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | float                | 4       | 5.500000   |
-| b               | float                | 4       | N/A        |
+| f               | float                | 4       | 5.300000   |
+| i               | int                  | 4       | 5          |
 | t0              | float                | 4       | N/A        |
+| val             | float                | 4       | N/A        |
 -----------------------------------------------------------------
 Hiiiii
-a : float
+f : float
 current size: 4
 Hiiiii
-b : float
+i : int
 current size: 8
 Hiiiii
 t0 : float
 current size: 12
-Function main stack size: 20
+Hiiiii
+val : float
+current size: 16
+Function main stack size: 24
 Pass 1 done
 Liveness analysis done
 FUNC_BEGIN main
-a:= 5.500000
-Handling assignment: a := 5.500000
-t0 :=  a + 6.500000
-Handling operation: t0 := a + 6.500000
-Error!!!! Variable 6.500000 not found in any scope
-Loaded float constant 6.500000 into $f6
-b:= t0
-Handling assignment: b := t0
+i:= 5
+Handling assignment: i := 5
+Getting register for i
+Assigned register $t9 to i
+f:= 5.300000
+Handling assignment: f := 5.300000
+Assigning float register $f31 to f
+$f30
+t0 :=  f + i
+Handling operation: t0 := f + i
+Assigning float register $f30 to i
+$f30
+Assigning float register $f29 to t0
+$f28
+val:= t0
+Handling assignment: val := t0
+Assigning float register $f28 to val
+$f28
 FUNC_END main
 Pass 2 done
 ################ MIPS Assembly Code ################ 
-.data
-float_const_6.500000: .float 6.500000
-.text
 .text
 .globl main
 main:
     move $fp, $sp
-    addi $sp, $sp, -20
-    sw   $ra, 16($sp)
-    sw   $fp, 12($sp)
-    li.s $f7, 5.500000
-    la $t9, float_const_6.500000
-    l.s $f6, 0($t9)
-    add.s $f5, $f7, $f6
-    mov.s $f4, $f5
-    lw   $fp, 12($sp)
-    lw   $ra, 16($sp)
-    addi $sp, $sp, 20
+    addi $sp, $sp, -24
+    sw   $ra, 20($sp)
+    sw   $fp, 16($sp)
+    li $t9, 5
+    li.s $f31, 5.300000
+mtc1 $t9, $f30
+cvt.s.w $f30, $f30
+    add.s $f29, $f31, $f30
+    mov.s $f28, $f29
+    lw   $fp, 16($sp)
+    lw   $ra, 20($sp)
+    addi $sp, $sp, 24
     li $v0, 10
     syscall
