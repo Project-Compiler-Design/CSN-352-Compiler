@@ -132,7 +132,7 @@ void push_into_stack(pair<scoped_symtab*, string> varPair){
 }
 
 void handleRegisterSpill(scoped_symtab* currentScope, string& newVar) {
-    currentScope = getScope(currentScope, newVar);
+    // currentScope = getScope(currentScope, newVar);
     cout << "Handling register spill for " << newVar << endl;
 
     int maxdist=0;
@@ -606,6 +606,7 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
     string lhs = trim(line.substr(0, assignPos));
     string rhs = trim(line.substr(assignPos + 2));
     cout << lhs << " " << rhs << endl;
+    int rhs_ptr=0;
     size_t amppos = rhs.find("&");
     if(lhs[0] == '*'){
         lhs = lhs.substr(1);
@@ -613,20 +614,55 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
     string dst = getRegister(scope, lhs);
     if (amppos != string::npos) 
         rhs = rhs.substr(amppos + 1);
+    if(rhs[0] == '*'){
+        rhs = rhs.substr(1);
+        rhs_ptr=1;
+    }
     if(isIntLiteral(rhs)){
+        cout<<"lhs "<<lhs<<endl;
         if(reg_of_const.count(rhs)) {
-            mipsCode.push_back("    move " + dst + ", " + reg_of_const[rhs]);
+            mipsCode.push_back("    sw " + reg_of_const[rhs] + ", " + to_string(0) + "("+dst + ")");
         }
         else{
-            mipsCode.push_back("    li " + dst + ", " + rhs);
+            mipsCode.push_back("    #Loading constant " + rhs + " into register");
+            if(availableRegs.empty()){
+                handleRegisterSpill(scope,rhs);
+            }
+            string reg = availableRegs.back();
+            availableRegs.pop_back();
+            mipsCode.push_back("    li " + reg + ", " + rhs);
+            mipsCode.push_back("    sw " + reg + ", " + to_string(0) + "("+dst + ")");
+            
         }
     }
     else{
-        symbol_info* rhsInfo = getScope(scope, rhs)->symbol_map[rhs];
-        if(var_to_reg.count({scope, rhs})){
-            push_into_stack({scope, rhs});
+        if(rhs_ptr){
+            if(var_to_reg.count({getScope(scope, rhs), rhs})){
+                mipsCode.push_back("    lw " + dst + ", " + "0(" + var_to_reg[{getScope(scope, rhs), rhs}] + ")");
+                symbol_info* sym = getScope(scope, rhs)->symbol_map[rhs];
+                if(getScope(scope, rhs)->symbol_map[rhs]->offset == -1){
+                    sym->offset = last_offset.top();
+                    last_offset.top()+=get_size_from_type(sym->type);
+                    mipsCode.push_back("    sw " + dst + ", " + to_string(sym->offset) + "($sp)");
+                }
+                else{
+                    mipsCode.push_back("    sw " + dst + ", " + to_string(sym->offset) + "($sp)");
+                }
+            }
+            else{
+                //yet to handle this case
+                cerr<<"Error: Pointer not found in register\n";
+                exit(1);
+            }
+
         }
-        mipsCode.push_back("    addi " + dst + ", $sp, " + to_string(rhsInfo->offset));
+        else{
+            symbol_info* rhsInfo = getScope(scope, rhs)->symbol_map[rhs];
+            if(var_to_reg.count({scope, rhs})){
+                push_into_stack({scope, rhs});
+            }
+            mipsCode.push_back("    addi " + dst + ", $sp, " + to_string(rhsInfo->offset));
+        }
     }
 }
 
@@ -748,7 +784,7 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 handle_param_receive(t, code.second);
                 continue;
             }
-            else if(t[0] == '*' || t.find("&") != string::npos){
+            else if(t[0] == '*' || t.find("&") != string::npos || t.find("*") != string::npos){
                 cout << "HERE\n";
                 handle_pointer(t, code.second);
                 continue;

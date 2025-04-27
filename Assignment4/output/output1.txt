@@ -1,18 +1,16 @@
 =====================LIST OF ERRORS===================================
-Line 6 : Missing return statement
+Line 5 : Missing return statement
 ======================================================================
-0x564ab429a8b0 FUNC_BEGIN main
-0x564ab42a0eb0 a:= 4
-0x564ab42a0eb0 b:= 10
-0x564ab42a0eb0 p:= &a
-0x564ab42a0eb0 *p:=  10
-0x564ab429a8b0 FUNC_END main
+0x6196f2b4b4b0 FUNC_BEGIN main
+0x6196f2b51ab0 a:= 5
+0x6196f2b51ab0 t0 :=  a + 6
+0x6196f2b51ab0 b:= t0
+0x6196f2b4b4b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| add1            | int                  | 4       | N/A        |
 | main            | int                  | 4       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
@@ -20,98 +18,30 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | int                  | 4       | 4          |
-| b               | int                  | 4       | 10         |
-| p               | int*                 | 0       | N/A        |
+| a               | int                  | 4       | 5          |
+| b               | int                  | 4       | N/A        |
+| t0              | int                  | 4       | N/A        |
 -----------------------------------------------------------------
 Hiiiii
 a : int
 current size: 4
 Hiiiii
-b : float
+b : int
 current size: 8
-Hiiiii
-c : float
-current size: 12
-Hiiiii
-d : int
-current size: 16
-Hiiiii
-e : int
-current size: 20
-Hiiiii
-f : float
-current size: 24
-Function add1 stack size: 32
-Hiiiii
-a : int
-current size: 4
-Hiiiii
-b : float
-current size: 8
-Hiiiii
-p : int*
-current size: 12
-Hiiiii
-d : int
-current size: 16
-Hiiiii
-e : int
-current size: 20
-Hiiiii
-f : float
-current size: 24
-Hiiiii
-g : int
-current size: 28
 Hiiiii
 t0 : int
-current size: 32
-Function main stack size: 40
+current size: 12
+Function main stack size: 20
 Pass 1 done
-Error!!!! Variable *p not found in any scope
 Liveness analysis done
 FUNC_BEGIN main
-a:= 4
-Handling assignment: a := 4
+a:= 5
+Handling assignment: a := 5
 Getting register for a
 Assigned register $t9 to a
-b:= 10
-Handling assignment: b := 10
-Getting register for b
-Assigned register $t8 to b
-p:= &a
-HERE
-Handling pointer arrays: p:= &a
-p &a
-Getting register for p
-Assigned register $t7 to p
-pls
-Pushed a from $t9 to stack at offset 0
-*p:=  10
-HERE
-Handling pointer arrays: *p:=  10
-*p 10
-Getting register for p
-Found register for p $t7
-FUNC_END main
-Pass 2 done
-################ MIPS Assembly Code ################ 
-.text
-.globl main
-add1:
-    move $fp, $sp
-    addi $sp, $sp, -20
-    sw   $ra, 16($sp)
-    sw   $fp, 12($sp)
-    li $t9, 4
-    li $t8, 10
-    #Pushing a to stack
-    sw $t9, 0($sp)
-    addi $t7, $sp, 0
-    move $t7, $t8
-    lw   $fp, 12($sp)
-    lw   $ra, 16($sp)
-    addi $sp, $sp, 20
-    li $v0, 10
-    syscall
+t0 :=  a + 6
+Handling operation: t0 := a + 6
+Getting register for a
+Found register for a $t9
+Error!!!! Variable 6 not found in any scope
+Getting register for 6

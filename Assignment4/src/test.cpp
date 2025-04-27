@@ -48,16 +48,15 @@ ll binpow(ll a, ll b, ll m) {
 } 
 
 void solve(){
-    stack<ll> s;
-    s.push(1);
-    s.top()=2;
-    cout<<s.top()<<endl;
+    int a = 4, b = 10;
+    int *p =&a;
+
+    *p = 10;
+    cout << "Value of a: " << a << endl; // Should print 10
 }
 
 int main(){
-    
-    ios::sync_with_stdio(0);
-    cin.tie(0);
+   
     ll t=1;
     // cin>>t;
     while(t--) solve();
