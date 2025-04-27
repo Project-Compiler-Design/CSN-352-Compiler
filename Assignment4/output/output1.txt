@@ -1,10 +1,12 @@
 =====================LIST OF ERRORS===================================
-Line 6 : Missing return statement
+Line 3 : Type mismatch in declaration
+Line 5 : Missing return statement
 ======================================================================
-0x588a0ef374b0 FUNC_BEGIN main
-0x588a0ef3dfc0 f:= 3.140000
-0x588a0ef3dfc0 m:= 2.000000
-0x588a0ef374b0 FUNC_END main
+0x557a37fca4b0 FUNC_BEGIN main
+0x557a37fd0ab0 a:= 5.500000
+0x557a37fd0ab0 t0 :=  a + 6.500000
+0x557a37fd0ab0 b:= t0
+0x557a37fca4b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
@@ -17,26 +19,37 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| f               | float                | 4       | 3.140000   |
-| m               | double               | 0       | N/A        |
+| a               | float                | 4       | 5.500000   |
+| b               | float                | 4       | N/A        |
+| t0              | float                | 4       | N/A        |
 -----------------------------------------------------------------
 Hiiiii
-f : float
+a : float
 current size: 4
 Hiiiii
-m : double
+b : float
+current size: 8
+Hiiiii
+t0 : float
 current size: 12
 Function main stack size: 20
 Pass 1 done
 Liveness analysis done
 FUNC_BEGIN main
-f:= 3.140000
-Handling assignment: f := 3.140000
-m:= 2.000000
-Handling assignment: m := 2.000000
+a:= 5.500000
+Handling assignment: a := 5.500000
+t0 :=  a + 6.500000
+Handling operation: t0 := a + 6.500000
+Error!!!! Variable 6.500000 not found in any scope
+Loaded float constant 6.500000 into $f6
+b:= t0
+Handling assignment: b := t0
 FUNC_END main
 Pass 2 done
 ################ MIPS Assembly Code ################ 
+.data
+float_const_6.500000: .float 6.500000
+.text
 .text
 .globl main
 main:
@@ -44,8 +57,11 @@ main:
     addi $sp, $sp, -20
     sw   $ra, 16($sp)
     sw   $fp, 12($sp)
-    li.s $f31, 3.140000
-    li.d $f28, 2.000000
+    li.s $f7, 5.500000
+    la $t9, float_const_6.500000
+    l.s $f6, 0($t9)
+    add.s $f5, $f7, $f6
+    mov.s $f4, $f5
     lw   $fp, 12($sp)
     lw   $ra, 16($sp)
     addi $sp, $sp, 20

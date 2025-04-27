@@ -137,7 +137,7 @@ void push_into_stack(pair<scoped_symtab*, string> varPair){
 }
 
 void handleRegisterSpill(scoped_symtab* currentScope, string& newVar) {
-    currentScope = getScope(currentScope, newVar);
+    // currentScope = getScope(currentScope, newVar);
     cout << "Handling register spill for " << newVar << endl;
 
     int maxdist=0;
@@ -321,10 +321,11 @@ void load_if_constant(scoped_symtab* scope, string& var, const string& reg) {
             mipsCode.insert(mipsCode.begin() + 1, floatLabel + ": .float " + var);
             mipsCode.insert(mipsCode.begin() + 2, ".text");
         }
-
+        if(availableRegs.empty()) handleRegisterSpill(scope,var);
+        string reg1 = availableRegs.back();
         // Load float from memory
-        mipsCode.push_back("    la " + reg + ", " + floatLabel);
-        mipsCode.push_back("    l.s " + reg + ", 0(" + reg + ")");
+        mipsCode.push_back("    la " + reg1 + ", " + floatLabel);
+        mipsCode.push_back("    l.s " + reg + ", 0(" + reg1 + ")");
         loadedConstants[var] = true;
         reg_of_const[var] = reg;
         cout << "Loaded float constant " << var << " into " << reg << endl;
@@ -363,9 +364,27 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
     string op1 = trim(rhs.substr(0, operator_pos));
     string op2 = trim(rhs.substr(operator_pos + opp.size()));
     if (isFloat){
-        string r1 = getFloatRegister(scope, op1);
-        string r2 = getFloatRegister(scope, op2);
-        string rd = getFloatRegister(scope, lhs);
+        string r1,r2,rd;
+    
+        if(isFloatLiteral(op1)){
+            if(availableFloatRegs.empty()) handleRegisterSpill(scope,op1);
+            r1=availableFloatRegs.back();
+            availableFloatRegs.pop_back();
+            load_if_constant(scope, op1, r1);
+        }
+        else{
+            r1 = getFloatRegister(scope,op1);
+        }
+        if(isFloatLiteral(op2)){
+            if(availableFloatRegs.empty()) handleRegisterSpill(scope,op1);
+            r2=availableFloatRegs.back();
+            availableFloatRegs.pop_back();
+            load_if_constant(scope, op2, r2);
+        }
+        else{
+            r2 = getFloatRegister(scope,op2);
+        }
+        rd = getFloatRegister(scope,lhs);
         
         if (opp == "+") mipsCode.push_back("    add.s " + rd + ", " + r1 + ", " + r2);
         else if (opp == "-") mipsCode.push_back("    sub.s " + rd + ", " + r1 + ", " + r2);
@@ -373,14 +392,34 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
         else if (opp == "/") mipsCode.push_back("    div.s " + rd + ", " + r1 + ", " + r2);
         return;
     }
+    string r1,r2,rd;
     
-    string r1 = getRegister(scope,op1);
-    string r2 = getRegister(scope,op2);
-    string rd = getRegister(scope,lhs);
+    if(isIntLiteral(op1)){
+        if(availableRegs.empty()) handleRegisterSpill(scope,op1);
+        r1=availableRegs.back();
+        availableRegs.pop_back();
+        load_if_constant(scope, op1, r1);
+    }
+    else{
+        r1 = getRegister(scope,op1);
+    }
+    if(isIntLiteral(op2)){
+        if(availableRegs.empty()) handleRegisterSpill(scope,op1);
+        r2=availableRegs.back();
+        availableRegs.pop_back();
+        load_if_constant(scope, op2, r2);
+    }
+    else{
+        r2 = getRegister(scope,op2);
+    }
+    rd = getRegister(scope,lhs);
+    // string r1 = getRegister(scope,op1);
+    // string r2 = getRegister(scope,op2);
+    // string rd = getRegister(scope,lhs);
     cout<<"Operation: " << op1 << " " << opp << " " << op2 << endl;
     cout<<"Registers: " << r1 << ", " << r2 << ", " << rd << endl;
-    load_if_constant(scope, op1, r1);
-    load_if_constant(scope, op2, r2);
+    // load_if_constant(scope, op1, r1);
+    // load_if_constant(scope, op2, r2);
 
     if (opp == "+") mipsCode.push_back("    add " + rd + ", " + r1 + ", " + r2);
     else if (opp == "-") mipsCode.push_back("    sub " + rd + ", " + r1 + ", " + r2);
@@ -645,6 +684,7 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
     string lhs = trim(line.substr(0, assignPos));
     string rhs = trim(line.substr(assignPos + 2));
     cout << lhs << " " << rhs << endl;
+    int rhs_ptr=0;
     size_t amppos = rhs.find("&");
     if(lhs[0] == '*'){
         lhs = lhs.substr(1);
@@ -652,20 +692,55 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
     string dst = getRegister(scope, lhs);
     if (amppos != string::npos) 
         rhs = rhs.substr(amppos + 1);
+    if(rhs[0] == '*'){
+        rhs = rhs.substr(1);
+        rhs_ptr=1;
+    }
     if(isIntLiteral(rhs)){
+        cout<<"lhs "<<lhs<<endl;
         if(reg_of_const.count(rhs)) {
-            mipsCode.push_back("    move " + dst + ", " + reg_of_const[rhs]);
+            mipsCode.push_back("    sw " + reg_of_const[rhs] + ", " + to_string(0) + "("+dst + ")");
         }
         else{
-            mipsCode.push_back("    li " + dst + ", " + rhs);
+            mipsCode.push_back("    #Loading constant " + rhs + " into register");
+            if(availableRegs.empty()){
+                handleRegisterSpill(scope,rhs);
+            }
+            string reg = availableRegs.back();
+            availableRegs.pop_back();
+            mipsCode.push_back("    li " + reg + ", " + rhs);
+            mipsCode.push_back("    sw " + reg + ", " + to_string(0) + "("+dst + ")");
+            
         }
     }
     else{
-        symbol_info* rhsInfo = getScope(scope, rhs)->symbol_map[rhs];
-        if(var_to_reg.count({scope, rhs})){
-            push_into_stack({scope, rhs});
+        if(rhs_ptr){
+            if(var_to_reg.count({getScope(scope, rhs), rhs})){
+                mipsCode.push_back("    lw " + dst + ", " + "0(" + var_to_reg[{getScope(scope, rhs), rhs}] + ")");
+                symbol_info* sym = getScope(scope, rhs)->symbol_map[rhs];
+                if(getScope(scope, rhs)->symbol_map[rhs]->offset == -1){
+                    sym->offset = last_offset.top();
+                    last_offset.top()+=get_size_from_type(sym->type);
+                    mipsCode.push_back("    sw " + dst + ", " + to_string(sym->offset) + "($sp)");
+                }
+                else{
+                    mipsCode.push_back("    sw " + dst + ", " + to_string(sym->offset) + "($sp)");
+                }
+            }
+            else{
+                //yet to handle this case
+                cerr<<"Error: Pointer not found in register\n";
+                exit(1);
+            }
+
         }
-        mipsCode.push_back("    addi " + dst + ", $sp, " + to_string(rhsInfo->offset));
+        else{
+            symbol_info* rhsInfo = getScope(scope, rhs)->symbol_map[rhs];
+            if(var_to_reg.count({scope, rhs})){
+                push_into_stack({scope, rhs});
+            }
+            mipsCode.push_back("    addi " + dst + ", $sp, " + to_string(rhsInfo->offset));
+        }
     }
 }
 
@@ -769,7 +844,7 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 handle_param_receive(t, code.second);
                 continue;
             }
-            else if(t[0] == '*' || t.find("&") != string::npos){
+            else if(t[0] == '*' || t.find("&") != string::npos || t.find("*") != string::npos){
                 cout << "HERE\n";
                 handle_pointer(t, code.second);
                 continue;
@@ -913,6 +988,10 @@ void codegen_main() {
     for (const string& line : mipsCode) {
         cerr << line << endl;
     }
-    printMipsCode(mipsCode, "./output/output.s");
+    regMap.clear();
+    availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5","$t6", "$t7", "$t8", "$t9"};
+    floatVarToReg.clear();
+    availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7"};
+    loadedConstants.clear();    printMipsCode(mipsCode, "./output/output.s");
     return;
 }
