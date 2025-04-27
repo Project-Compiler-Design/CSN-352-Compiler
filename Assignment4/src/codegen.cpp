@@ -297,10 +297,11 @@ void load_if_constant(scoped_symtab* scope, string& var, const string& reg) {
             mipsCode.insert(mipsCode.begin() + 1, floatLabel + ": .float " + var);
             mipsCode.insert(mipsCode.begin() + 2, ".text");
         }
-
+        if(availableRegs.empty()) handleRegisterSpill(scope,var);
+        string reg1 = availableRegs.back();
         // Load float from memory
-        mipsCode.push_back("    la " + reg + ", " + floatLabel);
-        mipsCode.push_back("    l.s " + reg + ", 0(" + reg + ")");
+        mipsCode.push_back("    la " + reg1 + ", " + floatLabel);
+        mipsCode.push_back("    l.s " + reg + ", 0(" + reg1 + ")");
         loadedConstants[var] = true;
         reg_of_const[var] = reg;
         cout << "Loaded float constant " << var << " into " << reg << endl;
@@ -339,9 +340,27 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
     string op1 = trim(rhs.substr(0, operator_pos));
     string op2 = trim(rhs.substr(operator_pos + opp.size()));
     if (isFloat){
-        string r1 = getFloatRegister(scope, op1);
-        string r2 = getFloatRegister(scope, op2);
-        string rd = getFloatRegister(scope, lhs);
+        string r1,r2,rd;
+    
+        if(isFloatLiteral(op1)){
+            if(availableFloatRegs.empty()) handleRegisterSpill(scope,op1);
+            r1=availableFloatRegs.back();
+            availableFloatRegs.pop_back();
+            load_if_constant(scope, op1, r1);
+        }
+        else{
+            r1 = getFloatRegister(scope,op1);
+        }
+        if(isFloatLiteral(op2)){
+            if(availableFloatRegs.empty()) handleRegisterSpill(scope,op1);
+            r2=availableFloatRegs.back();
+            availableFloatRegs.pop_back();
+            load_if_constant(scope, op2, r2);
+        }
+        else{
+            r2 = getFloatRegister(scope,op2);
+        }
+        rd = getFloatRegister(scope,lhs);
         
         if (opp == "+") mipsCode.push_back("    add.s " + rd + ", " + r1 + ", " + r2);
         else if (opp == "-") mipsCode.push_back("    sub.s " + rd + ", " + r1 + ", " + r2);
@@ -349,14 +368,34 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
         else if (opp == "/") mipsCode.push_back("    div.s " + rd + ", " + r1 + ", " + r2);
         return;
     }
+    string r1,r2,rd;
     
-    string r1 = getRegister(scope,op1);
-    string r2 = getRegister(scope,op2);
-    string rd = getRegister(scope,lhs);
+    if(isIntLiteral(op1)){
+        if(availableRegs.empty()) handleRegisterSpill(scope,op1);
+        r1=availableRegs.back();
+        availableRegs.pop_back();
+        load_if_constant(scope, op1, r1);
+    }
+    else{
+        r1 = getRegister(scope,op1);
+    }
+    if(isIntLiteral(op2)){
+        if(availableRegs.empty()) handleRegisterSpill(scope,op1);
+        r2=availableRegs.back();
+        availableRegs.pop_back();
+        load_if_constant(scope, op2, r2);
+    }
+    else{
+        r2 = getRegister(scope,op2);
+    }
+    rd = getRegister(scope,lhs);
+    // string r1 = getRegister(scope,op1);
+    // string r2 = getRegister(scope,op2);
+    // string rd = getRegister(scope,lhs);
     cout<<"Operation: " << op1 << " " << opp << " " << op2 << endl;
     cout<<"Registers: " << r1 << ", " << r2 << ", " << rd << endl;
-    load_if_constant(scope, op1, r1);
-    load_if_constant(scope, op2, r2);
+    // load_if_constant(scope, op1, r1);
+    // load_if_constant(scope, op2, r2);
 
     if (opp == "+") mipsCode.push_back("    add " + rd + ", " + r1 + ", " + r2);
     else if (opp == "-") mipsCode.push_back("    sub " + rd + ", " + r1 + ", " + r2);
@@ -916,6 +955,10 @@ void codegen_main() {
     for (const string& line : mipsCode) {
         cerr << line << endl;
     }
-
+    regMap.clear();
+    availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5","$t6", "$t7", "$t8", "$t9"};
+    floatVarToReg.clear();
+    availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7"};
+    loadedConstants.clear();
     return;
 }
