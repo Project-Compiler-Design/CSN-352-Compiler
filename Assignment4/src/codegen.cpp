@@ -1,5 +1,5 @@
 #include<bits/stdc++.h>
-
+#include<fstream>
 #include <utility.h> // Include your utility header
 using namespace std;
 
@@ -23,8 +23,10 @@ vector<string> functionparams;
 map<string, string> regMap;
 static vector<string> argRegisters = {"$a0", "$a1", "$a2", "$a3"};
 vector<string> availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5","$t6", "$t7", "$t8", "$t9"};
-vector<string> availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7"};
+vector<string> availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7","$f8", "$f9", "$f10", "$f11", "$f12", "$f13", "$f14", "$f15", "$f16", "$f17", "$f18", "$f19", "$f20", "$f21", "$f22", "$f23", "$f24", "$f25", "$f26", "$f27", "$f28", "$f29", "$f30", "$f31"};
 map<pair<scoped_symtab*, string>, string> floatVarToReg;
+vector<string> availableDoubleRegs={"$f0","$f2","$f4","$f6","$f8","$f10","$f12","$f14","$f16","$f18","$f20","$f22","$f24","$f26","$f28","$f30"};
+map<pair<scoped_symtab*, string>, string> doubleVarToReg;
 vector<string> mipsCode;
 
 map<string, bool> loadedConstants;
@@ -65,6 +67,9 @@ string trim(const string& s) {
 
 bool isIntLiteral(const string& s) {
     return !s.empty() && all_of(s.begin(), s.end(), ::isdigit);
+}
+bool isCharLiteral(const std::string& s) {
+    return s.length() >= 3 && s.front() == '\'' && s.back() == '\'' && s.length() == 3;
 }
 
 bool isFloatLiteral(const string& s) {
@@ -172,20 +177,39 @@ void handleRegisterSpill(scoped_symtab* currentScope, string& newVar) {
     cerr<<"hi"<<endl;
 }
 
-string getFloatRegister(scoped_symtab* scope, string& var) {
+string getFloatRegister(scoped_symtab* scope, string& var,string type="float") {
     scope = getScope(scope, var);
-    if (floatVarToReg.count({scope, var}))
-        return floatVarToReg[{scope, var}];
-    
     if (availableFloatRegs.empty()) {
         cerr << "No available float registers (spilling not implemented for float yet)\n";
         exit(1);
     }
-
-    string freg = availableFloatRegs.back();
-    availableFloatRegs.pop_back();
-    floatVarToReg[{scope, var}] = freg;
-    return freg;
+    if(type=="float")
+    {
+        if (floatVarToReg.count({scope, var}))
+        return floatVarToReg[{scope, var}];
+        string freg = availableFloatRegs.back();
+        availableFloatRegs.pop_back();
+        if(stoi(freg.substr(2))%2==1)
+        {
+            availableDoubleRegs.pop_back();
+        }
+        floatVarToReg[{scope, var}] = freg;
+        return freg;
+    }
+    else if(type=="double")
+    {
+        if (doubleVarToReg.count({scope, var}))
+        {
+            return floatVarToReg[{scope, var}];
+        }
+        string freg = availableDoubleRegs.back();
+        availableDoubleRegs.pop_back();
+        availableFloatRegs.pop_back();
+        availableFloatRegs.pop_back();
+        doubleVarToReg[{scope, var}] = freg;
+        return freg;
+    }
+    
 }
 
 string getRegister(scoped_symtab* scope, string& var) {
@@ -387,7 +411,7 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
 
     symbol_info* lhsInfo = getScope(scope,lhs)->symbol_map[lhs];
     bool isFloat = (lhsInfo && lhsInfo->type == "float");
-
+    bool isDouble = (lhsInfo && lhsInfo->type == "double");
     if (isFloat) {
         string dst = getFloatRegister(scope, lhs);
         if (isFloatLiteral(rhs)) {
@@ -400,13 +424,26 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
         }
         return;
     }
+    
+    else if (isDouble) {
+        string dst = getFloatRegister(scope, lhs,"double");  // Get destination double register
+        if (isFloatLiteral(rhs)) {
+            // Assume double literal loading (mock behavior)
+            mipsCode.push_back("    li.d " + dst + ", " + rhs);  // Load double literal
+        } 
+        else {
+            string src = getFloatRegister(scope, rhs);  // Get source double register
+            mipsCode.push_back("    mov.d " + dst + ", " + src);  // Move value from src to dst
+        }
+        return;
+    }
     string dst = getRegister(scope,lhs);
     if(rhs.find("CALL") != string::npos){
         handle_function_call(rhs);
         mipsCode.push_back("    move " + dst + ", $v0");
         return;
     }
-    if (isIntLiteral(rhs)) {
+    if (isIntLiteral(rhs)||isCharLiteral(rhs)) {
         if(reg_of_const.count(rhs)) {
             mipsCode.push_back("    move " + dst + ", " + reg_of_const[rhs]);
             loadedConstants[lhs] = true;
@@ -416,7 +453,8 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
         mipsCode.push_back("    li " + dst + ", " + rhs);
         loadedConstants[lhs] = true;
         reg_of_const[rhs]=dst;
-    } else {
+    }
+    else {
         
         string src = getRegister(scope,rhs);
         mipsCode.push_back("    move " + dst + ", " + src);
@@ -443,8 +481,9 @@ int get_symbol_size(symbol_info* sym) {
 int get_size_from_type(string type) {
     if (type == "int") return 4;
     else if (type == "float") return 4;
-    else if(type == "char")return 1;
+    else if(type == "char")return 4;
     else if(type == "bool")return 1;
+    else if(type=="double")return 8;
     return 4;
 }
 
@@ -630,25 +669,7 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
     }
 }
 
-// void pass1(vector<pair<string, scoped_symtab*>>& codeList){
-//     for(auto &code : codeList){
-//         string t = trim(code.first);
-//         if(t.empty()){
-//             cout << "empty codelist error" << endl;
-//         }
-//         else{
-//             if(t.rfind("FUNC_BEGIN", 0) == 0){
-//                 scoped_symtab* scope = code.second;
-//                 int stack_size = calculate_function_stack_size(scope);
-//                 istringstream iss(t);
-//                 string dummy, funcName;
-//                 iss >> dummy >> funcName;
-//                 int frameBytes = calculate_function_stack_size(scope);
-//                 funcStackSize[funcName] = frameBytes;
-//             }
-//         }
-//     }
-// }
+
 
 void pass1(vector<pair<string, scoped_symtab*>>& codeList) {
     for (int i = 0; i < codeList.size(); i++) {
@@ -852,7 +873,19 @@ void run_liveness(vector<LivenessInfo>& program) {
         }
     } while (changed);
 }
+void printMipsCode(vector<string>& mipsCode, const string& filename) {
+    ofstream outFile(filename);  // Open file for writing
+    if (!outFile) {
+        cerr << "Error opening file: " << filename << endl;
+        return;
+    }
 
+    for (const string& line : mipsCode) {
+        outFile << line << endl;  // Write to file instead of cerr
+    }
+
+    outFile.close();  // Always good practice to close explicitly
+}
 void codegen_main() {
     mipsCode.push_back(".text");
     mipsCode.push_back(".globl main");
@@ -880,6 +913,6 @@ void codegen_main() {
     for (const string& line : mipsCode) {
         cerr << line << endl;
     }
-
+    printMipsCode(mipsCode, "./output/output.s");
     return;
 }
