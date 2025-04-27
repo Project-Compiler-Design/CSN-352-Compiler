@@ -12,6 +12,7 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+| add1            | int                  | 4       | N/A        |
 | main            | int                  | 4       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
@@ -27,12 +28,46 @@ Hiiiii
 a : int
 current size: 4
 Hiiiii
-b : int
+b : float
+current size: 8
+Hiiiii
+c : float
+current size: 12
+Hiiiii
+d : int
+current size: 16
+Hiiiii
+e : int
+current size: 20
+Hiiiii
+f : float
+current size: 24
+Function add1 stack size: 32
+Hiiiii
+a : int
+current size: 4
+Hiiiii
+b : float
 current size: 8
 Hiiiii
 p : int*
 current size: 12
-Function main stack size: 20
+Hiiiii
+d : int
+current size: 16
+Hiiiii
+e : int
+current size: 20
+Hiiiii
+f : float
+current size: 24
+Hiiiii
+g : int
+current size: 28
+Hiiiii
+t0 : int
+current size: 32
+Function main stack size: 40
 Pass 1 done
 Error!!!! Variable *p not found in any scope
 Liveness analysis done
@@ -64,7 +99,7 @@ Pass 2 done
 ################ MIPS Assembly Code ################ 
 .text
 .globl main
-main:
+add1:
     move $fp, $sp
     addi $sp, $sp, -20
     sw   $ra, 16($sp)
