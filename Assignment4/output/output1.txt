@@ -1,3 +1,5 @@
+=====================LIST OF ERRORS===================================
+Line 6 : Missing return statement
 ======================================================================
 No Errors in the code
 Intermediate code generated successfully
@@ -18,6 +20,7 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+| add1            | int                  | 4       | N/A        |
 | main            | int                  | 4       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
