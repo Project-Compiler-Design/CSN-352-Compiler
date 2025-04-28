@@ -13,6 +13,8 @@
     extern char *yytext; 
 
     vector<pair<string,scoped_symtab*>> cleaned_TAC;
+	vector<pair<scoped_symtab*,string>> static_variables;
+	vector<pair<string,scoped_symtab*>> static_variables_code;
 
 	std::stack<std::string> parsing_stack;
     std::stack<int> pointer_info;
@@ -1032,9 +1034,18 @@ declaration
                 }
 
 				if (type_priority[$1] < type_priority[curr_scope->symbol_map[top_symbol]->type]) {
-					
-                    error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in declaration");
-					flag = 1;
+					string left=$1;
+					if(curr_scope->symbol_map[top_symbol]->type=="int" && left=="static,int"){
+						static_variables.push_back({curr_scope,top_symbol});
+					}
+					else if (curr_scope->symbol_map[top_symbol]->type=="float" && left=="static,float"){
+						static_variables.push_back({curr_scope,top_symbol});
+					}
+					else{
+						error_list.push_back("Line "+to_string(yylineno)+" : Type mismatch in declaration");
+						flag = 1;
+					}
+                    
 				}
 				
                 curr_scope->symbol_map[top_symbol]->name = top_symbol;
@@ -1046,7 +1057,19 @@ declaration
 				code=$2->code;
 
 			} else {
+				cout<<"heeeeeee"<<$1<<endl;
 				curr_scope->symbol_map[top_symbol]->type = $1;
+				if(curr_scope->symbol_map[top_symbol]->type.substr(0,6)=="static"){
+					static_variables.push_back({curr_scope,top_symbol});
+					if(curr_scope->symbol_map[top_symbol]->type=="static,int"){
+						static_variables_code.push_back({top_symbol+":= 0",curr_scope});
+					}
+					else if(curr_scope->symbol_map[top_symbol]->type=="static,float"){
+						static_variables_code.push_back({top_symbol+":= 0.0",curr_scope});
+					}
+					
+					
+				}
                 for(int i=0;i<depth;i++){
                     curr_scope->symbol_map[top_symbol]->type+="*";
                 }
@@ -1096,7 +1119,18 @@ declaration
                 temp+=$$->code[index];
                 index++;
             }
-            $$->final_code.push_back({temp,curr_scope});
+			int fla=0;
+			for(auto x:static_variables){
+				cout<<temp.substr(0,temp.find(":="))<<endl;
+				if(x.first==curr_scope && x.second==trimm(temp.substr(0,temp.find(":=")))){
+					static_variables_code.push_back({temp,curr_scope});
+					cout<<"static variable code: "<<temp<<endl;
+					fla=1;
+					break;
+				}
+			}
+			
+			if(fla==0) $$->final_code.push_back({temp,curr_scope});
             temp="";
             index++;
         }
@@ -1217,7 +1251,7 @@ init_declarator
             if($3->place.first[0]!='t' && $3->place.first[0]!='&' && $3->place.first[0]!='*' && $3->place.first[0]!='-' && $3->place.first[0]!='!'){
                 $3->code="";
             }
-            
+			
             $$->code=$3->code+"\n"+$1->place.first+":= "+$3->place.first;
             int index=0;
             string temp="";
@@ -2005,7 +2039,9 @@ start_symbol: translation_unit
 	print_errors();
 	// cleanTAC($1->code);
     // cerr<<endl<<endl<<endl;
-    cleaned_TAC=clean_vector_TAC($1->final_code);
+	vector<pair<string,scoped_symtab*>> temp=$1->final_code;
+	static_variables_code.insert(static_variables_code.end(), temp.begin(), temp.end());
+    cleaned_TAC=clean_vector_TAC(static_variables_code);
     // print_vector($1->final_code);
 	print_vector(cleaned_TAC);	
 }

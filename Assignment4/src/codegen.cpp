@@ -16,6 +16,8 @@ int paramFloatReceiveCounter = 0;
 int string_counter = 0;
 map<pair<scoped_symtab*,string>,string> var_to_reg;
 map<string,pair<scoped_symtab*,string>> reg_to_var;
+std::vector<pair<scoped_symtab*, string>> static_var;
+map<scoped_symtab*,int> scope_id;
 map<string, int> funcStackSize;
 map<string,int> size_of_extra_parameters;
 stack<int> last_offset;
@@ -637,42 +639,86 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
     string op2 = trim(rhs.substr(operator_pos + opp.size()));
     if (isFloat){
         string r1,r2,rd;
-    
+        string rx,ry;
         if(isFloatLiteral(op1)){
             if(availableFloatRegs.empty()) handleRegisterSpill(scope,op1);
             r1=availableFloatRegs.back();
+            rx=r1;
             availableFloatRegs.pop_back();
             load_if_constant(scope, op1, r1);
         }
         else{
+            int fl=0;
             
-            r1 = getFloatRegister(scope,op1);
-            if(var_to_reg.count({scope,op1})){
-                string tempr = var_to_reg[{scope,op1}];
-                mipsCode.push_back("mtc1 " + tempr + ", " + r1);
-                mipsCode.push_back("cvt.s.w " + r1+ ", " + r1);
+            for(auto x:static_var){
+                if(x.first==scope && x.second==op1){
+                    cout<<"Static variable " << op1 << " found\n";
+                    r1 = getRegister(scope,op1);
+                    mipsCode.push_back("    la " + r1 + ", " + "static_" + op1);
+                    string rr=getFloatRegister(scope,op1);
+                    mipsCode.push_back("    l.s "+rr+", 0("+r1+")");
+                    floatVarToReg[{scope,op1}] = rr;
+                    reg_to_var[rr] = {scope,op1};
+                    fl=1;
+                    rx=rr;
+                    break;
+                    
+                }
             }
+            if(fl==0){
+                r1 = getFloatRegister(scope,op1);
+                rx=r1;
+                if(floatVarToReg.count({scope,op1})){
+                    string tempr = floatVarToReg[{scope,op1}];
+                    mipsCode.push_back("mtc1 " + tempr + ", " + r1);
+                    mipsCode.push_back("cvt.s.w " + r1+ ", " + r1);
+                }
+            }
+            
+            
         }
         if(isFloatLiteral(op2)){
             if(availableFloatRegs.empty()) handleRegisterSpill(scope,op1);
             r2=availableFloatRegs.back();
+            ry=r2;
             availableFloatRegs.pop_back();
             load_if_constant(scope, op2, r2);
         }
         else{
-            r2 = getFloatRegister(scope,op2);
-            if(var_to_reg.count({scope,op2})){
-                string tempr = var_to_reg[{scope,op2}];
-                mipsCode.push_back("mtc1 " + tempr + ", " + r2);
-                mipsCode.push_back("cvt.s.w " + r2+ ", " + r2);
+            int fl=0;
+            
+            for(auto x:static_var){
+                if(x.first==scope && x.second==op1){
+                    cout<<"Static variable " << op2 << " found\n";
+                    r2 = getRegister(scope,op1);
+                    mipsCode.push_back("    la " + r2 + ", " + "static_" + op2);
+                    string rr=getFloatRegister(scope,op2);
+                    mipsCode.push_back("    l.s "+rr+", 0("+r2+")");
+                    floatVarToReg[{scope,op1}] = rr;
+                    reg_to_var[rr] = {scope,op1};
+                    fl=1;
+                    ry=rr;
+                    break;
+                    
+                }
             }
+            if(fl==0){
+                r2 = getFloatRegister(scope,op2);
+                rx=r2;
+                if(floatVarToReg.count({scope,op2})){
+                    string tempr = floatVarToReg[{scope,op2}];
+                    mipsCode.push_back("mtc1 " + tempr + ", " + r2);
+                    mipsCode.push_back("cvt.s.w " + r2+ ", " + r2);
+                }
+            }
+            
         }
         rd = getFloatRegister(scope,lhs);
         
-        if (opp == "+") mipsCode.push_back("    add.s " + rd + ", " + r1 + ", " + r2);
-        else if (opp == "-") mipsCode.push_back("    sub.s " + rd + ", " + r1 + ", " + r2);
-        else if (opp == "*") mipsCode.push_back("    mul.s " + rd + ", " + r1 + ", " + r2);
-        else if (opp == "/") mipsCode.push_back("    div.s " + rd + ", " + r1 + ", " + r2);
+        if (opp == "+") mipsCode.push_back("    add.s " + rd + ", " + rx + ", " + ry );
+        else if (opp == "-") mipsCode.push_back("    sub.s " + rd + ", " +  rx + ", " + ry );
+        else if (opp == "*") mipsCode.push_back("    mul.s " + rd + ", " +  rx + ", " + ry );
+        else if (opp == "/") mipsCode.push_back("    div.s " + rd + ", " +  rx + ", " + ry );
         return;
     }
     string r1,r2,rd;
@@ -685,7 +731,25 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
         load_if_constant(scope, op1, r1);
     }
     else{
-        r1 = getRegister(scope,op1);
+        //check if op1 is static 
+        int fl=0;
+        
+        for(auto x:static_var){
+            if(x.first==scope && x.second==op1){
+                cout<<"Static variable " << op1 << " found\n";
+                r1 = getRegister(scope,op1);
+                mipsCode.push_back("    lw " + r1 + ", " + "static_" + op1);
+                var_to_reg[{scope,op1}] = r1;
+                reg_to_var[r1] = {scope,op1};
+                fl=1;
+                break;
+                
+            }
+        }
+        if(fl==0){
+            r1 = getRegister(scope,op1);
+        }
+        
     }
     if(isIntLiteral(op2)){
         if(availableRegs.empty()) handleRegisterSpill(scope,op1);
@@ -694,7 +758,23 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
         load_if_constant(scope, op2, r2);
     }
     else{
-        r2 = getRegister(scope,op2);
+        int fl=0;
+        
+        for(auto x:static_var){
+            if(x.first==scope && x.second==op1){
+                cout<<"Static variable " << op2 << " found\n";
+                r2 = getRegister(scope,op2);
+                mipsCode.push_back("    lw " + r2 + ", " + "static_" + op2);
+                var_to_reg[{scope,op2}] = r2;
+                reg_to_var[r2] = {scope,op2};
+                fl=1;
+                break;
+                
+            }
+        }
+        if(fl==0){
+            r2 = getRegister(scope,op2);
+        }
     }
     rd = getRegister(scope,lhs);
     // string r1 = getRegister(scope,op1);
@@ -1386,6 +1466,9 @@ bool check_struct(const string& line, scoped_symtab* scope) {
     if(ppos == string::npos) return false;
     string structName = trim(rhs.substr(0, ppos));
     cout << "Struct name: " << structName << endl;
+    if(isIntLiteral(structName) || isFloatLiteral(structName) || isStringLiteral(structName)){
+        return false;
+    }
     symbol_info* sym = getScope(scope, structName)->symbol_map[structName];
     cout << sym->type << endl;
     if(sym->type.substr(0,6) == "struct"){
@@ -1670,12 +1753,60 @@ void printMipsCode(vector<string>& mipsCode, const string& filename) {
     outFile.close();  // Always good practice to close explicitly
 }
 
+vector<pair<string, scoped_symtab*>> handle_static_code(vector<pair<string, scoped_symtab*>>& codeList) {
+    // int count=0;
+    // for(auto x:codeList){
+    //     if(scope_id.find(x.second) == scope_id.end()){
+    //         scope_id[x.second] = count;
+    //         count++;
+    //     }
+    // }
+    //find lines from start till any FUNC_BEGIN
+    vector<pair<string, scoped_symtab*>> staticCode;
+    for (int i = 0; i < codeList.size(); ++i) {
+        string t = trim(codeList[i].first);
+        if (t.empty()) {
+            cout << "empty codelist error at line: "<< i+1 << endl;
+        } else if (t.rfind("FUNC_BEGIN", 0) == 0) {
+            break;
+        } else {
+            staticCode.push_back(codeList[i]);
+        }
+    }
+    //remove static code from original list
+    codeList.erase(codeList.begin(), codeList.begin() + staticCode.size());
+    
+    //iterate over static code and find all the variables and put in data section with name static_<variable>
+    for (auto& code : staticCode) {
+        string line = code.first;
+        size_t assignPos = line.find(":=");
+        if (assignPos != string::npos) {
+            string lhs = trim(line.substr(0, assignPos));
+            string rhs = trim(line.substr(assignPos + 2));
+            static_var.push_back({code.second,lhs});
+            if (isIntLiteral(rhs)) {
+                data_section.push_back("static_"+ lhs + ": .word " + rhs);
+            } else if (isFloatLiteral(rhs)) {
+                data_section.push_back("static_" + lhs + ": .float " + rhs);
+            } else if (isStringLiteral(rhs)) {
+                data_section.push_back("static_" + lhs + ": .asciiz \"" + rhs.substr(1, rhs.size() - 2) + "\"");
+            }
+        }
+    }
+
+    return codeList;
+
+
+}
+
 void codegen_main() {
     mipsCode.push_back(".text");
     mipsCode.push_back(".globl main");
     data_section.push_back(".data");
     data_section.push_back("newline: .asciiz \"\\n\"");
-    std::vector<std::pair<std::string,scoped_symtab*>> codeList=cleaned_TAC;
+    std::vector<std::pair<std::string,scoped_symtab*>> codeList=handle_static_code(cleaned_TAC);
+    
+
 
     pass1(codeList);
     cerr<<"Pass 1 done"<<endl;

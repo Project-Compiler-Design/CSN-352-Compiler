@@ -1,11 +1,28 @@
-=====================LIST OF ERRORS===================================
-Line 4 : Type mismatch in assignment
-Line 4 : Type mismatch in assignment
+
+a
+static variable code: a:= 5.300000
+
+4.000000
+t0 
+
+c
+
+
+t1 
+
+b
 ======================================================================
-0x63ed4fe344b0 FUNC_BEGIN main
-0x63ed4fe3afc0 a:=  3
-0x63ed4fe3afc0 RETURN 0
-0x63ed4fe344b0 FUNC_END main
+No Errors in the code
+Intermediate code generated successfully
+======================================================================
+0x61b9de7e1fc0 a:= 5.300000
+0x61b9de7db4b0 FUNC_BEGIN main
+0x61b9de7e1fc0 t0 :=  a + 4.000000
+0x61b9de7e1fc0 c:= t0
+0x61b9de7e1fc0 t1 :=  c + a
+0x61b9de7e1fc0 b:= t1
+0x61b9de7e1fc0 RETURN 0
+0x61b9de7db4b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
@@ -18,36 +35,88 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | static,int           | 0       | N/A        |
+| a               | float                | 4       | 5.300000   |
+| b               | float                | 4       | N/A        |
+| c               | float                | 4       | N/A        |
+| t0              | float                | 4       | N/A        |
+| t1              | float                | 4       | N/A        |
 -----------------------------------------------------------------
-Function main stack size: 12
+Function main stack size: 28
 Pass 1 done
-LHS: a, RHS: 3
-Token lhs: a
+LHS: t0, RHS: a + 4.000000
+Token rhs: a
+Token lhs: t0
+LHS: c, RHS: t0
+Token rhs: t0
+Token lhs: c
+LHS: t1, RHS: c + a
+Token rhs: c
+Token rhs: a
+Token lhs: t1
+LHS: b, RHS: t1
+Token rhs: t1
+Token lhs: b
 Liveness analysis done
 Inside pass2
 FUNC_BEGIN main
-a:=  3
-Handling assignment: a := 3
+t0 :=  a + 4.000000
+Struct name: a
+float
+Handling operation: t0 := a + 4.000000
+Static variable a found
 Getting register for a
 Assigned register $t9 to a
+Assigning float register $f31 to a
+$f30
+Loaded float constant 4.000000 into $f30
+Assigning float register $f29 to t0
+$f28
+c:= t0
+Handling assignment: c := t0
+Assigning float register $f28 to c
+$f28
+t1 :=  c + a
+Struct name: c
+float
+Handling operation: t1 := c + a
+Assigning float register $f27 to t1
+$f26
+b:= t1
+Handling assignment: b := t1
+Assigning float register $f26 to b
+$f26
 RETURN 0
 FUNC_END main
 Pass 2 done
 ################ MIPS Assembly Code ################ 
 .data
 newline: .asciiz "\n"
+static_a: .float 5.300000
+.data
+float_const_4.000000: .float 4.000000
+.text
 .text
 .globl main
 main:
     move $fp, $sp
-    addi $sp, $sp, -12
-    sw   $ra, 8($sp)
-    sw   $fp, 4($sp)
-    li $t9, 3
+    addi $sp, $sp, -28
+    sw   $ra, 24($sp)
+    sw   $fp, 20($sp)
+    la $t9, static_a
+    l.s $f31, 0($t9)
+    la $t8, float_const_4.000000
+    l.s $f30, 0($t8)
+    add.s $f29, $f31, $f30
+    mov.s $f28, $f29
+mtc1 $f28, $f28
+cvt.s.w $f28, $f28
+mtc1 $f31, $f31
+cvt.s.w $f31, $f31
+    add.s $f27, $f31, 
+    mov.s $f26, $f27
     li $v0, 0
-    lw   $fp, 4($sp)
-    lw   $ra, 8($sp)
-    addi $sp, $sp, 12
+    lw   $fp, 20($sp)
+    lw   $ra, 24($sp)
+    addi $sp, $sp, 28
     li $v0, 10
     syscall
