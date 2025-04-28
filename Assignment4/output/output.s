@@ -31,3 +31,4 @@ main:
     addi $sp, $sp, 28
     li $v0, 10
     syscall
+
