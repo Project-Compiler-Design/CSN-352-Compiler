@@ -1,51 +1,48 @@
 .data
 newline: .asciiz "\n"
-static_a: .float 5.300000
-.data
-float_const_4.000000: .float 4.000000
-.text
+str0: .asciiz ""
 .text
 .globl main
+foo:
+    move $fp, $sp
+    addi $sp, $sp, -12
+    sw   $ra, 8($sp)
+    sw   $fp, 4($sp)
+    move $t9, $a0
+    li $v0, 2
+    lw   $fp, 4($sp)
+    lw   $ra, 8($sp)
+    addi $sp, $sp, 12
+    jr   $ra
 main:
     move $fp, $sp
-<<<<<<< HEAD
-    addi $sp, $sp, -28
-    sw   $ra, 24($sp)
-    sw   $fp, 20($sp)
-    la $t9, static_a
-    l.s $f31, 0($t9)
-    la $t8, float_const_4.000000
-    l.s $f30, 0($t8)
-    add.s $f29, $f31, $f30
-    mov.s $f28, $f29
-mtc1 $f28, $f28
-cvt.s.w $f28, $f28
-mtc1 $f31, $f31
-cvt.s.w $f31, $f31
-    add.s $f27, $f31, 
-    mov.s $f26, $f27
+    addi $sp, $sp, -24
+    sw   $ra, 20($sp)
+    sw   $fp, 16($sp)
+    li $t8, 2
+    li $a0, 3
+    jal foo
+    move $t7, $v0
+    move $t6, $t7
+    la $a0, str0
+    move $a1, $t6
+#printf
+ move $a0, $a0
+    li $v0, 4
+syscall
+  li $v0, 4 
+ la $a0, newline 
+ syscall
+ move $a0, $a1
+    li $v0, 1
+syscall
+  li $v0, 4 
+ la $a0, newline 
+ syscall
+    move $t5, $v0
     li $v0, 0
-    lw   $fp, 20($sp)
-    lw   $ra, 24($sp)
-    addi $sp, $sp, 28
-=======
-    addi $sp, $sp, -16
-    sw   $ra, 12($sp)
-    sw   $fp, 8($sp)
-    li $t9, 5
-LABEL0:
-    li $t8, 0
-    slt $t7, $t8, $t9
-    bnez $t7, LABEL1
-    j LABEL2
-LABEL2:
-    li $t6, 1
-    sub $t9, $t9, $t6
-    j LABEL0
-LABEL1:
-    lw   $fp, 8($sp)
-    lw   $ra, 12($sp)
-    addi $sp, $sp, 16
->>>>>>> 6ccfb75a64099ecc5ff5952a333e07b31e7da547
+    lw   $fp, 16($sp)
+    lw   $ra, 20($sp)
+    addi $sp, $sp, 24
     li $v0, 10
     syscall

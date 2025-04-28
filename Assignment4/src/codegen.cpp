@@ -958,6 +958,42 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
         paramtype.push_back("string");
         return;
     }
+    if(isIntLiteral(var)){
+        paramtype.push_back("int");
+        if (paramCounter >= argRegisters.size()) {
+            srcReg=getRegister(scope, var);
+            functionparams.push_back("    addi $sp, $sp, -4 \n    li "+srcReg+", "+var+"\n    sw " + srcReg + ", " + to_string(0) + "($sp)");
+            // mipsCode.push_back("    addi $sp, $sp, -4");
+            // mipsCode.push_back("    sw " + srcReg + ", " + to_string(0) + "($sp)");
+            // cerr << "Too many integer parameters! Only 4 supported via $a0-$a3.\n";
+            // exit(1);
+            param_receive_offset=0;
+        }
+        else if(paramCounter == argRegisters.size()){
+            mipsCode.push_back("    li " + argRegisters[paramCounter] + ", " + var);
+            param_receive_offset=0;
+        }
+        else mipsCode.push_back("    li " + argRegisters[paramCounter] + ", " + var);
+        paramCounter++;
+        return;
+
+    }
+    else if(isFloatLiteral(var)){
+        paramtype.push_back("float");
+        if (paramFloatCounter == 0)
+            mipsCode.push_back("    li.s $f12, " + var);
+        else if (paramFloatCounter == 1)
+            mipsCode.push_back("    li.s $f14, " + var);
+        else {
+            srcReg=getFloatRegister(scope, var);
+            functionparams.push_back("    addi $sp, $sp, -4 \n   li.s "+srcReg+", "+var+"\n    s.s " + srcReg + ", " + to_string(0) + "($sp)");
+            // cerr << "Too many float parameters! Only 2 supported via $f12, $f14.\n";
+            // exit(1);
+        }
+        paramFloatCounter++;
+        return;
+        
+    }
     symbol_info* sym = getScope(scope, var)->symbol_map[var];
     if (!sym) {
         cerr << "Unknown symbol in handle_param_pass: " << var << endl;
@@ -990,6 +1026,7 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
             // mipsCode.push_back("    sw " + srcReg + ", " + to_string(0) + "($sp)");
             // cerr << "Too many integer parameters! Only 4 supported via $a0-$a3.\n";
             // exit(1);
+            param_receive_offset=0;
         }
         else if(paramCounter == argRegisters.size()){
             mipsCode.push_back("    move " + argRegisters[paramCounter] + ", " + srcReg);
@@ -1470,6 +1507,7 @@ bool check_struct(const string& line, scoped_symtab* scope) {
     if(isIntLiteral(structName) || isFloatLiteral(structName) || isStringLiteral(structName)){
         return false;
     }
+    // cout << "Struct ke andar: " << structName << endl;
     symbol_info* sym = getScope(scope, structName)->symbol_map[structName];
     cout << sym->type << endl;
     if(sym->type.substr(0,6) == "struct" || sym->type.substr(0,5) == "union") {
@@ -1608,6 +1646,7 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 continue;
             }
             else if(check_struct(t, code.second)){
+                cout << "Struct found: " << t << endl;
                 handle_struct(t, code.second);
                 continue;
             }
