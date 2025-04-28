@@ -1020,7 +1020,7 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
     if (pos != string::npos) {
         literal = var.substr(0, pos);
     }
-
+    else literal.pop_back();
     // Remove leading and trailing spaces from the literal
     size_t start = literal.find_first_not_of(' ');
     size_t end = literal.find_last_not_of(' ');
