@@ -1840,9 +1840,9 @@ selection_statement
 		string endlabel=newlabel();
         symbol_info* new_symbol=new symbol_info();
         $$=new_symbol;
-		$$->code=$3->code+"\n"+"if("+ $3->place.first +") goto "+truelabel+"\n"+"goto "+falselabel+"\n"+truelabel+":\n"+$5->code+"\n"+"goto "+endlabel+"\n"+falselabel+":\n"+$7->code+"\n"+endlabel+":\n";
+		$$->code=$3->code+"\n"+"if ("+ $3->place.first +") goto "+truelabel+"\n"+"goto "+falselabel+"\n"+truelabel+":\n"+$5->code+"\n"+"goto "+endlabel+"\n"+falselabel+":\n"+$7->code+"\n"+endlabel+":\n";
         $$->final_code = $3->final_code;
-        $$->final_code.push_back({"if("+ $3->place.first +") goto "+truelabel,curr_scope});
+        $$->final_code.push_back({"if ("+ $3->place.first +") goto "+truelabel,curr_scope});
         $$->final_code.push_back({"goto "+falselabel,curr_scope});
         $$->final_code.push_back({truelabel+":",curr_scope});
         $$->final_code.insert($$->final_code.end(), $5->final_code.begin(), $5->final_code.end());
@@ -1867,8 +1867,8 @@ selection_statement
                 temp.push_back({"goto "+label,curr_scope});
 			}
 			else{
-                str+="if ( "+$4->place.first+" == "+case_value+" ) goto "+label+"\n";
-                temp.push_back({"if ( "+$4->place.first+" == "+case_value+" ) goto "+label,curr_scope});
+                str+="if ( "+$4->place.first+" == "+case_value+") goto "+label+"\n";
+                temp.push_back({"if ( "+$4->place.first+" == "+case_value+") goto "+label,curr_scope});
             }
 		}
 		string endlabel=newlabel();
@@ -1892,10 +1892,10 @@ iteration_statement
 		string truelabel=newlabel();
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
-		$$->code=startlabel+":\n"+$3->code+"\n"+"if("+$3->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+$5->code+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
+		$$->code=startlabel+":\n"+$3->code+"\n"+"if ("+$3->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+$5->code+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
         $$->final_code.push_back({startlabel+":",curr_scope});
         $$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
-        $$->final_code.push_back({"if("+$3->place.first+") goto "+truelabel,curr_scope});
+        $$->final_code.push_back({"if ("+$3->place.first+") goto "+truelabel,curr_scope});
         $$->final_code.push_back({"goto "+endlabel,curr_scope});
         $$->final_code.push_back({truelabel+":",curr_scope});
         $$->final_code.insert($$->final_code.end(), $5->final_code.begin(), $5->final_code.end());
@@ -1912,10 +1912,10 @@ iteration_statement
 		string truelabel=newlabel();
 		symbol_info* new_symbol=new symbol_info();
 		$$=new_symbol;
-		$$->code=$3->code+"\n"+startlabel+":\n"+"if("+$3->place.first+") goto "+endlabel+"\n"+"goto "+truelabel+"\n"+truelabel+":\n"+$5->code+"\n"+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
+		$$->code=$3->code+"\n"+startlabel+":\n"+"if ("+$3->place.first+") goto "+endlabel+"\n"+" goto "+truelabel+"\n"+truelabel+":\n"+$5->code+"\n"+"\n"+" goto "+startlabel+"\n"+endlabel+":\n";
 		$$->final_code.push_back({startlabel+":",curr_scope});
 		$$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
-		$$->final_code.push_back({"if("+$3->place.first+") goto "+endlabel,curr_scope});
+		$$->final_code.push_back({"if ("+$3->place.first+") goto "+endlabel,curr_scope});
 		$$->final_code.push_back({"goto "+truelabel,curr_scope});
 		$$->final_code.push_back({truelabel+":",curr_scope});
 		$$->final_code.insert($$->final_code.end(), $5->final_code.begin(), $5->final_code.end());
@@ -1935,10 +1935,10 @@ iteration_statement
         $$->final_code.insert($$->final_code.end(), $2->final_code.begin(), $2->final_code.end());
         $$->final_code.push_back({truelabel+":",curr_scope});
         $$->final_code.insert($$->final_code.end(), $5->final_code.begin(), $5->final_code.end());
-        $$->final_code.push_back({"if("+$5->place.first+") goto "+startlabel,curr_scope});
+        $$->final_code.push_back({"if ("+$5->place.first+") goto "+startlabel,curr_scope});
         $$->final_code.push_back({"goto "+endlabel,curr_scope});
         $$->final_code.push_back({endlabel+":",curr_scope});
-		$$->code=startlabel+":\n"+$2->code+"\n"+truelabel+":\n"+$5->code+"\n"+"\n"+"if("+$5->place.first+") goto "+startlabel+"\n"+"goto "+endlabel+"\n"+endlabel+":\n";
+		$$->code=startlabel+":\n"+$2->code+"\n"+truelabel+":\n"+$5->code+"\n"+"\n"+"if ("+$5->place.first+") goto "+startlabel+"\n"+"goto "+endlabel+"\n"+endlabel+":\n";
 		$$->code=replace_break_continue($$->code,endlabel,startlabel,1);
         $$->final_code=replace_break_continue_final($$->final_code,endlabel,startlabel,1);
 	}
@@ -1952,13 +1952,13 @@ iteration_statement
         $$->final_code = $3->final_code;
         $$->final_code.push_back({startlabel+":",curr_scope});
         $$->final_code.insert($$->final_code.end(), $4->final_code.begin(), $4->final_code.end());
-        $$->final_code.push_back({"if("+$4->place.first+") goto "+truelabel,curr_scope});
+        $$->final_code.push_back({"if ("+$4->place.first+") goto "+truelabel,curr_scope});
         $$->final_code.push_back({"goto "+endlabel,curr_scope});
         $$->final_code.push_back({truelabel+":",curr_scope});
         $$->final_code.insert($$->final_code.end(), $6->final_code.begin(), $6->final_code.end());
         $$->final_code.push_back({"goto "+startlabel,curr_scope});
         $$->final_code.push_back({endlabel+":",curr_scope});
-		$$->code=$3->code+"\n"+startlabel+":\n"+$4->code+"\n"+"if("+$4->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+$6->code+"\n"+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
+		$$->code=$3->code+"\n"+startlabel+":\n"+$4->code+"\n"+"if ("+$4->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+$6->code+"\n"+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
         $$->code=replace_break_continue($$->code,endlabel,startlabel,1);
         $$->final_code=replace_break_continue_final($$->final_code,endlabel,startlabel,1);
 	}
@@ -1973,7 +1973,7 @@ iteration_statement
 		$$->final_code = $3->final_code;
         $$->final_code.push_back({startlabel+":",curr_scope});
         $$->final_code.insert($$->final_code.end(), $4->final_code.begin(), $4->final_code.end());
-        $$->final_code.push_back({"if("+$4->place.first+") goto "+truelabel,curr_scope});
+        $$->final_code.push_back({"if ("+$4->place.first+") goto "+truelabel,curr_scope});
         $$->final_code.push_back({"goto "+endlabel,curr_scope});
         $$->final_code.push_back({truelabel+":",curr_scope});
         $$->final_code.insert($$->final_code.end(), $7->final_code.begin(), $7->final_code.end());
@@ -1981,7 +1981,7 @@ iteration_statement
         $$->final_code.insert($$->final_code.end(), $5->final_code.begin(), $5->final_code.end());
         $$->final_code.push_back({"goto "+startlabel,curr_scope});
         $$->final_code.push_back({endlabel+":",curr_scope});
-		$$->code=$3->code+"\n"+startlabel+":\n"+$4->code+"\n"+"if("+$4->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+$7->code+"\n"+updatelabel+":\n"+$5->code+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
+		$$->code=$3->code+"\n"+startlabel+":\n"+$4->code+"\n"+"if ("+$4->place.first+") goto "+truelabel+"\n"+"goto "+endlabel+"\n"+truelabel+":\n"+$7->code+"\n"+updatelabel+":\n"+$5->code+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
         $$->code=replace_break_continue($$->code,endlabel,updatelabel,0);
         $$->final_code=replace_break_continue_final($$->final_code,endlabel,updatelabel,0);
 	}
