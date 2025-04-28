@@ -119,9 +119,9 @@ void push_into_stack(pair<scoped_symtab*, string> varPair){
         return;
             
     }
-    if(type=="int") reg = var_to_reg[{scope, var}];
-    else if(type=="float") reg = floatVarToReg[{scope, var}];
-    else if(type=="double"){
+    if(type.substr(0,3)=="int") reg = var_to_reg[{scope, var}];
+    else if(type.substr(0,5)=="float") reg = floatVarToReg[{scope, var}];
+    else if(type.substr(0,6)=="double"){
         reg = doubleVarToReg[{scope, var}];
     }
     
@@ -132,39 +132,39 @@ void push_into_stack(pair<scoped_symtab*, string> varPair){
     if(scope->symbol_map[var]->offset == -1){
         sym->offset = last_offset.top();
         last_offset.top()+=get_size_from_type(sym->type);
-        if(type=="int")
+        if(type.substr(0,3)=="int")
             mipsCode.push_back("    sw " + reg + ", " + to_string(sym->offset) + "($sp)");
-        else if(type=="float")
+        else if(type.substr(0,5)=="float")
             mipsCode.push_back("    s.s " + reg + ", " + to_string(sym->offset) + "($sp)");
-        else if(type=="double")
+        else if(type.substr(0,6)=="double")
             mipsCode.push_back("    s.d " + reg + ", " + to_string(sym->offset) + "($sp)");
         else{
             cerr<<"Error: Type not supported for push into stack\n";
             return;
         }
     }else{
-        if(type=="int")
+        if(type.substr(0,3)=="int")
             mipsCode.push_back("    sw " + reg + ", " + to_string(sym->offset) + "($sp)");
-        else if(type=="float")
+        else if(type.substr(0,5)=="float")
             mipsCode.push_back("    s.s " + reg + ", " + to_string(sym->offset) + "($sp)");
-        else if(type=="double")
+        else if(type.substr(0,6)=="double")
             mipsCode.push_back("    s.d " + reg + ", " + to_string(sym->offset) + "($sp)");
         else{
             cerr<<"Error: Type not supported for push into stack\n";
             return;
         }
     }
-    if(type=="int")
+    if(type.substr(0,3)=="int")
     {
         availableRegs.push_back(reg);
         var_to_reg.erase({scope, var});
     }
-    else if(type=="float")
+    else if(type.substr(0,5)=="float")
     {
         
         floatVarToReg.erase({scope, var});
     }
-    else if(type=="double")
+    else if(type.substr(0,6)=="double")
     {
         
         doubleVarToReg.erase({scope, var});
@@ -1415,6 +1415,7 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
     else{
         if(rhs_ptr){
             if(var_to_reg.count({getScope(scope, rhs), rhs})){
+                cerr<<"Pointer found in register\n";
                 dst=getRegister(scope, lhs);
                 mipsCode.push_back("    lw " + dst + ", " + "0(" + var_to_reg[{getScope(scope, rhs), rhs}] + ")");
                 symbol_info* sym = getScope(scope, rhs)->symbol_map[rhs];
@@ -1462,14 +1463,14 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
         }
         else{
             symbol_info* rhsInfo = getScope(scope, rhs)->symbol_map[rhs];
-            if(rhsInfo->type=="int"){
+            if(rhsInfo->type.substr(0,3)=="int"){
                 dst=getRegister(scope, lhs);
                 if(var_to_reg.count({scope, rhs})){
                     push_into_stack({scope, rhs});
                 }
                 mipsCode.push_back("    addi " + dst + ", $sp, " + to_string(rhsInfo->offset));
             }
-            else if(rhsInfo->type=="float"){
+            else if(rhsInfo->type.substr(0,5)=="float"){
                 dst=getFloatRegister(scope, lhs);
                 string regis=floatVarToReg[{scope, rhs}];
                 if(floatVarToReg.count({scope, rhs})){
@@ -1493,7 +1494,7 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
                 mipsCode.push_back("    li.s " + regii + ", " + val);
                 mipsCode.push_back("   add.s " + dst + ", $sp, " + regii);
             }
-            else if(rhsInfo->type=="double"){
+            else if(rhsInfo->type.substr(0,6)=="double"){
                 string reg = getFloatRegister(scope, rhs,"double");
                 string regis=doubleVarToReg[{scope, rhs}];
                 if(doubleVarToReg.count({scope, rhs})){
