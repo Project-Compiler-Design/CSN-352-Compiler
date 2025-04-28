@@ -842,8 +842,23 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
     string srcReg;
     if(isStringLiteral(var))
     {
+        string literal = var;
+    size_t pos = var.find('%');
+    if (pos != string::npos) {
+        literal = var.substr(0, pos);
+    }
+
+    // Remove leading and trailing spaces from the literal
+    size_t start = literal.find_first_not_of(' ');
+    size_t end = literal.find_last_not_of(' ');
+    if (start != string::npos && end != string::npos) {
+        literal = literal.substr(start, end - start + 1);
+        literal=literal+"\"";
+    } else {
+        literal = ""; // if only spaces
+    }
         string str=newstring();
-        data_section.push_back(str+": .asciiz "+var);
+        data_section.push_back(str+": .asciiz "+literal);
         string_to_label[var]=str;
         mipsCode.push_back("    la $a0, " + str);
         paramCounter++;
@@ -922,8 +937,7 @@ void handle_function_call(const string& line) {
             else if(type=="bool") mipsCode.push_back("    li $v0, 1");
             else if(type=="double") mipsCode.push_back("    li $v0, 3");
             mipsCode.push_back("syscall");
-            cnt++;
-            
+            mipsCode.push_back("  li $v0, 4 \n la $a0, newline \n syscall");
         }
         
         cout<<"----------------------"<<arg_no<<endl;
@@ -1399,6 +1413,7 @@ void codegen_main() {
     mipsCode.push_back(".text");
     mipsCode.push_back(".globl main");
     data_section.push_back(".data");
+    data_section.push_back("newline: .asciiz \"\\n\"");
     std::vector<std::pair<std::string,scoped_symtab*>> codeList=cleaned_TAC;
 
     pass1(codeList);

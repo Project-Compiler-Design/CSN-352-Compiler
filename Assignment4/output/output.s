@@ -1,4 +1,5 @@
 .data
+newline: .asciiz "\n"
 str0: .asciiz "Hi"
 .text
 .globl main
@@ -7,16 +8,22 @@ main:
     addi $sp, $sp, -16
     sw   $ra, 12($sp)
     sw   $fp, 8($sp)
-    li.s $f31, 5.500000
+    li $t9, 5
     la $a0, str0
-    mov.s $f12, $f31
+    move $a1, $t9
  move $a0, $a0
     li $v0, 4
 syscall
-    mov.s $f12, $f12
-    li $v0, 2
+  li $v0, 4 
+ la $a0, newline 
+ syscall
+ move $a0, $a1
+    li $v0, 1
 syscall
-    move $t9, $v0
+  li $v0, 4 
+ la $a0, newline 
+ syscall
+    move $t8, $v0
     li $v0, 0
     lw   $fp, 8($sp)
     lw   $ra, 12($sp)

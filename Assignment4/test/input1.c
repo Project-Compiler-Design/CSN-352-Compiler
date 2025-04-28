@@ -1,6 +1,6 @@
 int main(){
-    float f=5.5;
-    
-    printf("Hi",f);
+    int a=5;
+
+    printf("Hi %d",a);
     return 0;
 }

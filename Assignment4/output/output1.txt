@@ -2,13 +2,13 @@
 No Errors in the code
 Intermediate code generated successfully
 ======================================================================
-0x5ea8502ea4b0 FUNC_BEGIN main
-0x5ea8502f0fc0 f:= 5.500000
-0x5ea8502f0fc0 PARAM "Hi"
-0x5ea8502f0fc0 PARAM f
-0x5ea8502f0fc0 t0 := CALL printf,2
-0x5ea8502f0fc0 RETURN 0
-0x5ea8502ea4b0 FUNC_END main
+0x595d911394b0 FUNC_BEGIN main
+0x595d9113ffc0 a:= 5
+0x595d9113ffc0 PARAM "Hi %d"
+0x595d9113ffc0 PARAM a
+0x595d9113ffc0 t0 := CALL printf,2
+0x595d9113ffc0 RETURN 0
+0x595d911394b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
@@ -21,7 +21,7 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| f               | float                | 4       | 5.500000   |
+| a               | int                  | 4       | 5          |
 | t0              |                      | 0       | N/A        |
 -----------------------------------------------------------------
 Function main stack size: 16
@@ -29,16 +29,18 @@ Pass 1 done
 Error!!!! Variable printf,2 not found in any scope
 Liveness analysis done
 FUNC_BEGIN main
-f:= 5.500000
-Handling assignment: f := 5.500000
-Assigning float register $f31 to f
-$f30
-PARAM "Hi"
-PARAM f
+a:= 5
+Handling assignment: a := 5
+Getting register for a
+Assigned register $t9 to a
+PARAM "Hi %d"
+PARAM a
+Getting register for a
+Found register for a $t9
 t0 := CALL printf,2
 Handling assignment: t0 := CALL printf,2
 Getting register for t0
-Assigned register $t9 to t0
+Assigned register $t8 to t0
 Handling function call: CALL printf,2
 ----------------------2
 RETURN 0
@@ -46,6 +48,7 @@ FUNC_END main
 Pass 2 done
 ################ MIPS Assembly Code ################ 
 .data
+newline: .asciiz "\n"
 str0: .asciiz "Hi"
 .text
 .globl main
@@ -54,16 +57,22 @@ main:
     addi $sp, $sp, -16
     sw   $ra, 12($sp)
     sw   $fp, 8($sp)
-    li.s $f31, 5.500000
+    li $t9, 5
     la $a0, str0
-    mov.s $f12, $f31
+    move $a1, $t9
  move $a0, $a0
     li $v0, 4
 syscall
-    mov.s $f12, $f12
-    li $v0, 2
+  li $v0, 4 
+ la $a0, newline 
+ syscall
+ move $a0, $a1
+    li $v0, 1
 syscall
-    move $t9, $v0
+  li $v0, 4 
+ la $a0, newline 
+ syscall
+    move $t8, $v0
     li $v0, 0
     lw   $fp, 8($sp)
     lw   $ra, 12($sp)
