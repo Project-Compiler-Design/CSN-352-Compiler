@@ -1,22 +1,13 @@
+=====================LIST OF ERRORS===================================
+Line 10 : Missing return statement
 ======================================================================
-No Errors in the code
-Intermediate code generated successfully
-======================================================================
-0x55b2184a18b0 FUNC_BEGIN main
-0x55b2184a8f50 a:= alloc 8
-0x55b2184a8f50 t0 := a + 0
-0x55b2184a8f50 *t0 := 5
-0x55b2184a8f50 t1 := a + 4
-0x55b2184a8f50 *t1 := 10
-0x55b2184a8f50 d:= 4
-0x55b2184a8f50 PARAM "%d"
-0x55b2184a8f50 PARAM &d
-0x55b2184a8f50 t2 := CALL scanf,2
-0x55b2184a8f50 PARAM "%d\n"
-0x55b2184a8f50 PARAM d
-0x55b2184a8f50 t3 := CALL printf,2
-0x55b2184a8f50 RETURN 0
-0x55b2184a18b0 FUNC_END main
+0x55afb6d6c8b0 FUNC_BEGIN main
+0x55afb6d73f50 a:= alloc 8
+0x55afb6d73f50 t0 := a + 0
+0x55afb6d73f50 *t0 := 5
+0x55afb6d73f50 t1 := a + 4
+0x55afb6d73f50 *t1 := 10
+0x55afb6d6c8b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
@@ -35,13 +26,10 @@ Printing scope table
 | a               | struct A             | 0       | N/A        |
 | a.x             | int                  | 4       | 5          |
 | a.y             | int                  | 4       | 10         |
-| d               | int                  | 4       | 4          |
 | t0              | struct A             | 0       | N/A        |
 | t1              | struct A             | 0       | N/A        |
-| t2              |                      | 0       | N/A        |
-| t3              |                      | 0       | N/A        |
 -----------------------------------------------------------------
-Function main stack size: 32
+Function main stack size: 20
 Pass 1 done
 LHS: a, RHS: alloc 8
 Token rhs: alloc
@@ -57,18 +45,6 @@ Token rhs: a
 Token lhs: t1
 LHS: *t1, RHS: 10
 Token lhs: t1
-LHS: d, RHS: 4
-Token lhs: d
-LHS: t2, RHS: CALL scanf,2
-Token rhs: CALL
-Token rhs: scanf,2
-Error!!!! Variable scanf,2 not found in any scope
-Token lhs: t2
-LHS: t3, RHS: CALL printf,2
-Token rhs: CALL
-Token rhs: printf,2
-Error!!!! Variable printf,2 not found in any scope
-Token lhs: t3
 Liveness analysis done
 FUNC_BEGIN main
 a:= alloc 8
@@ -85,7 +61,7 @@ Getting register for t0
 Assigned register $t8 to t0
 Struct a found in register$t9
 Pushing a into stack
-Pushing struct a into stack
+Pushing struct/union a into stack
 0
 *t0 := 5
 Handling pointer arrays: *t0 := 5
@@ -105,7 +81,7 @@ Getting register for t1
 Assigned register $t7 to t1
 Struct a found in register$t9
 Pushing a into stack
-Pushing struct a into stack
+Pushing struct/union a into stack
 0
 *t1 := 10
 Handling pointer arrays: *t1 := 10
@@ -117,44 +93,18 @@ querying available regs
 available regs
 8
 Loaded constant 10 into $t9
-d:= 4
-Handling assignment: d := 4
-Getting register for d
-Assigned register $t6 to d
-PARAM "%d"
-PARAM &d
-Getting register for d
-Found register for d $t6
-t2 := CALL scanf,2
-Handling assignment: t2 := CALL scanf,2
-Getting register for t2
-Assigned register $t5 to t2
-Handling function call: CALL scanf,2
---------------------------$t6 PARAM "%d\n"
-PARAM d
-Getting register for d
-Found register for d $t6
-t3 := CALL printf,2
-Handling assignment: t3 := CALL printf,2
-Getting register for t3
-Assigned register $t4 to t3
-Handling function call: CALL printf,2
-----------------------2
-RETURN 0
 FUNC_END main
 Pass 2 done
 ################ MIPS Assembly Code ################ 
 .data
 newline: .asciiz "\n"
-str0: .asciiz ""
-str1: .asciiz ""
 .text
 .globl main
 main:
     move $fp, $sp
-    addi $sp, $sp, -32
-    sw   $ra, 28($sp)
-    sw   $fp, 24($sp)
+    addi $sp, $sp, -20
+    sw   $ra, 16($sp)
+    sw   $fp, 12($sp)
     #Pushing a to stack
     addi $t8, $sp, 0
     #Loading constant 5 into register
@@ -165,35 +115,8 @@ main:
     #Loading constant 10 into register
     li $t9, 10
     sw $t9, 0($t7)
-    li $t6, 4
-    la $a0, str0
-    move $a1, $t6
-#scanf
-    li $v0, 4
-syscall
-    li $v0, 5
-syscall
-move $t6 ,$v0
-    move $t5, $v0
-    la $a0, str1
-    move $a1, $t6
-#printf
- move $a0, $a0
-    li $v0, 4
-syscall
-  li $v0, 4 
- la $a0, newline 
- syscall
- move $a0, $a1
-    li $v0, 1
-syscall
-  li $v0, 4 
- la $a0, newline 
- syscall
-    move $t4, $v0
-    li $v0, 0
-    lw   $fp, 24($sp)
-    lw   $ra, 28($sp)
-    addi $sp, $sp, 32
+    lw   $fp, 12($sp)
+    lw   $ra, 16($sp)
+    addi $sp, $sp, 20
     li $v0, 10
     syscall
