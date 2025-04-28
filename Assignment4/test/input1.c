@@ -1,5 +1,9 @@
+struct A{
+    int a;
+    int b;
+};
+
 int main(){
-    float a = 5.5;
-    int b=a+6.5;
-    
+    int arr[2]={1,2};
+    arr[0]=8;
 }

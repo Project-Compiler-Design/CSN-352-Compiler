@@ -292,12 +292,10 @@ void generate_return_MIPS(scoped_symtab* scope,string val) {
 
 // --- Operation/Assignment Handlers ---
 void load_if_constant(scoped_symtab* scope, string& var, const string& reg) {
-    scope = getScope(scope, var);
-    if (loadedConstants[var]) return;
-
     // Handle integer literal
     if (isIntLiteral(var)) {
         if (reg_of_const.count(var)) {
+            if(reg==reg_of_const[var]) return;
             mipsCode.push_back("    move " + reg + ", " + reg_of_const[var]);
             cout << "Loaded integer constant (cached) " << var << " into " << reg << endl;
             return;
@@ -339,6 +337,7 @@ void load_if_constant(scoped_symtab* scope, string& var, const string& reg) {
             int* val = static_cast<int*>(sym->ptr);
             mipsCode.push_back("    li " + reg + ", " + to_string(*val));
             loadedConstants[var] = true;
+            reg_of_const[var] = reg;
             cout << "Loaded symbol (int) " << var << " into " << reg << endl;
         } else if (sym->type == "float") {
             float* val = static_cast<float*>(sym->ptr);
@@ -352,6 +351,7 @@ void load_if_constant(scoped_symtab* scope, string& var, const string& reg) {
             mipsCode.push_back("    la " + reg + ", " + floatLabel);
             mipsCode.push_back("    l.s " + reg + ", 0(" + reg + ")");
             loadedConstants[var] = true;
+            reg_of_const[var] = reg;
             cout << "Loaded symbol (float) " << var << " into " << reg << endl;
         }
     }
@@ -395,6 +395,7 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
     string r1,r2,rd;
     
     if(isIntLiteral(op1)){
+        cerr<<"hi"<<endl;
         if(availableRegs.empty()) handleRegisterSpill(scope,op1);
         r1=availableRegs.back();
         availableRegs.pop_back();
@@ -442,7 +443,6 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
         mipsCode.push_back("    slt " + rd + ", " + r1 + ", " + r2);
         mipsCode.push_back("    xori " + rd + ", " + rd + ", 1");
     }
-
 }
 
 void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
@@ -494,7 +494,13 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
         reg_of_const[rhs]=dst;
     }
     else {
-        
+        if(rhs.find("alloc")!=string::npos){
+            int rest=stoi(rhs.substr(rhs.find("alloc")+6));
+            lhsInfo->offset=last_offset.top();
+            last_offset.top()+=rest;
+            cerr<<"Allocating " << rest << " bytes for " << lhs << " at offset " << lhsInfo->offset << endl;
+            return;
+        }
         string src = getRegister(scope,rhs);
         mipsCode.push_back("    move " + dst + ", " + src);
     }
@@ -674,12 +680,45 @@ void handle_param_receive(const string& line, scoped_symtab* scope) {
     
 }
 
+void handle_array(const string& line, scoped_symtab* scope) {
+    // scope=getScope(scope, line);
+    cerr<<"Handling array: " << line << endl;
+    size_t assignPos = line.find(":=");
+    string lhs = trim(line.substr(0, assignPos));
+    string rhs = trim(line.substr(assignPos + 2));
+    string r1;
+    if(isIntLiteral(rhs)){
+        if(availableRegs.empty()) handleRegisterSpill(scope,rhs);
+        r1=availableRegs.back();
+        availableRegs.pop_back();
+        load_if_constant(scope, rhs, r1);
+    }
+    else{
+        r1 = getRegister(scope,rhs);
+    }
+    //add cases
 
+    lhs = lhs.substr(3);
+    //split on plus
+    size_t plusPos = lhs.find("+");
+    string lhs1 = trim(lhs.substr(0, plusPos));
+    string lhs2 = trim(lhs.substr(plusPos + 1));
+    lhs2.pop_back();
+    lhs2 = trim(lhs2);
+    string regis = getRegister(scope,lhs2);
+    mipsCode.push_back("    addi " + regis + ", " + regis + ", " + to_string(getScope(scope,lhs1)->symbol_map[lhs1]->offset));
+    mipsCode.push_back("    add " + regis + ", " + regis + ", $sp");
+    mipsCode.push_back("    sw " + r1 + ", 0(" + regis + ")");
+}
 
 
 void handle_pointer(const string& line, scoped_symtab* scope) {
     // scope=getScope(scope, line);
     cerr<<"Handling pointer arrays: " << line << endl;
+    if(line[0]=='*' && line[1]=='('){
+        handle_array(line, scope);
+        return;
+    }
     size_t assignPos = line.find(":=");
     string lhs = trim(line.substr(0, assignPos));
     string rhs = trim(line.substr(assignPos + 2));
@@ -709,6 +748,8 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
             string reg = availableRegs.back();
             availableRegs.pop_back();
             mipsCode.push_back("    li " + reg + ", " + rhs);
+            loadedConstants[rhs] = true;
+            reg_of_const[rhs] = reg;
             mipsCode.push_back("    sw " + reg + ", " + to_string(0) + "("+dst + ")");
             
         }
@@ -844,7 +885,7 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 handle_param_receive(t, code.second);
                 continue;
             }
-            else if(t[0] == '*' || t.find("&") != string::npos || t.find("*") != string::npos){
+            else if(t.find("&") != string::npos || (t.find("*") != string::npos && t[t.find("*")+1] != ' ') ){
                 cout << "HERE\n";
                 handle_pointer(t, code.second);
                 continue;
@@ -873,13 +914,28 @@ void compute_use_def(LivenessInfo& inst) {
         string lhs = trim(line.substr(0, eq));
         string rhs = trim(line.substr(eq + 2));
         //here
-        inst.def.insert({getScope(inst.scope,lhs), lhs});
+        // inst.def.insert({getScope(inst.scope,lhs), lhs});
         istringstream iss(rhs);
         string token;
         while (iss >> token)
             if (isalpha(token[0]) && token != lhs){
                 //here
                 inst.use.insert({getScope(inst.scope,token), token});
+            }
+
+        istringstream iss2(lhs);
+        string token2;
+        bool first=true;
+        while (iss2 >> token2)
+            if (isalpha(token2[0])){
+                //here
+                if(first){
+                    inst.def.insert({getScope(inst.scope,token2), token2});
+                    first=false;
+                }
+                else{
+                    inst.use.insert({getScope(inst.scope,token2), token2});
+                }
             }
     } else if (line.find("if(") == 0) {
         size_t start = line.find('(') + 1;

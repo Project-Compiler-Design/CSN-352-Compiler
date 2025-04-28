@@ -1191,7 +1191,7 @@ init_declarator
 				}
 				for(int i=0;i<$1->array_length;i++){
 					qid temp=newtemp($1->type,curr_scope);
-					code=code+"\n"+temp.first+":= "+to_string(i)+"*";
+					code=code+"\n"+temp.first+":= "+to_string(i)+" * ";
 					if($1->type=="int") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ) := "+to_string(*(int*)($1->int_array[i]->ptr));
 					else if($1->type=="float") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ) := "+to_string(*(float*)($1->int_array[i]->ptr));
 					else if($1->type=="char") code=code+"2\n"+"*( "+$1->name+" + "+temp.first+" ) := "+char(*(char*)($1->int_array[i]->ptr));

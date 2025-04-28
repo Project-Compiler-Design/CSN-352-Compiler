@@ -1,17 +1,24 @@
 =====================LIST OF ERRORS===================================
-Line 3 : Type mismatch in declaration
-Line 5 : Missing return statement
+Line 9 : Missing return statement
 ======================================================================
-0x557a37fca4b0 FUNC_BEGIN main
-0x557a37fd0ab0 a:= 5.500000
-0x557a37fd0ab0 t0 :=  a + 6.500000
-0x557a37fd0ab0 b:= t0
-0x557a37fca4b0 FUNC_END main
+0x55ebee78b8b0 FUNC_BEGIN main
+0x55ebee792f50 arr := alloc 8
+0x55ebee792f50 t0:= 0 * 4
+0x55ebee792f50 *( arr + t0 ) := 1
+0x55ebee792f50 t1:= 1 * 4
+0x55ebee792f50 *( arr + t1 ) := 2
+0x55ebee792f50 t3:=  8
+0x55ebee792f50 t2 := 4 * 0
+0x55ebee792f50  *( arr + t2 ) := 8
+0x55ebee78b8b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+| A               | struct               | 0       | N/A        |
+| a               | int                  | 4       | N/A        |
+| b               | int                  | 4       | N/A        |
 | main            | int                  | 4       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
@@ -19,51 +26,133 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | float                | 4       | 5.500000   |
-| b               | float                | 4       | N/A        |
-| t0              | float                | 4       | N/A        |
+| arr             | int                  | 4       | 1          |
+| t0              | int                  | 4       | N/A        |
+| t1              | int                  | 4       | N/A        |
+| t2              | int                  | 4       | N/A        |
+| t3              | int                  | 4       | N/A        |
 -----------------------------------------------------------------
 Hiiiii
-a : float
+arr : int
 current size: 4
 Hiiiii
-b : float
+t0 : int
 current size: 8
 Hiiiii
-t0 : float
+t1 : int
 current size: 12
-Function main stack size: 20
+Hiiiii
+t2 : int
+current size: 16
+Hiiiii
+t3 : int
+current size: 20
+Function main stack size: 28
 Pass 1 done
+Error!!!! Variable alloc not found in any scope
 Liveness analysis done
 FUNC_BEGIN main
-a:= 5.500000
-Handling assignment: a := 5.500000
-t0 :=  a + 6.500000
-Handling operation: t0 := a + 6.500000
-Error!!!! Variable 6.500000 not found in any scope
-Loaded float constant 6.500000 into $f6
-b:= t0
-Handling assignment: b := t0
+arr := alloc 8
+Handling assignment: arr := alloc 8
+Getting register for arr
+Assigned register $t9 to arr
+Allocating 8 bytes for arr at offset 0
+t0:= 0 * 4
+Handling operation: t0 := 0 * 4
+hi
+Loaded integer constant 0 into $t8
+Loaded integer constant 4 into $t7
+Getting register for t0
+Assigned register $t6 to t0
+Operation: 0 * 4
+Registers: $t8, $t7, $t6
+*( arr + t0 ) := 1
+HERE
+Handling pointer arrays: *( arr + t0 ) := 1
+Handling array: *( arr + t0 ) := 1
+Loaded integer constant 1 into $t5
+Getting register for t0
+Found register for t0 $t6
+t1:= 1 * 4
+Handling operation: t1 := 1 * 4
+hi
+Loaded integer constant (cached) 1 into $t4
+Loaded integer constant (cached) 4 into $t3
+Getting register for t1
+Assigned register $t2 to t1
+Operation: 1 * 4
+Registers: $t4, $t3, $t2
+*( arr + t1 ) := 2
+HERE
+Handling pointer arrays: *( arr + t1 ) := 2
+Handling array: *( arr + t1 ) := 2
+Loaded integer constant 2 into $t1
+Getting register for t1
+Found register for t1 $t2
+t3:=  8
+Handling assignment: t3 := 8
+Getting register for t3
+Assigned register $t0 to t3
+t2 := 4 * 0
+Handling operation: t2 := 4 * 0
+hi
+Handling register spill for 4
+Spilling arr from $t9
+Loaded integer constant (cached) 4 into $t9
+Handling register spill for 4
+Spilling t0 from $t6
+Loaded integer constant (cached) 0 into $t6
+Getting register for t2
+Handling register spill for t2
+Spilling t1 from $t2
+Assigned register $t2 to t2
+Operation: 4 * 0
+Registers: $t9, $t6, $t2
+*( arr + t2 ) := 8
+HERE
+Handling pointer arrays: *( arr + t2 ) := 8
+Handling array: *( arr + t2 ) := 8
+Handling register spill for 8
+Spilling t3 from $t0
+Getting register for t2
+Found register for t2 $t2
 FUNC_END main
 Pass 2 done
 ################ MIPS Assembly Code ################ 
-.data
-float_const_6.500000: .float 6.500000
-.text
 .text
 .globl main
 main:
     move $fp, $sp
-    addi $sp, $sp, -20
-    sw   $ra, 16($sp)
-    sw   $fp, 12($sp)
-    li.s $f7, 5.500000
-    la $t9, float_const_6.500000
-    l.s $f6, 0($t9)
-    add.s $f5, $f7, $f6
-    mov.s $f4, $f5
-    lw   $fp, 12($sp)
-    lw   $ra, 16($sp)
-    addi $sp, $sp, 20
+    addi $sp, $sp, -28
+    sw   $ra, 24($sp)
+    sw   $fp, 20($sp)
+    li $t8, 0
+    li $t7, 4
+    mul $t6, $t8, $t7
+    li $t5, 1
+    addi $t6, $t6, 0
+    add $t6, $t6, $sp
+    sw $t5, 0($t6)
+    move $t4, $t5
+    move $t3, $t7
+    mul $t2, $t4, $t3
+    li $t1, 2
+    addi $t2, $t2, 0
+    add $t2, $t2, $sp
+    sw $t1, 0($t2)
+    li $t0, 8
+    # Spilling arr from $t9
+    move $t9, $t7
+    # Spilling t0 from $t6
+    move $t6, $t8
+    # Spilling t1 from $t2
+    mul $t2, $t9, $t6
+    # Spilling t3 from $t0
+    addi $t2, $t2, 0
+    add $t2, $t2, $sp
+    sw $t0, 0($t2)
+    lw   $fp, 20($sp)
+    lw   $ra, 24($sp)
+    addi $sp, $sp, 28
     li $v0, 10
     syscall
