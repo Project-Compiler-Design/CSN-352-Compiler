@@ -678,13 +678,28 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
                 }
             }
             if(fl==0){
-                r1 = getFloatRegister(scope,op1);
-                rx=r1;
-                if(floatVarToReg.count({scope,op1})){
-                    string tempr = floatVarToReg[{scope,op1}];
-                    mipsCode.push_back("mtc1 " + tempr + ", " + r1);
-                    mipsCode.push_back("cvt.s.w " + r1+ ", " + r1);
+                // r1 = getFloatRegister(scope,op1);
+                // rx=r1;
+                // if(floatVarToReg.count({scope,op1})){
+                //     string tempr = floatVarToReg[{scope,op1}];
+                //     mipsCode.push_back("mtc1 " + tempr + ", " + r1);
+                //     mipsCode.push_back("cvt.s.w " + r1+ ", " + r1);
+                // }
+
+                string typ = getScope(scope,op1)->symbol_map[op1]->type;
+                if(typ == "int"){
+                    string r1 = getRegister(scope,op1);
+                    string tempr = getFloatRegister(scope,op1);
+                    mipsCode.push_back("    mtc1 " + r1 + ", " + tempr);
+                    mipsCode.push_back("    cvt.s.w " + tempr+ ", " + tempr);
+                    rx = tempr;
                 }
+                else{
+                    string tempr = getFloatRegister(scope,op1);
+                    rx = tempr;
+                }
+
+            
             }
             
             
@@ -715,12 +730,26 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
                 }
             }
             if(fl==0){
-                r2 = getFloatRegister(scope,op2);
-                ry=r2;
-                if(floatVarToReg.count({scope,op2})){
-                    string tempr = floatVarToReg[{scope,op2}];
-                    mipsCode.push_back("mtc1 " + tempr + ", " + r2);
-                    mipsCode.push_back("cvt.s.w " + r2+ ", " + r2);
+                // r2 = getFloatRegister(scope,op2);
+                // ry=r2;
+                // if(floatVarToReg.count({scope,op2})){
+                //     string tempr = floatVarToReg[{scope,op2}];
+                //     mipsCode.push_back("mtc1 " + tempr + ", " + r2);
+                //     mipsCode.push_back("cvt.s.w " + r2+ ", " + r2);
+                // }
+
+
+                string typ = getScope(scope,op2)->symbol_map[op2]->type;
+                if(typ == "int"){
+                    string r1 = getRegister(scope,op2);
+                    string tempr = getFloatRegister(scope,op2);
+                    mipsCode.push_back("    mtc1 " + r1 + ", " + tempr);
+                    mipsCode.push_back("    cvt.s.w " + tempr+ ", " + tempr);
+                    ry = tempr;
+                }
+                else{
+                    string tempr = getFloatRegister(scope,op2);
+                    ry = tempr;
                 }
             }
             

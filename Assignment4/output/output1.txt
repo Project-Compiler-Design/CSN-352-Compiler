@@ -1,21 +1,12 @@
+=====================LIST OF ERRORS===================================
+Line 4 : Missing return statement
 ======================================================================
-No Errors in the code
-Intermediate code generated successfully
-======================================================================
-0x6244cb5b04b0 FUNC_BEGIN main
-0x6244cb5b6fc0 a := alloc 8
-0x6244cb5b6fc0 t0:= 0 * 4
-0x6244cb5b6fc0 *( a + t0 ) := 1.000000
-0x6244cb5b6fc0 t1:= 1 * 4
-0x6244cb5b6fc0 *( a + t1 ) := 2.000000
-0x6244cb5b6fc0 t2 := 4 * 0
-0x6244cb5b6fc0 t3 := *( a + t2 )
-0x6244cb5b6fc0 b:= t3
-0x6244cb5b6fc0 PARAM "%f\n"
-0x6244cb5b6fc0 PARAM b
-0x6244cb5b6fc0 t4 := CALL printf,2
-0x6244cb5b6fc0 RETURN 0
-0x6244cb5b04b0 FUNC_END main
+0x563b3b1d54b0 FUNC_BEGIN main
+0x563b3b1dbfc0 a:= 2.530000
+0x563b3b1dbfc0 b:= 4.300000
+0x563b3b1dbfc0 t0 :=  a + b
+0x563b3b1dbfc0 c:= t0
+0x563b3b1d54b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
@@ -28,198 +19,63 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | float                | 4       | 1.000000   |
-| b               | float                | 4       | N/A        |
-| t0              | int                  | 4       | N/A        |
-| t1              | int                  | 4       | N/A        |
-| t2              | int                  | 4       | N/A        |
-| t3              | float                | 4       | N/A        |
-| t4              |                      | 0       | N/A        |
+| a               | float                | 4       | 2.530000   |
+| b               | float                | 4       | 4.300000   |
+| c               | float                | 4       | N/A        |
+| t0              | float                | 4       | N/A        |
 -----------------------------------------------------------------
-Function main stack size: 36
+Function main stack size: 24
 Pass 1 done
-LHS: a, RHS: alloc 8
-Token rhs: alloc
-Error!!!! Variable alloc not found in any scope
+LHS: a, RHS: 2.530000
 Token lhs: a
-LHS: t0, RHS: 0 * 4
-Token lhs: t0
-LHS: *( a + t0 ), RHS: 1.000000
-Token lhs: a
-Token lhs: t0
-LHS: t1, RHS: 1 * 4
-Token lhs: t1
-LHS: *( a + t1 ), RHS: 2.000000
-Token lhs: a
-Token lhs: t1
-LHS: t2, RHS: 4 * 0
-Token lhs: t2
-LHS: t3, RHS: *( a + t2 )
-Token rhs: a
-Token rhs: t2
-Token lhs: t3
-LHS: b, RHS: t3
-Token rhs: t3
+LHS: b, RHS: 4.300000
 Token lhs: b
-LHS: t4, RHS: CALL printf,2
-Token rhs: CALL
-Token rhs: printf,2
-Error!!!! Variable printf,2 not found in any scope
-Token lhs: t4
+LHS: t0, RHS: a + b
+Token rhs: a
+Token rhs: b
+Token lhs: t0
+LHS: c, RHS: t0
+Token rhs: t0
+Token lhs: c
 Liveness analysis done
 Inside pass2
 FUNC_BEGIN main
-a := alloc 8
-Handling assignment: a := alloc 8
-Getting register for a
-Assigned register $t9 to a
-last_offset: 0
-Allocating 8 bytes for a at offset 0
-t0:= 0 * 4
-Handling operation: t0 := 0 * 4
-hi
-Loaded integer constant 0 into $t8
-Loaded integer constant 4 into $t7
-Getting register for t0
-Assigned register $t6 to t0
-Operation: 0 * 4
-Registers: $t8, $t7, $t6
-*( a + t0 ) := 1.000000
-Handling array: *( a + t0 ) := 1.000000
-Array name: a
-Float array
-Error!!!! Variable 1.000000 not found in any scope
-Assigning float register $f31 to 1.000000
+a:= 2.530000
+Handling assignment: a := 2.530000
+Assigning float register $f31 to a
 $f30
-Loaded float constant 1.000000 into $f31
-lhs2: t0
-lhs1: a
-Getting register for t0
-Found register for t0 $t6
-regii: $t6
-val: 0
-t1:= 1 * 4
-Handling operation: t1 := 1 * 4
-hi
-Loaded integer constant 1 into $t4
-Loaded integer constant 4 into $t3
-Getting register for t1
-Assigned register $t2 to t1
-Operation: 1 * 4
-Registers: $t4, $t3, $t2
-*( a + t1 ) := 2.000000
-Handling array: *( a + t1 ) := 2.000000
-Array name: a
-Float array
-Error!!!! Variable 2.000000 not found in any scope
-Assigning float register $f30 to 2.000000
+b:= 4.300000
+Handling assignment: b := 4.300000
+Assigning float register $f30 to b
 $f30
-Loaded float constant 2.000000 into $f30
-lhs2: t1
-lhs1: a
-Getting register for t1
-Found register for t1 $t2
-regii: $t2
-val: 0
-t2 := 4 * 0
-Handling operation: t2 := 4 * 0
-hi
-Loaded integer constant 4 into $t0
-Handling register spill for 4
-Spilling t0 from $t6
-Loaded integer constant 0 into $t6
-Getting register for t2
-Handling register spill for t2
-Spilling t1 from $t2
-Assigned register $t2 to t2
-Operation: 4 * 0
-Registers: $t0, $t6, $t2
-t3 := *( a + t2 )
-Handling array: t3 := *( a + t2 )
-Array name: a
-Getting register for t2
-Found register for t2 $t2
-Handling register spill for 0
-Assigning float register $f29 to t3
+t0 :=  a + b
+Struct name: a
+float
+Handling operation: t0 := a + b
+Assigning float register $f29 to t0
 $f28
-b:= t3
-Handling assignment: b := t3
-Assigning float register $f28 to b
+c:= t0
+Handling assignment: c := t0
+Assigning float register $f28 to c
 $f28
-PARAM "%f\n"
-PARAM b
-t4 := CALL printf,2
-Handling assignment: t4 := CALL printf,2
-Getting register for t4
-Handling register spill for t4
-Spilling a from $t9
-Assigned register $t9 to t4
-Handling function call: CALL printf,2
-----------------------2
-RETURN 0
 FUNC_END main
 Pass 2 done
 ################ MIPS Assembly Code ################ 
 .data
 newline: .asciiz "\n"
-str0: .asciiz ""
-float_const_2.000000: .float 2.000000
-float_const_1.000000: .float 1.000000
 .text
 .globl main
 main:
     move $fp, $sp
-    addi $sp, $sp, -36
-    sw   $ra, 32($sp)
-    sw   $fp, 28($sp)
-    li $t8, 0
-    li $t7, 4
-    mul $t6, $t8, $t7
-    la $t5, float_const_1.000000
-    l.s $f31, 0($t5)
-    li $t5, 0
-   add $t6, $t6, $t5
-    add $t6, $t6, $sp
-    s.s $f31, 0($t6)
-    li $t4, 1
-    li $t3, 4
-    mul $t2, $t4, $t3
-    la $t1, float_const_2.000000
-    l.s $f30, 0($t1)
-    li $t1, 0
-   add $t2, $t2, $t1
-    add $t2, $t2, $sp
-    s.s $f30, 0($t2)
-    li $t0, 4
-    # Spilling t0 from $t6
-    li $t6, 0
-    # Spilling t1 from $t2
-    mul $t2, $t0, $t6
-    li $t0, 0
-   add $t2, $t2, $t0
-    add $t2, $t2, $sp
-    l.s $f29, 0($t2)
+    addi $sp, $sp, -24
+    sw   $ra, 20($sp)
+    sw   $fp, 16($sp)
+    li.s $f31, 2.530000
+    li.s $f30, 4.300000
+    add.s $f29, $f31, $f30
     mov.s $f28, $f29
-    la $a0, str0
-    mov.s $f12, $f28
-    # Spilling a from $t9
-#printf
- move $a0, $a0
-    li $v0, 4
-syscall
-  li $v0, 4 
- la $a0, newline 
- syscall
-    mov.s $f12, $f12
-    li $v0, 2
-syscall
-  li $v0, 4 
- la $a0, newline 
- syscall
-    move $t9, $v0
-    li $v0, 0
-    lw   $fp, 28($sp)
-    lw   $ra, 32($sp)
-    addi $sp, $sp, 36
+    lw   $fp, 16($sp)
+    lw   $ra, 20($sp)
+    addi $sp, $sp, 24
     li $v0, 10
     syscall
