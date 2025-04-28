@@ -13,6 +13,7 @@ static int paramFloatCounter = 0;
 int paramReceiveCounter = 0;
 int param_receive_offset=0;
 int paramFloatReceiveCounter = 0;
+int string_counter = 0;
 map<pair<scoped_symtab*,string>,string> var_to_reg;
 map<string,pair<scoped_symtab*,string>> reg_to_var;
 map<string, int> funcStackSize;
@@ -28,7 +29,9 @@ map<pair<scoped_symtab*, string>, string> floatVarToReg;
 vector<string> availableDoubleRegs={"$f0","$f2","$f4","$f6","$f8","$f10","$f12","$f14","$f16","$f18","$f20","$f22","$f24","$f26","$f28","$f30"};
 map<pair<scoped_symtab*, string>, string> doubleVarToReg;
 vector<string> mipsCode;
-
+vector<string> data_section;
+vector<string> paramtype;
+map<string,string> string_to_label;
 map<string, bool> loadedConstants;
 map<string,string> reg_of_const;
 int get_size_from_type(string type);
@@ -68,6 +71,9 @@ bool isIntLiteral(const string& s) {
 
 bool isCharLiteral(const std::string& s) {
     return s.length() >= 3 && s.front() == '\'' && s.back() == '\'' && s.length() == 3;
+}
+bool isStringLiteral(const std::string& s) {
+    return s.length() >= 2 && s.front() == '"' && s.back() == '"';
 }
 
 bool isFloatLiteral(const string& s) {
@@ -536,10 +542,10 @@ void generate_func_end_MIPS( string &func, int stackSize) {
 void generate_return_MIPS(scoped_symtab* scope,string val) {
     if(isIntLiteral(val) || isFloatLiteral(val)) 
     {
-        mipsCode.push_back("\t move $a0, $v0 \n \t li   $v0, 1 \n \t syscall");
-        mipsCode.push_back("    li $v0, " + val);
+       //mipsCode.push_back("\t move $a0, $v0 \n \t li   $v0, 1 \n \t syscall");
+      mipsCode.push_back("    li $v0, " + val);
     }
-    else{
+   else{
         string reg=getRegister(scope,val);
         mipsCode.push_back("    move $v0, " + reg);
     }
@@ -826,17 +832,47 @@ int space_for_extra_params(symbol_info* sym) {
     }
     return size;
 }
-
+string newstring(){
+    string label = "str" + to_string(string_counter);
+    string_counter++;
+    return label;
+}
 void handle_param_pass(const string& line, scoped_symtab* scope) {
     string var = trim(line.substr(5)); // after "PARAM"
     string srcReg;
+    if(isStringLiteral(var))
+    {
+        string literal = var;
+    size_t pos = var.find('%');
+    if (pos != string::npos) {
+        literal = var.substr(0, pos);
+    }
+
+    // Remove leading and trailing spaces from the literal
+    size_t start = literal.find_first_not_of(' ');
+    size_t end = literal.find_last_not_of(' ');
+    if (start != string::npos && end != string::npos) {
+        literal = literal.substr(start, end - start + 1);
+        literal=literal+"\"";
+    } else {
+        literal = ""; // if only spaces
+    }
+        string str=newstring();
+        data_section.push_back(str+": .asciiz "+literal);
+        string_to_label[var]=str;
+        mipsCode.push_back("    la $a0, " + str);
+        paramCounter++;
+        paramtype.push_back("string");
+        return;
+    }
     symbol_info* sym = getScope(scope, var)->symbol_map[var];
     if (!sym) {
         cerr << "Unknown symbol in handle_param_pass: " << var << endl;
         exit(1);
     }
-
+    
     if (sym->type == "float") {
+        paramtype.push_back("float");
         srcReg = getFloatRegister(scope, var);
         if (paramFloatCounter == 0)
             mipsCode.push_back("    mov.s $f12, " + srcReg);
@@ -849,7 +885,9 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
         }
         paramFloatCounter++;
     } 
-    else {
+    else if (sym->type =="int" || sym->type == "char") {
+         if(sym->type=="int") paramtype.push_back("int");
+         if(sym->type=="char") paramtype.push_back("char");
         srcReg = getRegister(scope, var);
         if (paramCounter >= argRegisters.size()) {
             functionparams.push_back("    addi $sp, $sp, -4 \n    sw " + srcReg + ", " + to_string(0) + "($sp)");
@@ -877,11 +915,35 @@ void handle_function_call(const string& line) {
     iss >> call >> funcWithComma;
     iss.ignore(); // skip comma
     iss >> argCount;
-
+    int arg_no=0;
     string funcName = trim(funcWithComma);
     if (!funcName.empty() && funcName.back() == ',') funcName.pop_back();
     if(funcName.find(",")!=string::npos){
+        arg_no=stoi(funcName.substr(funcName.find(",")+1));
         funcName = funcName.substr(0,funcName.find(","));
+        
+    }
+    if(funcName=="printf")
+    {
+        int floatCounter=0;
+        int cnt=0;
+        for(auto &type : paramtype){
+            if(type=="int" || type=="char" || type=="string") {mipsCode.push_back(" move $a0, $a"+to_string(cnt));cnt++;}
+            if(type=="float"||type=="double") {mipsCode.push_back("    mov.s $f12, $f"+to_string(12+2*floatCounter));floatCounter++;}
+            if(type=="int") mipsCode.push_back("    li $v0, 1");
+            else if(type=="char") mipsCode.push_back("    li $v0, 11");
+            else if(type=="string") mipsCode.push_back("    li $v0, 4");
+            else if(type=="float") mipsCode.push_back("    li $v0, 2");
+            else if(type=="bool") mipsCode.push_back("    li $v0, 1");
+            else if(type=="double") mipsCode.push_back("    li $v0, 3");
+            mipsCode.push_back("syscall");
+            mipsCode.push_back("  li $v0, 4 \n la $a0, newline \n syscall");
+        }
+        
+        cout<<"----------------------"<<arg_no<<endl;
+        paramtype.clear();
+        arg_no=0;
+        return;
     }
     if(functionparams.size() > 0){
         reverse(functionparams.begin(), functionparams.end());
@@ -892,9 +954,11 @@ void handle_function_call(const string& line) {
     }
     
     //cerr<<"Function name: " << funcName << endl;
+    paramtype.clear();
     mipsCode.push_back("    jal " + funcName);
     paramCounter = 0; // Reset after call
     paramFloatCounter = 0;
+    arg_no=0;
 }
 
 void handle_param_receive(const string& line, scoped_symtab* scope) {
@@ -1519,7 +1583,10 @@ void printMipsCode(vector<string>& mipsCode, const string& filename) {
         cerr << "Error opening file: " << filename << endl;
         return;
     }
-
+    
+    for(auto data : data_section){
+        outFile << data << endl;
+    }
     for (const string& line : mipsCode) {
         outFile << line << endl;  // Write to file instead of cerr
     }
@@ -1530,6 +1597,8 @@ void printMipsCode(vector<string>& mipsCode, const string& filename) {
 void codegen_main() {
     mipsCode.push_back(".text");
     mipsCode.push_back(".globl main");
+    data_section.push_back(".data");
+    data_section.push_back("newline: .asciiz \"\\n\"");
     std::vector<std::pair<std::string,scoped_symtab*>> codeList=cleaned_TAC;
 
     pass1(codeList);
@@ -1553,6 +1622,9 @@ void codegen_main() {
     mipsCode.push_back("    syscall");
 
     cerr << "################ MIPS Assembly Code ################ \n";
+    for(auto data : data_section){
+        cerr << data << endl;
+    }
     for (const string& line : mipsCode) {
         cerr << line << endl;
     }

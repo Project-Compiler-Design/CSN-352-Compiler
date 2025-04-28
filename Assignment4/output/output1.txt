@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 =====================LIST OF ERRORS===================================
 Line 14 : Missing return statement
 ======================================================================
@@ -16,14 +17,24 @@ Line 14 : Missing return statement
 0x5692eb7ecb50 goto LABEL0
 0x5692eb7ecb50 LABEL1:
 0x5692eb7e54b0 FUNC_END main
+=======
+======================================================================
+No Errors in the code
+Intermediate code generated successfully
+======================================================================
+0x595d911394b0 FUNC_BEGIN main
+0x595d9113ffc0 a:= 5
+0x595d9113ffc0 PARAM "Hi %d"
+0x595d9113ffc0 PARAM a
+0x595d9113ffc0 t0 := CALL printf,2
+0x595d9113ffc0 RETURN 0
+0x595d911394b0 FUNC_END main
+>>>>>>> 6ff312695b6cdb9a4e3b8b18207282560174ae9d
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| A               | struct               | 0       | N/A        |
-| a               | int                  | 4       | N/A        |
-| b               | int                  | 4       | N/A        |
 | main            | int                  | 4       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
@@ -31,6 +42,7 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
+<<<<<<< HEAD
 | c               | int                  | 4       | 3          |
 | d               | int                  | 4       | N/A        |
 | t1              | int                  | 4       | N/A        |
@@ -103,13 +115,42 @@ Operation: i + 1
 Registers: $t9, $t2, $t9
 goto LABEL0
 LABEL1:
+=======
+| a               | int                  | 4       | 5          |
+| t0              |                      | 0       | N/A        |
+-----------------------------------------------------------------
+Function main stack size: 16
+Pass 1 done
+Error!!!! Variable printf,2 not found in any scope
+Liveness analysis done
+FUNC_BEGIN main
+a:= 5
+Handling assignment: a := 5
+Getting register for a
+Assigned register $t9 to a
+PARAM "Hi %d"
+PARAM a
+Getting register for a
+Found register for a $t9
+t0 := CALL printf,2
+Handling assignment: t0 := CALL printf,2
+Getting register for t0
+Assigned register $t8 to t0
+Handling function call: CALL printf,2
+----------------------2
+RETURN 0
+>>>>>>> 6ff312695b6cdb9a4e3b8b18207282560174ae9d
 FUNC_END main
 Pass 2 done
 ################ MIPS Assembly Code ################ 
+.data
+newline: .asciiz "\n"
+str0: .asciiz "Hi"
 .text
 .globl main
 main:
     move $fp, $sp
+<<<<<<< HEAD
     addi $sp, $sp, -28
     sw   $ra, 24($sp)
     sw   $fp, 20($sp)
@@ -132,5 +173,30 @@ LABEL1:
     lw   $fp, 20($sp)
     lw   $ra, 24($sp)
     addi $sp, $sp, 28
+=======
+    addi $sp, $sp, -16
+    sw   $ra, 12($sp)
+    sw   $fp, 8($sp)
+    li $t9, 5
+    la $a0, str0
+    move $a1, $t9
+ move $a0, $a0
+    li $v0, 4
+syscall
+  li $v0, 4 
+ la $a0, newline 
+ syscall
+ move $a0, $a1
+    li $v0, 1
+syscall
+  li $v0, 4 
+ la $a0, newline 
+ syscall
+    move $t8, $v0
+    li $v0, 0
+    lw   $fp, 8($sp)
+    lw   $ra, 12($sp)
+    addi $sp, $sp, 16
+>>>>>>> 6ff312695b6cdb9a4e3b8b18207282560174ae9d
     li $v0, 10
     syscall
