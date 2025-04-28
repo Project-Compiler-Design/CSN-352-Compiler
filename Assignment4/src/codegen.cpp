@@ -542,29 +542,53 @@ pair<size_t, string> find_operator(const string& line) {
 }
 
 void generate_func_begin_MIPS(const string &func, int stackSize) {
+    cout << "idhar" << endl;
+    if (func != "main")
+        stackSize += 40;
     mipsCode.push_back(func + ":");
     mipsCode.push_back("    move $fp, $sp");
-    mipsCode.push_back("    addi $sp, $sp, -" + to_string(stackSize));
+    mipsCode.push_back("    addi $sp, $sp, -" + to_string(stackSize) );
     mipsCode.push_back("    sw   $ra, " + to_string(stackSize - 4) + "($sp)");
     mipsCode.push_back("    sw   $fp, " + to_string(stackSize - 8) + "($sp)");
+    cout << "yaha" << endl;
+    cout << func << endl;
+    if (func != "main")
+    {
+        int spillCount = 10;
+        int slot = 0;
+        for (int i = 0; i < spillCount; i++){
+            string reg = "$t" + to_string(i);
+            mipsCode.push_back("    sw   " + reg + ", " + to_string(stackSize - 12 - 4*slot) + "($sp)");
+            slot++;
+        }
+    }
+    cout << "abe" << endl;
     last_offset.push(0);
+    cout << "bahar" << endl;
 }
 
 void generate_func_end_MIPS( string &func, int stackSize) {
     // mipsCode.push_back("    move $sp, $fp");
-    mipsCode.push_back("    lw   $fp, " + to_string(stackSize - 8) + "($sp)");
-    mipsCode.push_back("    lw   $ra, " + to_string(stackSize - 4) + "($sp)");
-    mipsCode.push_back("    addi $sp, $sp, " + to_string(stackSize));
-    if(func!="main") mipsCode.push_back("    jr   $ra");
-    // regMap.clear();
-    // availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5","$t6", "$t7", "$t8", "$t9"};
-    // floatVarToReg.clear();
-    // availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7"};
-    // loadedConstants.clear();
+    // if(func!="main")stackSize += 40;
+    // mipsCode.push_back("    lw   $fp, " + to_string(stackSize - 8) + "($sp)");
+    // mipsCode.push_back("    lw   $ra, " + to_string(stackSize - 4) + "($sp)");
+    // if(func != "main"){
+    //     int slot = 0, spillCount = 10;
+    //     for (int i = 0; i < spillCount; i++){
+    //         string reg = "$t" + to_string(i);
+    //         mipsCode.push_back("    lw   " + reg + ", " + to_string(stackSize - 12 - 4*slot) + "($sp)");
+    //         slot++;
+    //     }
+    //     mipsCode.push_back("    addi $sp, $sp, " + to_string(stackSize));
+    //     mipsCode.push_back("    jr   $ra");
+    // }
+    if(!last_offset.empty())
     last_offset.pop();
+    cout << "exit done" << endl;
 }
 
-void generate_return_MIPS(scoped_symtab* scope,string val) {
+void generate_return_MIPS(string& func, scoped_symtab* scope,string val) {
+    cout << func << " hello " << val <<endl;
     if(isIntLiteral(val) || isFloatLiteral(val)) 
     {
        //mipsCode.push_back("\t move $a0, $v0 \n \t li   $v0, 1 \n \t syscall");
@@ -574,7 +598,22 @@ void generate_return_MIPS(scoped_symtab* scope,string val) {
         string reg=getRegister(scope,val);
         mipsCode.push_back("    move $v0, " + reg);
     }
-    
+    int stackSize = funcStackSize[func];
+    if(func!="main")stackSize += 40;
+    mipsCode.push_back("    lw   $fp, " + to_string(stackSize - 8) + "($sp)");
+    mipsCode.push_back("    lw   $ra, " + to_string(stackSize - 4) + "($sp)");
+    if(func != "main"){
+        int slot = 0, spillCount = 10;
+        for (int i = 0; i < spillCount; i++){
+            string reg = "$t" + to_string(i);
+            mipsCode.push_back("    lw   " + reg + ", " + to_string(stackSize - 12 - 4*slot) + "($sp)");
+            slot++;
+        }
+        mipsCode.push_back("    addi $sp, $sp, " + to_string(stackSize));
+    }
+    mipsCode.push_back("    jr   $ra");
+
+    cout << "exit done" << endl;
 }
 
 void load_if_constant(scoped_symtab* scope, string& var, const string& reg) {
@@ -1098,7 +1137,8 @@ void handle_function_call(const string& line) {
     }
     if(funcName=="printf")
     {
-        int floatCounter=0;
+        cout << "printf me" << endl;
+        int floatCounter = 0;
         mipsCode.push_back("#printf");
         int cnt=0;
         for(auto &type : paramtype){
@@ -1164,10 +1204,10 @@ void handle_function_call(const string& line) {
     }
     if(functionparams.size() > 0){
         reverse(functionparams.begin(), functionparams.end());
-    for(auto &param : functionparams){
-        mipsCode.push_back(param);
-    }
-    functionparams.clear();
+        for(auto &param : functionparams){
+            mipsCode.push_back(param);
+        }
+        functionparams.clear();
     }
     
     //cerr<<"Function name: " << funcName << endl;
@@ -1622,6 +1662,8 @@ void pass1(vector<pair<string, scoped_symtab*>>& codeList) {
     }
 }
 
+string curr_func;
+
 void pass2(vector<pair<string, scoped_symtab*>>& codeList){
     cout<<"Inside pass2"<<endl;
     for(int idx = 0; idx < codeList.size(); ++idx){
@@ -1637,6 +1679,8 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 istringstream iss(t);
                 string dummy, funcName;
                 iss >> dummy >> funcName;
+                trim(funcName);
+                curr_func = funcName;
                 generate_func_begin_MIPS(funcName, funcStackSize[funcName]);
                 paramReceiveCounter = 0;
                 paramFloatReceiveCounter = 0;
@@ -1645,6 +1689,7 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 istringstream iss(t);
                 string dummy, funcName;
                 iss >> dummy >> funcName;
+                curr_func = "";   
                 generate_func_end_MIPS(funcName, funcStackSize[funcName]);
 
                 continue;
@@ -1653,9 +1698,10 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 istringstream iss(t);
                 string keyword, val;
                 iss >> keyword >> val;
-                generate_return_MIPS(code.second,val);
+                generate_return_MIPS(curr_func, code.second, val);
             }
-            else if (t.rfind("if(", 0) == 0 && t.find("goto") != string::npos) {
+            else if (t.rfind("if (", 0) == 0 && t.find("goto") != string::npos) {
+                cout << "idhar aagaya" << endl;
                 size_t start = t.find('(') + 1;
                 size_t end = t.find(')');
                 string condition = t.substr(start, end - start);
@@ -1925,5 +1971,10 @@ void codegen_main() {
     }
 
     printMipsCode(mipsCode, "./output/output.s");
+
+    string windowsPath = "/mnt/c/Users/anups/Downloads"; // Replace with your desired Windows path
+    string copyCommand = "cp ./output/output.s \"" + windowsPath + "/output.s\"";
+    system(copyCommand.c_str());
+    cout << "File copied to Windows at: " << windowsPath << "/output.s" << endl;
     return;
 }
