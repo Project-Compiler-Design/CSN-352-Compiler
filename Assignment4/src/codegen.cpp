@@ -41,7 +41,6 @@ struct pair_hash {
     }
 };
 
-
 struct LivenessInfo {
     scoped_symtab* scope;
     string code;
@@ -52,13 +51,11 @@ struct LivenessInfo {
 
 vector<LivenessInfo> currentLiveness;
 
-
 vector<string> operators = {
     "==", "!=", "<=", ">=", "&&", "||", "+=", "-=", "*=", "/=", "%=",
     "<<", ">>", "<", ">", "+", "-", "*", "/", "%", "=", "&", "|", "^", "!", "~"
 };
 
-// --- Helper Functions ---
 string trim(const string& s) {
     size_t start = s.find_first_not_of(" \t\r\n");
     size_t end = s.find_last_not_of(" \t\r\n");
@@ -68,6 +65,7 @@ string trim(const string& s) {
 bool isIntLiteral(const string& s) {
     return !s.empty() && all_of(s.begin(), s.end(), ::isdigit);
 }
+
 bool isCharLiteral(const std::string& s) {
     return s.length() >= 3 && s.front() == '\'' && s.back() == '\'' && s.length() == 3;
 }
@@ -281,7 +279,6 @@ void handleDoubleRegisterSpill(scoped_symtab* currentScope, const string& newVar
     push_into_stack(varPair);
 }
 
-
 void handleFloatRegisterSpill(scoped_symtab* currentScope, const string& newVar) {
     cout << "Handling float register spill for " << newVar << endl;
 
@@ -386,7 +383,6 @@ void handleFloatRegisterSpill(scoped_symtab* currentScope, const string& newVar)
 
     push_into_stack(varPair);
 }
-
 
 void handleRegisterSpill(scoped_symtab* currentScope, string& newVar) {
     // currentScope = getScope(currentScope, newVar);
@@ -550,7 +546,6 @@ void generate_return_MIPS(scoped_symtab* scope,string val) {
     
 }
 
-// --- Operation/Assignment Handlers ---
 void load_if_constant(scoped_symtab* scope, string& var, const string& reg) {
     // Handle integer literal
     if (isIntLiteral(var)) {
@@ -617,10 +612,10 @@ void load_if_constant(scoped_symtab* scope, string& var, const string& reg) {
     }
 }
 
-
 void handle_operation(string lhs, string rhs, size_t operator_pos, const string& opp, scoped_symtab* scope) {
     cout<<"Handling operation: " << lhs << " := " << rhs << endl;
-    bool isFloat = (getScope(scope,lhs)->symbol_map[lhs]->type == "float");
+    bool isFloat;
+    isFloat = (getScope(scope,lhs)->symbol_map[lhs]->type == "float");
     string op1 = trim(rhs.substr(0, operator_pos));
     string op2 = trim(rhs.substr(operator_pos + opp.size()));
     if (isFloat){
@@ -815,12 +810,9 @@ int calculate_function_stack_size(scoped_symtab* scope) {
     int size = 0;
     // cout<<"Calculating stack size for function " << scope->symbol_map['a']->type << endl;
     for (const auto& [name, sym] : scope->symbol_map) {
-        cout<<"Hiiiii"<<endl;
-        cout<<name << " : " << sym->type << endl;
         if (!sym->is_param_list && !sym->is_return) {
             size += sym->type == "string" ? get_symbol_size(sym) : get_size_from_type(sym->type);
         }
-        cout<<"current size: " << size << endl;
     }
     return size;
 }
@@ -905,7 +897,6 @@ void handle_function_call(const string& line) {
     paramFloatCounter = 0;
 }
 
-
 void handle_param_receive(const string& line, scoped_symtab* scope) {
     cerr<<"Handling param receive: " << line << endl;
     size_t assignPos = line.find(":=");
@@ -966,38 +957,49 @@ void handle_array(const string& line, scoped_symtab* scope) {
     string lhs = trim(line.substr(0, assignPos));
     string rhs = trim(line.substr(assignPos + 2));
     string r1;
-    if(isIntLiteral(rhs)){
-        if(availableRegs.empty()) handleRegisterSpill(scope,rhs);
-        r1=availableRegs.back();
-        availableRegs.pop_back();
-        load_if_constant(scope, rhs, r1);
-    }
-    else{
-        r1 = getRegister(scope,rhs);
-    }
-    //add cases
+    if(line[0]=='*'){
+        if(isIntLiteral(rhs)){
+            if(availableRegs.empty()) handleRegisterSpill(scope,rhs);
+            r1=availableRegs.back();
+            availableRegs.pop_back();
+            load_if_constant(scope, rhs, r1);
+        }
+        else{
+            r1 = getRegister(scope,rhs);
+        }
+        //add cases
 
-    lhs = lhs.substr(3);
-    //split on plus
-    size_t plusPos = lhs.find("+");
-    string lhs1 = trim(lhs.substr(0, plusPos));
-    string lhs2 = trim(lhs.substr(plusPos + 1));
-    lhs2.pop_back();
-    lhs2 = trim(lhs2);
-    string regis = getRegister(scope,lhs2);
-    mipsCode.push_back("    addi " + regis + ", " + regis + ", " + to_string(getScope(scope,lhs1)->symbol_map[lhs1]->offset));
-    mipsCode.push_back("    add " + regis + ", " + regis + ", $sp");
-    mipsCode.push_back("    sw " + r1 + ", 0(" + regis + ")");
+        lhs = lhs.substr(3);
+        //split on plus
+        size_t plusPos = lhs.find("+");
+        string lhs1 = trim(lhs.substr(0, plusPos));
+        string lhs2 = trim(lhs.substr(plusPos + 1));
+        lhs2.pop_back();
+        lhs2 = trim(lhs2);
+        string regis = getRegister(scope,lhs2);
+        mipsCode.push_back("    addi " + regis + ", " + regis + ", " + to_string(getScope(scope,lhs1)->symbol_map[lhs1]->offset));
+        mipsCode.push_back("    add " + regis + ", " + regis + ", $sp");
+        mipsCode.push_back("    sw " + r1 + ", 0(" + regis + ")");
+    }else{
+        rhs = rhs.substr(3);
+        //split on plus
+        size_t plusPos = rhs.find("+");
+        string rhs1 = trim(rhs.substr(0, plusPos));
+        string rhs2 = trim(rhs.substr(plusPos + 1));
+        rhs2.pop_back();
+        rhs2 = trim(rhs2);
+        string regis = getRegister(scope,rhs2);
+        mipsCode.push_back("    addi " + regis + ", " + regis + ", " + to_string(getScope(scope,rhs1)->symbol_map[rhs1]->offset));
+        mipsCode.push_back("    add " + regis + ", " + regis + ", $sp");
+        mipsCode.push_back("    lw " + regis + ", 0(" + regis + ")");
+        string dst = getRegister(scope,lhs);
+        mipsCode.push_back("    move " + dst + ", " + regis);
+    }
 }
-
 
 void handle_pointer(const string& line, scoped_symtab* scope) {
     // scope=getScope(scope, line);
     cerr<<"Handling pointer arrays: " << line << endl;
-    if(line[0]=='*' && line[1]=='('){
-        handle_array(line, scope);
-        return;
-    }
     size_t assignPos = line.find(":=");
     string lhs = trim(line.substr(0, assignPos));
     string rhs = trim(line.substr(assignPos + 2));
@@ -1063,12 +1065,12 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
         }
     }
 }
+
 bool check_struct(const string& line, scoped_symtab* scope) {
     auto pos = line.find(":=");
     string lhs = trim(line.substr(0, pos));
     string rhs = trim(line.substr(pos + 2));
     auto ppos = rhs.find("+");
-    cout << "Checking struct: " << lhs << " " << rhs << endl;
     if(ppos == string::npos) return false;
     string structName = trim(rhs.substr(0, ppos));
     cout << "Struct name: " << structName << endl;
@@ -1079,7 +1081,6 @@ bool check_struct(const string& line, scoped_symtab* scope) {
     }
     return false;
 }
-
 
 void handle_struct(const string& line, scoped_symtab* scope) {
     auto pos = line.find(":=");
@@ -1137,7 +1138,6 @@ void pass1(vector<pair<string, scoped_symtab*>>& codeList) {
         }
     }
 }
-
 
 void pass2(vector<pair<string, scoped_symtab*>>& codeList){
     for(int idx = 0; idx < codeList.size(); ++idx){
@@ -1201,7 +1201,11 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 handle_param_receive(t, code.second);
                 continue;
             }
-            else if(t[0] == '*' || t.find("&") != string::npos || t.find("*") != string::npos){
+            else if((t.find("*") != string::npos && t.find("(")!=string::npos && t[t.find("*")+1] == '(')){
+                handle_array(t, code.second);
+                continue;
+            }
+            else if(t.find("&") != string::npos || (t.find("*") != string::npos && t[t.find("*")+1] != ' ')){
                 handle_pointer(t, code.second);
                 continue;
             }
@@ -1323,6 +1327,7 @@ void run_liveness(vector<LivenessInfo>& program) {
         }
     } while (changed);
 }
+
 void printMipsCode(vector<string>& mipsCode, const string& filename) {
     ofstream outFile(filename);  // Open file for writing
     if (!outFile) {
@@ -1336,6 +1341,7 @@ void printMipsCode(vector<string>& mipsCode, const string& filename) {
 
     outFile.close();  // Always good practice to close explicitly
 }
+
 void codegen_main() {
     mipsCode.push_back(".text");
     mipsCode.push_back(".globl main");
@@ -1354,20 +1360,18 @@ void codegen_main() {
     }
     run_liveness(currentLiveness);
     cerr<<"Liveness analysis done"<<endl;
+
     pass2(codeList);
     cerr<<"Pass 2 done"<<endl;
-    // cout<<cleaned_TAC.size()<<endl;
+
     mipsCode.push_back("    li $v0, 10");
     mipsCode.push_back("    syscall");
+
     cerr << "################ MIPS Assembly Code ################ \n";
     for (const string& line : mipsCode) {
         cerr << line << endl;
     }
-    // regMap.clear();
-    // availableRegs = {"$t0", "$t1", "$t2", "$t3", "$t4", "$t5","$t6", "$t7", "$t8", "$t9"};
-    // floatVarToReg.clear();
-    // availableFloatRegs = {"$f0", "$f1", "$f2", "$f3", "$f4", "$f5", "$f6", "$f7"};
-    // loadedConstants.clear();    
+
     printMipsCode(mipsCode, "./output/output.s");
     return;
 }

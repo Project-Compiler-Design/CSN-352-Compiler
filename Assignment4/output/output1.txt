@@ -1,16 +1,15 @@
 =====================LIST OF ERRORS===================================
 Line 9 : Missing return statement
 ======================================================================
-0x55ebee78b8b0 FUNC_BEGIN main
-0x55ebee792f50 arr := alloc 8
-0x55ebee792f50 t0:= 0 * 4
-0x55ebee792f50 *( arr + t0 ) := 1
-0x55ebee792f50 t1:= 1 * 4
-0x55ebee792f50 *( arr + t1 ) := 2
-0x55ebee792f50 t3:=  8
-0x55ebee792f50 t2 := 4 * 0
-0x55ebee792f50  *( arr + t2 ) := 8
-0x55ebee78b8b0 FUNC_END main
+0x55a76c35c8b0 FUNC_BEGIN main
+0x55a76c363f50 arr := alloc 4
+0x55a76c363f50 t0:= 0 * 4
+0x55a76c363f50 *( arr + t0 ) := 5
+0x55a76c363f50 t1 := 4 * 0
+0x55a76c363f50 t2 := *( arr + t1 )
+0x55a76c363f50 t3 :=  t2 + 2
+0x55a76c363f50 c:= t3
+0x55a76c35c8b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
@@ -26,37 +25,23 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| arr             | int                  | 4       | 1          |
+| arr             | int                  | 4       | 5          |
+| c               | int                  | 4       | N/A        |
 | t0              | int                  | 4       | N/A        |
 | t1              | int                  | 4       | N/A        |
 | t2              | int                  | 4       | N/A        |
 | t3              | int                  | 4       | N/A        |
 -----------------------------------------------------------------
-Hiiiii
-arr : int
-current size: 4
-Hiiiii
-t0 : int
-current size: 8
-Hiiiii
-t1 : int
-current size: 12
-Hiiiii
-t2 : int
-current size: 16
-Hiiiii
-t3 : int
-current size: 20
-Function main stack size: 28
+Function main stack size: 32
 Pass 1 done
 Error!!!! Variable alloc not found in any scope
 Liveness analysis done
 FUNC_BEGIN main
-arr := alloc 8
-Handling assignment: arr := alloc 8
+arr := alloc 4
+Handling assignment: arr := alloc 4
 Getting register for arr
 Assigned register $t9 to arr
-Allocating 8 bytes for arr at offset 0
+Allocating 4 bytes for arr at offset 0
 t0:= 0 * 4
 Handling operation: t0 := 0 * 4
 hi
@@ -66,56 +51,47 @@ Getting register for t0
 Assigned register $t6 to t0
 Operation: 0 * 4
 Registers: $t8, $t7, $t6
-*( arr + t0 ) := 1
-HERE
-Handling pointer arrays: *( arr + t0 ) := 1
-Handling array: *( arr + t0 ) := 1
-Loaded integer constant 1 into $t5
+*( arr + t0 ) := 5
+Handling array: *( arr + t0 ) := 5
+Loaded integer constant 5 into $t5
 Getting register for t0
 Found register for t0 $t6
-t1:= 1 * 4
-Handling operation: t1 := 1 * 4
+t1 := 4 * 0
+Handling operation: t1 := 4 * 0
 hi
-Loaded integer constant (cached) 1 into $t4
-Loaded integer constant (cached) 4 into $t3
+Loaded integer constant (cached) 4 into $t4
+Loaded integer constant (cached) 0 into $t3
 Getting register for t1
 Assigned register $t2 to t1
-Operation: 1 * 4
+Operation: 4 * 0
 Registers: $t4, $t3, $t2
-*( arr + t1 ) := 2
-HERE
-Handling pointer arrays: *( arr + t1 ) := 2
-Handling array: *( arr + t1 ) := 2
-Loaded integer constant 2 into $t1
+t2 := *( arr + t1 )
+Handling array: t2 := *( arr + t1 )
 Getting register for t1
 Found register for t1 $t2
-t3:=  8
-Handling assignment: t3 := 8
+Getting register for t2
+Assigned register $t1 to t2
+t3 :=  t2 + 2
+Struct name: t2
+int
+Handling operation: t3 := t2 + 2
+Getting register for t2
+Found register for t2 $t1
+Loaded integer constant 2 into $t0
 Getting register for t3
-Assigned register $t0 to t3
-t2 := 4 * 0
-Handling operation: t2 := 4 * 0
-hi
-Handling register spill for 4
+Handling register spill for t3
 Spilling arr from $t9
-Loaded integer constant (cached) 4 into $t9
-Handling register spill for 4
+Assigned register $t9 to t3
+Operation: t2 + 2
+Registers: $t1, $t0, $t9
+c:= t3
+Handling assignment: c := t3
+Getting register for c
+Handling register spill for c
 Spilling t0 from $t6
-Loaded integer constant (cached) 0 into $t6
-Getting register for t2
-Handling register spill for t2
-Spilling t1 from $t2
-Assigned register $t2 to t2
-Operation: 4 * 0
-Registers: $t9, $t6, $t2
-*( arr + t2 ) := 8
-HERE
-Handling pointer arrays: *( arr + t2 ) := 8
-Handling array: *( arr + t2 ) := 8
-Handling register spill for 8
-Spilling t3 from $t0
-Getting register for t2
-Found register for t2 $t2
+Assigned register $t6 to c
+Getting register for t3
+Found register for t3 $t9
 FUNC_END main
 Pass 2 done
 ################ MIPS Assembly Code ################ 
@@ -123,36 +99,30 @@ Pass 2 done
 .globl main
 main:
     move $fp, $sp
-    addi $sp, $sp, -28
-    sw   $ra, 24($sp)
-    sw   $fp, 20($sp)
+    addi $sp, $sp, -32
+    sw   $ra, 28($sp)
+    sw   $fp, 24($sp)
     li $t8, 0
     li $t7, 4
     mul $t6, $t8, $t7
-    li $t5, 1
+    li $t5, 5
     addi $t6, $t6, 0
     add $t6, $t6, $sp
     sw $t5, 0($t6)
-    move $t4, $t5
-    move $t3, $t7
+    move $t4, $t7
+    move $t3, $t8
     mul $t2, $t4, $t3
-    li $t1, 2
     addi $t2, $t2, 0
     add $t2, $t2, $sp
-    sw $t1, 0($t2)
-    li $t0, 8
+    lw $t2, 0($t2)
+    move $t1, $t2
+    li $t0, 2
     # Spilling arr from $t9
-    move $t9, $t7
+    add $t9, $t1, $t0
     # Spilling t0 from $t6
-    move $t6, $t8
-    # Spilling t1 from $t2
-    mul $t2, $t9, $t6
-    # Spilling t3 from $t0
-    addi $t2, $t2, 0
-    add $t2, $t2, $sp
-    sw $t0, 0($t2)
-    lw   $fp, 20($sp)
-    lw   $ra, 24($sp)
-    addi $sp, $sp, 28
+    move $t6, $t9
+    lw   $fp, 24($sp)
+    lw   $ra, 28($sp)
+    addi $sp, $sp, 32
     li $v0, 10
     syscall

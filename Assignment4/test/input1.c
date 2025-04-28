@@ -4,6 +4,6 @@ struct A{
 };
 
 int main(){
-    int arr[2]={1,2};
-    arr[0]=8;
+    int arr[1]={5};
+    int c = arr[0]+2;
 }

@@ -1,12 +1,12 @@
 =====================LIST OF ERRORS===================================
 Line 6 : Missing return statement
 ======================================================================
-0x564b375698b0 FUNC_BEGIN main
-0x564b375703c0 a:= 1
-0x564b375703c0 p:= &a
-0x564b375703c0 *p:=  10
-0x564b375703c0 c:= a
-0x564b375698b0 FUNC_END main
+0x55bc954118b0 FUNC_BEGIN main
+0x55bc954183c0 a:= 1
+0x55bc954183c0 p:= &a
+0x55bc954183c0 *p:=  10
+0x55bc954183c0 c:= a
+0x55bc954118b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
@@ -23,15 +23,6 @@ Printing scope table
 | c               | int                  | 4       | N/A        |
 | p               | int*                 | 0       | N/A        |
 -----------------------------------------------------------------
-Hiiiii
-a : int
-current size: 4
-Hiiiii
-c : int
-current size: 8
-Hiiiii
-p : int*
-current size: 12
 Function main stack size: 20
 Pass 1 done
 Liveness analysis done
@@ -41,13 +32,11 @@ Handling assignment: a := 1
 Getting register for a
 Assigned register $t9 to a
 p:= &a
-HERE
 Handling pointer arrays: p:= &a
 p &a
 Getting register for p
 Assigned register $t8 to p
 *p:=  10
-HERE
 Handling pointer arrays: *p:=  10
 *p 10
 Getting register for p
