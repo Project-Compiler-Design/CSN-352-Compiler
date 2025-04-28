@@ -166,7 +166,8 @@ postfix_expression
 			}
 			else{
                 string code=$3->code;
-                qid temp=newtemp(find_symbol->type,curr_scope);
+                qid temp=newtemp("int",curr_scope);
+
                 string add_str="";
                 if(find_symbol->type=="int"){
                     add_str=temp.first+" := "+"4 * "+$3->place.first;
@@ -1224,7 +1225,7 @@ init_declarator
 					code=code+to_string(2*$1->array_length);
 				}
 				for(int i=0;i<$1->array_length;i++){
-					qid temp=newtemp($1->type,curr_scope);
+					qid temp=newtemp("int",curr_scope);
 					code=code+"\n"+temp.first+":= "+to_string(i)+" * ";
 					if($1->type=="int") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ) := "+to_string(*(int*)($1->int_array[i]->ptr));
 					else if($1->type=="float") code=code+"4\n"+"*( "+$1->name+" + "+temp.first+" ) := "+to_string(*(float*)($1->int_array[i]->ptr));

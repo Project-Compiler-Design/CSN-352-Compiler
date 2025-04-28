@@ -85,12 +85,13 @@ syscall
   li $v0, 4 
  la $a0, newline 
  syscall
- move $a0, $a1
-    li $v0, 1
+    mov.s $f12, $f12
+    li $v0, 2
 syscall
   li $v0, 4 
  la $a0, newline 
  syscall
+    move $t9, $v0
     move $t9, $v0
     li $v0, 0
     lw   $fp, 12($sp)
