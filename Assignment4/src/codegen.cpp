@@ -958,42 +958,113 @@ void handle_array(const string& line, scoped_symtab* scope) {
     string rhs = trim(line.substr(assignPos + 2));
     string r1;
     if(line[0]=='*'){
+        string arr_name=trim(lhs.substr(2).substr(0,lhs.substr(2).find("+")));
+        cout<<"Array name: " << arr_name << endl;
         if(isIntLiteral(rhs)){
             if(availableRegs.empty()) handleRegisterSpill(scope,rhs);
             r1=availableRegs.back();
             availableRegs.pop_back();
             load_if_constant(scope, rhs, r1);
+            lhs = lhs.substr(3);
+            //split on plus
+            size_t plusPos = lhs.find("+");
+            string lhs1 = trim(lhs.substr(0, plusPos));
+            string lhs2 = trim(lhs.substr(plusPos + 1));
+            lhs2.pop_back();
+            lhs2 = trim(lhs2);
+            string regis = getRegister(scope,lhs2);
+            mipsCode.push_back("    addi " + regis + ", " + regis + ", " + to_string(getScope(scope,lhs1)->symbol_map[lhs1]->offset));
+            mipsCode.push_back("    add " + regis + ", " + regis + ", $sp");
+            mipsCode.push_back("    sw " + r1 + ", 0(" + regis + ")");
         }
-        else{
-            r1 = getRegister(scope,rhs);
+        else if(isFloatLiteral(rhs)){
+            if(getScope(scope,arr_name)->symbol_map[arr_name]->type=="float"){
+                r1=getFloatRegister(scope,rhs);
+                load_if_constant(scope, rhs, r1);
+                lhs = lhs.substr(3);
+                //split on plus
+                size_t plusPos = lhs.find("+");
+                string lhs1 = trim(lhs.substr(0, plusPos));
+                string lhs2 = trim(lhs.substr(plusPos + 1));
+                lhs2.pop_back();
+                lhs2 = trim(lhs2);
+                string regis = getFloatRegister(scope,lhs2);
+                string val=to_string(getScope(scope,lhs1)->symbol_map[lhs1]->offset);
+                string regii = getFloatRegister(scope,val);
+                mipsCode.push_back("    li.s " + regii + ", " + val);
+                mipsCode.push_back("   add.s " + regis + ", " + regis + ", " + regii);
+
+                // mipsCode.push_back("    addi " + regis + ", " + regis + ", " + to_string(getScope(scope,lhs1)->symbol_map[lhs1]->offset));
+                mipsCode.push_back("    add.s " + regis + ", " + regis + ", $sp");
+                mipsCode.push_back("    s.s" + r1 + ", 0(" + regis + ")");
+            }
+            else if(getScope(scope,arr_name)->symbol_map[arr_name]->type=="double"){
+                r1=getFloatRegister(scope,rhs,"double");
+                load_if_constant(scope, rhs, r1);
+                lhs = lhs.substr(3);
+                //split on plus
+                size_t plusPos = lhs.find("+");
+                string lhs1 = trim(lhs.substr(0, plusPos));
+                string lhs2 = trim(lhs.substr(plusPos + 1));
+                lhs2.pop_back();
+                lhs2 = trim(lhs2);
+                string regis = getFloatRegister(scope,lhs2,"double");
+                string val=to_string(getScope(scope,lhs1)->symbol_map[lhs1]->offset);
+                string regii = getFloatRegister(scope,val,"double");
+                mipsCode.push_back("    li.d " + regii + ", " + val);
+                mipsCode.push_back("   add.d " + regis + ", " + regis + ", " + regii);
+
+                // mipsCode.push_back("    addi " + regis + ", " + regis + ", " + to_string(getScope(scope,lhs1)->symbol_map[lhs1]->offset));
+                mipsCode.push_back("    add.d " + regis + ", " + regis + ", $sp");
+                mipsCode.push_back("    s.d" + r1 + ", 0(" + regis + ")");
+            }
+            
+            
         }
+        
         //add cases
 
-        lhs = lhs.substr(3);
-        //split on plus
-        size_t plusPos = lhs.find("+");
-        string lhs1 = trim(lhs.substr(0, plusPos));
-        string lhs2 = trim(lhs.substr(plusPos + 1));
-        lhs2.pop_back();
-        lhs2 = trim(lhs2);
-        string regis = getRegister(scope,lhs2);
-        mipsCode.push_back("    addi " + regis + ", " + regis + ", " + to_string(getScope(scope,lhs1)->symbol_map[lhs1]->offset));
-        mipsCode.push_back("    add " + regis + ", " + regis + ", $sp");
-        mipsCode.push_back("    sw " + r1 + ", 0(" + regis + ")");
+        
     }else{
         rhs = rhs.substr(3);
+        string arr_name=trim(rhs.substr(0,rhs.find("+")));
+        cout<<"Array name: " << arr_name << endl;
         //split on plus
         size_t plusPos = rhs.find("+");
         string rhs1 = trim(rhs.substr(0, plusPos));
         string rhs2 = trim(rhs.substr(plusPos + 1));
         rhs2.pop_back();
         rhs2 = trim(rhs2);
-        string regis = getRegister(scope,rhs2);
-        mipsCode.push_back("    addi " + regis + ", " + regis + ", " + to_string(getScope(scope,rhs1)->symbol_map[rhs1]->offset));
-        mipsCode.push_back("    add " + regis + ", " + regis + ", $sp");
-        mipsCode.push_back("    lw " + regis + ", 0(" + regis + ")");
-        string dst = getRegister(scope,lhs);
-        mipsCode.push_back("    move " + dst + ", " + regis);
+        if(getScope(scope,arr_name)->symbol_map[arr_name]->type=="float"){
+            string regis = getFloatRegister(scope,rhs2);
+            string val=to_string(getScope(scope,rhs1)->symbol_map[rhs1]->offset);
+            string regii = getFloatRegister(scope,val);
+            mipsCode.push_back("    li.s " + regii + ", " + val);
+            mipsCode.push_back("   add.s " + regis + ", " + regis + ", " + regii);
+            // mipsCode.push_back("    addi " + regis + ", " + regis + ", " + to_string(getScope(scope,rhs1)->symbol_map[rhs1]->offset));
+            mipsCode.push_back("    add.s " + regis + ", " + regis + ", $sp");
+            string dst = getRegister(scope,lhs);
+            mipsCode.push_back("    l.s " + dst + ", 0(" + regis + ")");
+        }
+        else if(getScope(scope,arr_name)->symbol_map[arr_name]->type=="double"){
+            string regis = getFloatRegister(scope,rhs2,"double");
+            string val=to_string(getScope(scope,rhs1)->symbol_map[rhs1]->offset);
+            string regii = getFloatRegister(scope,val,"double");
+            mipsCode.push_back("    li.d " + regii + ", " + val);
+            mipsCode.push_back("   add.d " + regis + ", " + regis + ", " + regii);
+            // mipsCode.push_back("    addi " + regis + ", " + regis + ", " + to_string(getScope(scope,rhs1)->symbol_map[rhs1]->offset));
+            mipsCode.push_back("    add.d " + regis + ", " + regis + ", $sp");
+            string dst = getRegister(scope,lhs);
+            mipsCode.push_back("    l.d " + dst + ", 0(" + regis + ")");
+        }
+        else{
+            string regis = getRegister(scope,rhs2);
+            mipsCode.push_back("    addi " + regis + ", " + regis + ", " + to_string(getScope(scope,rhs1)->symbol_map[rhs1]->offset));
+            mipsCode.push_back("    add " + regis + ", " + regis + ", $sp");
+            string dst = getRegister(scope,lhs);
+            mipsCode.push_back("    lw " + dst + ", 0(" + regis + ")");
+        }
+        
     }
 }
 
@@ -1009,7 +1080,7 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
     if(lhs[0] == '*'){
         lhs = lhs.substr(1);
     }
-    string dst = getRegister(scope, lhs);
+    string dst;
     if (amppos != string::npos) 
         rhs = rhs.substr(amppos + 1);
     if(rhs[0] == '*'){
@@ -1018,6 +1089,7 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
     }
     if(isIntLiteral(rhs)){
         cout<<"lhs "<<lhs<<endl;
+        dst=getRegister(scope, lhs);
         if(reg_of_const.count(rhs)) {
             mipsCode.push_back("    sw " + reg_of_const[rhs] + ", " + to_string(0) + "("+dst + ")");
         }
@@ -1035,9 +1107,52 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
             
         }
     }
+    else if(isFloatLiteral(rhs)){
+       cout<<"lhs "<<lhs<<endl;
+       if(getScope(scope,lhs)->symbol_map[lhs]->type=="float"){
+        dst=getFloatRegister(scope, lhs);
+        if(reg_of_const.count(rhs)) {
+            mipsCode.push_back("    s.s " + reg_of_const[rhs] + ", " + to_string(0) + "("+dst + ")");
+        }
+        else{
+            mipsCode.push_back("    #Loading constant " + rhs + " into register");
+            if(availableFloatRegs.empty()){
+                handleFloatRegisterSpill(scope,rhs);
+            }
+            string reg = getFloatRegister(scope,rhs);
+            mipsCode.push_back("    li.s " + reg + ", " + rhs);
+            loadedConstants[rhs] = true;
+            reg_of_const[rhs] = reg;
+            mipsCode.push_back("    s.s " + reg + ", " + to_string(0) + "("+dst + ")");
+            
+        }
+       }
+       else {
+        dst=getFloatRegister(scope, lhs,"double");
+        if(reg_of_const.count(rhs)) {
+            mipsCode.push_back("    s.d " + reg_of_const[rhs] + ", " + to_string(0) + "("+dst + ")");
+        }
+        else{
+            mipsCode.push_back("    #Loading constant " + rhs + " into register");
+            if(availableFloatRegs.empty()){
+                handleDoubleRegisterSpill(scope,rhs);
+            }
+            string reg =getFloatRegister(scope,rhs,"double");
+            mipsCode.push_back("    li.d " + reg + ", " + rhs);
+            loadedConstants[rhs] = true;
+            reg_of_const[rhs] = reg;
+            mipsCode.push_back("    s.d " + reg + ", " + to_string(0) + "("+dst + ")");
+            
+        }
+        
+       }
+       
+    }
+    
     else{
         if(rhs_ptr){
             if(var_to_reg.count({getScope(scope, rhs), rhs})){
+                dst=getRegister(scope, lhs);
                 mipsCode.push_back("    lw " + dst + ", " + "0(" + var_to_reg[{getScope(scope, rhs), rhs}] + ")");
                 symbol_info* sym = getScope(scope, rhs)->symbol_map[rhs];
                 if(getScope(scope, rhs)->symbol_map[rhs]->offset == -1){
@@ -1049,6 +1164,32 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
                     mipsCode.push_back("    sw " + dst + ", " + to_string(sym->offset) + "($sp)");
                 }
             }
+            else if(floatVarToReg.count({getScope(scope, rhs), rhs})){
+                dst=getFloatRegister(scope, lhs);
+                mipsCode.push_back("    l.s " + dst + ", " + "0(" + floatVarToReg[{getScope(scope, rhs), rhs}] + ")");
+                symbol_info* sym = getScope(scope, rhs)->symbol_map[rhs];
+                if(getScope(scope, rhs)->symbol_map[rhs]->offset == -1){
+                    sym->offset = last_offset.top();
+                    last_offset.top()+=get_size_from_type(sym->type);
+                    mipsCode.push_back("    s.s " + dst + ", " + to_string(sym->offset) + "($sp)");
+                }
+                else{
+                    mipsCode.push_back("    s.s " + dst + ", " + to_string(sym->offset) + "($sp)");
+                }
+            }
+            else if(doubleVarToReg.count({getScope(scope, rhs), rhs})){
+                dst=getFloatRegister(scope, lhs,"double");
+                mipsCode.push_back("    l.d " + dst + ", " + "0(" + doubleVarToReg[{getScope(scope, rhs), rhs}] + ")");
+                symbol_info* sym = getScope(scope, rhs)->symbol_map[rhs];
+                if(getScope(scope, rhs)->symbol_map[rhs]->offset == -1){
+                    sym->offset = last_offset.top();
+                    last_offset.top()+=get_size_from_type(sym->type);
+                    mipsCode.push_back("    s.d " + dst + ", " + to_string(sym->offset) + "($sp)");
+                }
+                else{
+                    mipsCode.push_back("    s.d " + dst + ", " + to_string(sym->offset) + "($sp)");
+                }
+            }
             else{
                 //yet to handle this case
                 cerr<<"Error: Pointer not found in register\n";
@@ -1058,10 +1199,54 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
         }
         else{
             symbol_info* rhsInfo = getScope(scope, rhs)->symbol_map[rhs];
-            if(var_to_reg.count({scope, rhs})){
-                push_into_stack({scope, rhs});
+            if(rhsInfo->type=="int"){
+                dst=getRegister(scope, lhs);
+                if(var_to_reg.count({scope, rhs})){
+                    push_into_stack({scope, rhs});
+                }
+                mipsCode.push_back("    addi " + dst + ", $sp, " + to_string(rhsInfo->offset));
             }
-            mipsCode.push_back("    addi " + dst + ", $sp, " + to_string(rhsInfo->offset));
+            else if(rhsInfo->type=="float"){
+                dst=getFloatRegister(scope, lhs);
+                string regis=floatVarToReg[{scope, rhs}];
+                if(floatVarToReg.count({scope, rhs})){
+                    push_into_stack({scope, rhs});
+                }
+                availableFloatRegs.push_back(regis);
+                if(stoi(regis.substr(2))%2==1){
+                    string pair=regis.substr(0,2)+to_string(stoi(regis.substr(2))-1);
+                    if(find(availableFloatRegs.begin(), availableFloatRegs.end(), pair) != availableFloatRegs.end()){
+                        availableDoubleRegs.push_back(pair);
+                    }
+                }
+                else{
+                    string pair=regis.substr(0,2)+to_string(stoi(regis.substr(2))+1);
+                    if(find(availableFloatRegs.begin(), availableFloatRegs.end(), pair) != availableFloatRegs.end()){
+                        availableDoubleRegs.push_back(regis);
+                    }
+                }
+                string val=to_string(rhsInfo->offset);
+                string regii = getFloatRegister(scope,val);
+                mipsCode.push_back("    li.s " + regii + ", " + val);
+                mipsCode.push_back("   add.s " + dst + ", $sp, " + regii);
+            }
+            else if(rhsInfo->type=="double"){
+                string reg = getFloatRegister(scope, rhs,"double");
+                string regis=doubleVarToReg[{scope, rhs}];
+                if(doubleVarToReg.count({scope, rhs})){
+                    push_into_stack({scope, rhs});
+                }
+                availableDoubleRegs.push_back(regis);
+                string pair=regis.substr(0,2)+to_string(stoi(regis.substr(2))+1);
+                availableFloatRegs.push_back(pair);
+                availableFloatRegs.push_back(regis);
+                string val=to_string(rhsInfo->offset);
+                string regii = getFloatRegister(scope,val,"double");
+                mipsCode.push_back("    li.d " + regii + ", " + val);
+                mipsCode.push_back("   add.d " + reg + ", $sp, " + regii);
+            }
+            
+            
         }
     }
 }
@@ -1090,7 +1275,7 @@ void handle_struct(const string& line, scoped_symtab* scope) {
     string structName = trim(rhs.substr(0, ppos));
     int offset = stoi(trim(rhs.substr(ppos + 2)));
     cout << lhs << " " << rhs << " " << structName << " " << offset << endl;
-    int symoffset = scope->symbol_map[structName]->offset;
+    int symoffset = getScope(scope,structName)->symbol_map[structName]->offset;
     string dst = getRegister(scope, lhs);
     if (var_to_reg.count({scope, structName})) {
         push_into_stack({scope, structName});

@@ -1,15 +1,21 @@
 =====================LIST OF ERRORS===================================
-Line 9 : Missing return statement
+Line 14 : Missing return statement
 ======================================================================
-0x55a76c35c8b0 FUNC_BEGIN main
-0x55a76c363f50 arr := alloc 4
-0x55a76c363f50 t0:= 0 * 4
-0x55a76c363f50 *( arr + t0 ) := 5
-0x55a76c363f50 t1 := 4 * 0
-0x55a76c363f50 t2 := *( arr + t1 )
-0x55a76c363f50 t3 :=  t2 + 2
-0x55a76c363f50 c:= t3
-0x55a76c35c8b0 FUNC_END main
+0x5692eb7e54b0 FUNC_BEGIN main
+0x5692eb7ecb50 i:= 0
+0x5692eb7ecb50 i:=  1
+0x5692eb7ecb50 LABEL0:
+0x5692eb7ecb50 t0 :=  i < 10
+0x5692eb7ecb50 if(t0) goto LABEL2
+0x5692eb7ecb50 goto LABEL1
+0x5692eb7ecb50 LABEL2:
+0x5692eb7ee5e0 c:= 3
+0x5692eb7ee5e0 t1 :=  c + 4
+0x5692eb7ee5e0 d:= t1
+0x5692eb7ecb50 i :=  i + 1 
+0x5692eb7ecb50 goto LABEL0
+0x5692eb7ecb50 LABEL1:
+0x5692eb7e54b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
@@ -25,73 +31,78 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| arr             | int                  | 4       | 5          |
-| c               | int                  | 4       | N/A        |
-| t0              | int                  | 4       | N/A        |
+| c               | int                  | 4       | 3          |
+| d               | int                  | 4       | N/A        |
 | t1              | int                  | 4       | N/A        |
-| t2              | int                  | 4       | N/A        |
-| t3              | int                  | 4       | N/A        |
 -----------------------------------------------------------------
-Function main stack size: 32
+-----------------------------------------------------------------
+| Identifier      | Type                 | Size    | Value      |
+-----------------------------------------------------------------
+| i               | int                  | 4       | 0          |
+| t0              | int                  | 4       | N/A        |
+-----------------------------------------------------------------
+Function main stack size: 28
 Pass 1 done
-Error!!!! Variable alloc not found in any scope
 Liveness analysis done
 FUNC_BEGIN main
-arr := alloc 4
-Handling assignment: arr := alloc 4
-Getting register for arr
-Assigned register $t9 to arr
-Allocating 4 bytes for arr at offset 0
-t0:= 0 * 4
-Handling operation: t0 := 0 * 4
-hi
-Loaded integer constant 0 into $t8
-Loaded integer constant 4 into $t7
+i:= 0
+Handling assignment: i := 0
+Getting register for i
+Assigned register $t9 to i
+i:=  1
+Handling assignment: i := 1
+Getting register for i
+Found register for i $t9
+LABEL0:
+t0 :=  i < 10
+Handling operation: t0 := i < 10
+Getting register for i
+Found register for i $t9
+Loaded integer constant 10 into $t8
 Getting register for t0
-Assigned register $t6 to t0
-Operation: 0 * 4
-Registers: $t8, $t7, $t6
-*( arr + t0 ) := 5
-Handling array: *( arr + t0 ) := 5
-Loaded integer constant 5 into $t5
+Assigned register $t7 to t0
+Operation: i < 10
+Registers: $t9, $t8, $t7
+if(t0) goto LABEL2
+Condition: t0, Label: LABEL2
 Getting register for t0
-Found register for t0 $t6
-t1 := 4 * 0
-Handling operation: t1 := 4 * 0
-hi
-Loaded integer constant (cached) 4 into $t4
-Loaded integer constant (cached) 0 into $t3
-Getting register for t1
-Assigned register $t2 to t1
-Operation: 4 * 0
-Registers: $t4, $t3, $t2
-t2 := *( arr + t1 )
-Handling array: t2 := *( arr + t1 )
-Getting register for t1
-Found register for t1 $t2
-Getting register for t2
-Assigned register $t1 to t2
-t3 :=  t2 + 2
-Struct name: t2
-int
-Handling operation: t3 := t2 + 2
-Getting register for t2
-Found register for t2 $t1
-Loaded integer constant 2 into $t0
-Getting register for t3
-Handling register spill for t3
-Spilling arr from $t9
-Assigned register $t9 to t3
-Operation: t2 + 2
-Registers: $t1, $t0, $t9
-c:= t3
-Handling assignment: c := t3
+Found register for t0 $t7
+goto LABEL1
+LABEL2:
+c:= 3
+Handling assignment: c := 3
 Getting register for c
-Handling register spill for c
-Spilling t0 from $t6
 Assigned register $t6 to c
-Getting register for t3
-Found register for t3 $t9
+t1 :=  c + 4
+Struct name: c
+int
+Handling operation: t1 := c + 4
+Getting register for c
+Found register for c $t6
+Loaded integer constant 4 into $t5
+Getting register for t1
+Assigned register $t4 to t1
+Operation: c + 4
+Registers: $t6, $t5, $t4
+d:= t1
+Handling assignment: d := t1
+Getting register for d
+Assigned register $t3 to d
+Getting register for t1
+Found register for t1 $t4
+i :=  i + 1
+Struct name: i
+int
+Handling operation: i := i + 1
+Getting register for i
+Found register for i $t9
+Loaded integer constant (cached) 1 into $t2
+Getting register for i
+Found register for i $t9
+Operation: i + 1
+Registers: $t9, $t2, $t9
+goto LABEL0
+LABEL1:
 FUNC_END main
 Pass 2 done
 ################ MIPS Assembly Code ################ 
@@ -99,30 +110,27 @@ Pass 2 done
 .globl main
 main:
     move $fp, $sp
-    addi $sp, $sp, -32
-    sw   $ra, 28($sp)
-    sw   $fp, 24($sp)
-    li $t8, 0
-    li $t7, 4
-    mul $t6, $t8, $t7
-    li $t5, 5
-    addi $t6, $t6, 0
-    add $t6, $t6, $sp
-    sw $t5, 0($t6)
-    move $t4, $t7
-    move $t3, $t8
-    mul $t2, $t4, $t3
-    addi $t2, $t2, 0
-    add $t2, $t2, $sp
-    lw $t2, 0($t2)
-    move $t1, $t2
-    li $t0, 2
-    # Spilling arr from $t9
-    add $t9, $t1, $t0
-    # Spilling t0 from $t6
-    move $t6, $t9
-    lw   $fp, 24($sp)
-    lw   $ra, 28($sp)
-    addi $sp, $sp, 32
+    addi $sp, $sp, -28
+    sw   $ra, 24($sp)
+    sw   $fp, 20($sp)
+    li $t9, 0
+    li $t9, 1
+LABEL0:
+    li $t8, 10
+    slt $t7, $t9, $t8
+    bnez $t7, LABEL2
+    j LABEL1
+LABEL2:
+    li $t6, 3
+    li $t5, 4
+    add $t4, $t6, $t5
+    move $t3, $t4
+    move $t2, $t9
+    add $t9, $t9, $t2
+    j LABEL0
+LABEL1:
+    lw   $fp, 20($sp)
+    lw   $ra, 24($sp)
+    addi $sp, $sp, 28
     li $v0, 10
     syscall

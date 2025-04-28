@@ -4,6 +4,11 @@ struct A{
 };
 
 int main(){
-    int arr[1]={5};
-    int c = arr[0]+2;
+    int i=0;
+    for(i=1;i<10;i++){
+        int c=3;
+        int d=c+4;
+
+    }
+
 }
