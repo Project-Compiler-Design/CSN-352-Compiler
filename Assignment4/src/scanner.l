@@ -57,6 +57,7 @@ FALSE          	"false"
 STATIC         	"static"
 SWITCH         	"switch"
 WHILE          	"while"
+UNTIL         	"until"
 VOID           	"void"
 RETURN          "return"
 SIZEOF         	"sizeof"
@@ -176,6 +177,7 @@ INVALID_ID     (({DIGIT})+({LETTER}|_)*|{DIGIT}+{LETTER}+(\.{DIGIT}*)?)
 {STATIC}           { yylval.str = strdup(yytext); return STATIC; }
 {SWITCH}           { yylval.str = strdup(yytext); return SWITCH; }
 {WHILE}            { yylval.str = strdup(yytext); return WHILE; }
+{UNTIL}            { yylval.str = strdup(yytext); return UNTIL; }
 {VOID}             { yylval.str = strdup(yytext); return VOID; }
 {RETURN}           { yylval.str = strdup(yytext); return RETURN; }
 {SIZEOF}           { yylval.str = strdup(yytext); return SIZEOF; }

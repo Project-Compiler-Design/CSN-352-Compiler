@@ -4,21 +4,22 @@ newline: .asciiz "\n"
 .globl main
 main:
     move $fp, $sp
-    addi $sp, $sp, -20
-    sw   $ra, 16($sp)
-    sw   $fp, 12($sp)
-    #Pushing a to stack
-    addi $t8, $sp, 0
-    #Loading constant 5 into register
+    addi $sp, $sp, -16
+    sw   $ra, 12($sp)
+    sw   $fp, 8($sp)
     li $t9, 5
-    sw $t9, 0($t8)
-    #Pushing a to stack
-    addi $t7, $sp, 4
-    #Loading constant 10 into register
-    li $t9, 10
-    sw $t9, 0($t7)
-    lw   $fp, 12($sp)
-    lw   $ra, 16($sp)
-    addi $sp, $sp, 20
+LABEL0:
+    li $t8, 0
+    slt $t7, $t8, $t9
+    bnez $t7, LABEL1
+    j LABEL2
+LABEL2:
+    li $t6, 1
+    sub $t9, $t9, $t6
+    j LABEL0
+LABEL1:
+    lw   $fp, 8($sp)
+    lw   $ra, 12($sp)
+    addi $sp, $sp, 16
     li $v0, 10
     syscall
