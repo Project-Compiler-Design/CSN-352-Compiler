@@ -34,6 +34,7 @@ vector<string> paramtype;
 map<string,string> string_to_label;
 map<string, bool> loadedConstants;
 map<string,string> reg_of_const;
+vector<string> reg_for_scanf;
 int get_size_from_type(string type);
 void handle_function_call(const string& line);
 
@@ -850,6 +851,7 @@ string newstring(){
 }
 void handle_param_pass(const string& line, scoped_symtab* scope) {
     string var = trim(line.substr(5)); // after "PARAM"
+    if(var[0] == '&')var = var.substr(1);
     string srcReg;
     if(isStringLiteral(var))
     {
@@ -885,6 +887,7 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
     if (sym->type == "float") {
         paramtype.push_back("float");
         srcReg = getFloatRegister(scope, var);
+        reg_for_scanf.push_back(srcReg);
         if (paramFloatCounter == 0)
             mipsCode.push_back("    mov.s $f12, " + srcReg);
         else if (paramFloatCounter == 1)
@@ -900,6 +903,7 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
          if(sym->type=="int") paramtype.push_back("int");
          if(sym->type=="char") paramtype.push_back("char");
         srcReg = getRegister(scope, var);
+        reg_for_scanf.push_back(srcReg);
         if (paramCounter >= argRegisters.size()) {
             functionparams.push_back("    addi $sp, $sp, -4 \n    sw " + srcReg + ", " + to_string(0) + "($sp)");
             // mipsCode.push_back("    addi $sp, $sp, -4");
@@ -937,6 +941,7 @@ void handle_function_call(const string& line) {
     if(funcName=="printf")
     {
         int floatCounter=0;
+        mipsCode.push_back("#printf");
         int cnt=0;
         for(auto &type : paramtype){
             if(type=="int" || type=="char" || type=="string") {mipsCode.push_back(" move $a0, $a"+to_string(cnt));cnt++;}
@@ -953,6 +958,49 @@ void handle_function_call(const string& line) {
         
         cout<<"----------------------"<<arg_no<<endl;
         paramtype.clear();
+        reg_for_scanf.clear();
+        arg_no=0;
+        paramCounter = 0; // Reset after call
+        paramFloatCounter = 0;
+        return;
+    }
+    if(funcName == "scanf") {
+        int floatCounter=0;
+        int cnt=0;
+        for(int i=0;i<reg_for_scanf.size();i++){
+            cout<<"--------------------------"<<reg_for_scanf[i]<<" ";
+        }
+        mipsCode.push_back("#scanf");
+        for(auto &type : paramtype){
+            if(type=="int") 
+            {mipsCode.push_back("    li $v0, 5"); mipsCode.push_back("syscall"); mipsCode.push_back("move "+ reg_for_scanf[cnt]+" ,$v0");cnt++;}
+            else if(type=="char") {mipsCode.push_back("    li $v0, 12"), mipsCode.push_back("syscall"); mipsCode.push_back("move "+ reg_for_scanf[cnt]+" ,$v0");cnt++;}
+            else if(type=="string") 
+            {
+            // mipsCode.push_back("    li $v0, 8");
+            //     string str=newstring();
+            //     data_section.push_back(str+": .space 100");
+            //     mipsCode.push_back("la $a0, "+str);
+            //     mipsCode.push_back("li $a1, 100");
+                mipsCode.push_back("    li $v0, 4");
+                mipsCode.push_back("syscall");
+            }
+            else if(type=="float") 
+            {mipsCode.push_back("    li $v0, 6");
+                mipsCode.push_back("syscall");
+                mipsCode.push_back("mov.s "+reg_for_scanf[cnt]+",$f0");
+                cnt++;
+            }
+            else if(type=="double") {mipsCode.push_back("    li $v0, 7");
+                mipsCode.push_back("syscall");
+                mipsCode.push_back("mov.d "+reg_for_scanf[cnt]+",$f0");
+                cnt++;
+            } 
+        }
+        reg_for_scanf.clear();
+        paramtype.clear();
+        paramCounter = 0; // Reset after call
+        paramFloatCounter = 0;
         arg_no=0;
         return;
     }
@@ -970,6 +1018,7 @@ void handle_function_call(const string& line) {
     paramCounter = 0; // Reset after call
     paramFloatCounter = 0;
     arg_no=0;
+    reg_for_scanf.clear();
 }
 
 void handle_param_receive(const string& line, scoped_symtab* scope) {
