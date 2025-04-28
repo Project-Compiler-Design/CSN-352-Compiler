@@ -8,12 +8,5 @@ Intermediate code generated successfully
 4.      *t0:= 10
 5.      t1:= a+4
 6.      *t1:= 10
-7.      c:= 4
-8.      p:= &c
-9.      q:= &p
-10.      t2:= *q
-11.      d:= *t3
-12.      t4:= *q
-13.      *t4:= 20
-14.      RETURN 0
-15.  FUNC_END main
+7.      RETURN 0
+8.  FUNC_END main

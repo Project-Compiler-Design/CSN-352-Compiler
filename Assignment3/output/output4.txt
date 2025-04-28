@@ -1,0 +1,72 @@
+======================================================================
+No Errors in the code
+Intermediate code generated successfully
+======================================================================
+1.  FUNC_BEGIN main
+2.      PARAM "Enter an operator (+, -, *, /): "
+3.      t0:= CALL printf,1
+4.      PARAM "%c"
+5.      PARAM &operation
+6.      t1:= CALL scanf,2
+7.      PARAM "Enter two operands: "
+8.      t2:= CALL printf,1
+9.      PARAM "%lf %lf"
+10.      PARAM &n1
+11.      PARAM &n2
+12.      t3:= CALL scanf,3
+13.      r:= 0
+14.      if(operation=='+') goto LABEL0
+15.      if(operation=='-') goto LABEL5
+16.      if(operation=='*') goto LABEL6
+17.      if(operation=='/') goto LABEL7
+18.      goto LABEL8
+19.  LABEL0:
+20.      t4:=  n1+n2
+21.      PARAM "%.1lf + %.1lf = %.1lf"
+22.      PARAM n1
+23.      PARAM n2
+24.      PARAM t4
+25.      t5:= CALL printf,4
+26.      goto LABEL9
+27.  LABEL5:
+28.      if(b==1) goto LABEL1
+29.      if(b==2) goto LABEL2
+30.      goto LABEL3
+31.  LABEL1:
+32.      goto LABEL4
+33.  LABEL2:
+34.      r:=  r-1
+35.      t6:=  n1-n2
+36.      PARAM "%.1lf - %.1lf = %.1lf"
+37.      PARAM n1
+38.      PARAM n2
+39.      PARAM t6
+40.      t7:= CALL printf,4
+41.      goto LABEL4
+42.  LABEL3:
+43.      PARAM "Error! operator is not correct"
+44.      t8:= CALL printf,1
+45.      goto LABEL4
+46.  LABEL4:
+47.      goto LABEL9
+48.  LABEL6:
+49.      t9:=  n1*n2
+50.      PARAM "%.1lf * %.1lf = %.1lf"
+51.      PARAM n1
+52.      PARAM n2
+53.      PARAM t9
+54.      t10:= CALL printf,4
+55.  LABEL7:
+56.      t11:=  n1/n2
+57.      PARAM "%.1lf / %.1lf = %.1lf"
+58.      PARAM n1
+59.      PARAM n2
+60.      PARAM t11
+61.      t12:= CALL printf,4
+62.      goto LABEL9
+63.  LABEL8:
+64.      PARAM "Error! operator is not correct"
+65.      t13:= CALL printf,1
+66.  LABEL9:
+67.      RETURN 0
+68.  FUNC_END main

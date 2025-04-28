@@ -8,12 +8,6 @@ int main(){
     a.x=10;
     a.y=10;
 
-    int c=4;
-    int* p=&c;
-    int **q=&p;
-    int d;
-    d=**q;
-
-    **q=20;
+    // int c=a.x;
     return 0;
 }
