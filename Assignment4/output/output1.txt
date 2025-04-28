@@ -2,26 +2,25 @@
 No Errors in the code
 Intermediate code generated successfully
 ======================================================================
-0x62d782f4c4b0 FUNC_BEGIN foo
-0x62d782f535c0 a := PARAM
-0x62d782f535c0 RETURN 2
-0x62d782f4c4b0 FUNC_END foo
-0x62d782f4c4b0 FUNC_BEGIN main
-0x62d782f54220 a:= 2
-0x62d782f54220 PARAM 3
-0x62d782f54220 t0 := CALL foo,1
-0x62d782f54220 c:= t0
-0x62d782f54220 PARAM "%d\n"
-0x62d782f54220 PARAM c
-0x62d782f54220 t1 := CALL printf,2
-0x62d782f54220 RETURN 0
-0x62d782f4c4b0 FUNC_END main
+0x6244cb5b04b0 FUNC_BEGIN main
+0x6244cb5b6fc0 a := alloc 8
+0x6244cb5b6fc0 t0:= 0 * 4
+0x6244cb5b6fc0 *( a + t0 ) := 1.000000
+0x6244cb5b6fc0 t1:= 1 * 4
+0x6244cb5b6fc0 *( a + t1 ) := 2.000000
+0x6244cb5b6fc0 t2 := 4 * 0
+0x6244cb5b6fc0 t3 := *( a + t2 )
+0x6244cb5b6fc0 b:= t3
+0x6244cb5b6fc0 PARAM "%f\n"
+0x6244cb5b6fc0 PARAM b
+0x6244cb5b6fc0 t4 := CALL printf,2
+0x6244cb5b6fc0 RETURN 0
+0x6244cb5b04b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| foo             | int                  | 4       | N/A        |
 | main            | int                  | 4       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
@@ -29,71 +28,132 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| a               | int                  | 4       | N/A        |
------------------------------------------------------------------
------------------------------------------------------------------
-| Identifier      | Type                 | Size    | Value      |
------------------------------------------------------------------
-| a               | int                  | 4       | 2          |
-| c               | int                  | 4       | N/A        |
+| a               | float                | 4       | 1.000000   |
+| b               | float                | 4       | N/A        |
 | t0              | int                  | 4       | N/A        |
-| t1              |                      | 0       | N/A        |
+| t1              | int                  | 4       | N/A        |
+| t2              | int                  | 4       | N/A        |
+| t3              | float                | 4       | N/A        |
+| t4              |                      | 0       | N/A        |
 -----------------------------------------------------------------
-Function foo stack size: 12
-Function main stack size: 24
+Function main stack size: 36
 Pass 1 done
-LHS: a, RHS: PARAM
-Token rhs: PARAM
+LHS: a, RHS: alloc 8
+Token rhs: alloc
+Error!!!! Variable alloc not found in any scope
 Token lhs: a
-LHS: a, RHS: 2
-Token lhs: a
-LHS: t0, RHS: CALL foo,1
-Token rhs: CALL
-Token rhs: foo,1
-Error!!!! Variable foo,1 not found in any scope
+LHS: t0, RHS: 0 * 4
 Token lhs: t0
-LHS: c, RHS: t0
-Token rhs: t0
-Token lhs: c
-LHS: t1, RHS: CALL printf,2
+LHS: *( a + t0 ), RHS: 1.000000
+Token lhs: a
+Token lhs: t0
+LHS: t1, RHS: 1 * 4
+Token lhs: t1
+LHS: *( a + t1 ), RHS: 2.000000
+Token lhs: a
+Token lhs: t1
+LHS: t2, RHS: 4 * 0
+Token lhs: t2
+LHS: t3, RHS: *( a + t2 )
+Token rhs: a
+Token rhs: t2
+Token lhs: t3
+LHS: b, RHS: t3
+Token rhs: t3
+Token lhs: b
+LHS: t4, RHS: CALL printf,2
 Token rhs: CALL
 Token rhs: printf,2
 Error!!!! Variable printf,2 not found in any scope
-Token lhs: t1
+Token lhs: t4
 Liveness analysis done
 Inside pass2
-FUNC_BEGIN foo
-a := PARAM
-Handling param receive: a := PARAM
+FUNC_BEGIN main
+a := alloc 8
+Handling assignment: a := alloc 8
 Getting register for a
 Assigned register $t9 to a
-RETURN 2
-FUNC_END foo
-FUNC_BEGIN main
-a:= 2
-Handling assignment: a := 2
-Getting register for a
-Assigned register $t8 to a
-PARAM 3
-t0 := CALL foo,1
-Handling assignment: t0 := CALL foo,1
+last_offset: 0
+Allocating 8 bytes for a at offset 0
+t0:= 0 * 4
+Handling operation: t0 := 0 * 4
+hi
+Loaded integer constant 0 into $t8
+Loaded integer constant 4 into $t7
 Getting register for t0
-Assigned register $t7 to t0
-Handling function call: CALL foo,1
-c:= t0
-Handling assignment: c := t0
-Getting register for c
-Assigned register $t6 to c
+Assigned register $t6 to t0
+Operation: 0 * 4
+Registers: $t8, $t7, $t6
+*( a + t0 ) := 1.000000
+Handling array: *( a + t0 ) := 1.000000
+Array name: a
+Float array
+Error!!!! Variable 1.000000 not found in any scope
+Assigning float register $f31 to 1.000000
+$f30
+Loaded float constant 1.000000 into $f31
+lhs2: t0
+lhs1: a
 Getting register for t0
-Found register for t0 $t7
-PARAM "%d\n"
-PARAM c
-Getting register for c
-Found register for c $t6
-t1 := CALL printf,2
-Handling assignment: t1 := CALL printf,2
+Found register for t0 $t6
+regii: $t6
+val: 0
+t1:= 1 * 4
+Handling operation: t1 := 1 * 4
+hi
+Loaded integer constant 1 into $t4
+Loaded integer constant 4 into $t3
 Getting register for t1
-Assigned register $t5 to t1
+Assigned register $t2 to t1
+Operation: 1 * 4
+Registers: $t4, $t3, $t2
+*( a + t1 ) := 2.000000
+Handling array: *( a + t1 ) := 2.000000
+Array name: a
+Float array
+Error!!!! Variable 2.000000 not found in any scope
+Assigning float register $f30 to 2.000000
+$f30
+Loaded float constant 2.000000 into $f30
+lhs2: t1
+lhs1: a
+Getting register for t1
+Found register for t1 $t2
+regii: $t2
+val: 0
+t2 := 4 * 0
+Handling operation: t2 := 4 * 0
+hi
+Loaded integer constant 4 into $t0
+Handling register spill for 4
+Spilling t0 from $t6
+Loaded integer constant 0 into $t6
+Getting register for t2
+Handling register spill for t2
+Spilling t1 from $t2
+Assigned register $t2 to t2
+Operation: 4 * 0
+Registers: $t0, $t6, $t2
+t3 := *( a + t2 )
+Handling array: t3 := *( a + t2 )
+Array name: a
+Getting register for t2
+Found register for t2 $t2
+Handling register spill for 0
+Assigning float register $f29 to t3
+$f28
+b:= t3
+Handling assignment: b := t3
+Assigning float register $f28 to b
+$f28
+PARAM "%f\n"
+PARAM b
+t4 := CALL printf,2
+Handling assignment: t4 := CALL printf,2
+Getting register for t4
+Handling register spill for t4
+Spilling a from $t9
+Assigned register $t9 to t4
 Handling function call: CALL printf,2
 ----------------------2
 RETURN 0
@@ -103,31 +163,46 @@ Pass 2 done
 .data
 newline: .asciiz "\n"
 str0: .asciiz ""
+float_const_2.000000: .float 2.000000
+float_const_1.000000: .float 1.000000
 .text
 .globl main
-foo:
-    move $fp, $sp
-    addi $sp, $sp, -12
-    sw   $ra, 8($sp)
-    sw   $fp, 4($sp)
-    move $t9, $a0
-    li $v0, 2
-    lw   $fp, 4($sp)
-    lw   $ra, 8($sp)
-    addi $sp, $sp, 12
-    jr   $ra
 main:
     move $fp, $sp
-    addi $sp, $sp, -24
-    sw   $ra, 20($sp)
-    sw   $fp, 16($sp)
-    li $t8, 2
-    li $a0, 3
-    jal foo
-    move $t7, $v0
-    move $t6, $t7
+    addi $sp, $sp, -36
+    sw   $ra, 32($sp)
+    sw   $fp, 28($sp)
+    li $t8, 0
+    li $t7, 4
+    mul $t6, $t8, $t7
+    la $t5, float_const_1.000000
+    l.s $f31, 0($t5)
+    li $t5, 0
+   add $t6, $t6, $t5
+    add $t6, $t6, $sp
+    s.s $f31, 0($t6)
+    li $t4, 1
+    li $t3, 4
+    mul $t2, $t4, $t3
+    la $t1, float_const_2.000000
+    l.s $f30, 0($t1)
+    li $t1, 0
+   add $t2, $t2, $t1
+    add $t2, $t2, $sp
+    s.s $f30, 0($t2)
+    li $t0, 4
+    # Spilling t0 from $t6
+    li $t6, 0
+    # Spilling t1 from $t2
+    mul $t2, $t0, $t6
+    li $t0, 0
+   add $t2, $t2, $t0
+    add $t2, $t2, $sp
+    l.s $f29, 0($t2)
+    mov.s $f28, $f29
     la $a0, str0
-    move $a1, $t6
+    mov.s $f12, $f28
+    # Spilling a from $t9
 #printf
  move $a0, $a0
     li $v0, 4
@@ -135,16 +210,16 @@ syscall
   li $v0, 4 
  la $a0, newline 
  syscall
- move $a0, $a1
-    li $v0, 1
+    mov.s $f12, $f12
+    li $v0, 2
 syscall
   li $v0, 4 
  la $a0, newline 
  syscall
-    move $t5, $v0
+    move $t9, $v0
     li $v0, 0
-    lw   $fp, 16($sp)
-    lw   $ra, 20($sp)
-    addi $sp, $sp, 24
+    lw   $fp, 28($sp)
+    lw   $ra, 32($sp)
+    addi $sp, $sp, 36
     li $v0, 10
     syscall
