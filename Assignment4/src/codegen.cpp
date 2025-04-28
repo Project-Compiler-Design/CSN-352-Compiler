@@ -101,21 +101,31 @@ scoped_symtab* getScope(scoped_symtab* scope, string& var) {
 }
 
 void push_into_stack(pair<scoped_symtab*, string> varPair){
+    cerr<<"Pushing " << varPair.second << " into stack\n";
     mipsCode.push_back("    #Pushing " + varPair.second + " to stack");
     scoped_symtab* scope = varPair.first;
     string var = varPair.second;
     symbol_info* sym = scope->symbol_map[var];
     string type=sym->type;
     string reg;
+    if(type.find("struct") != string::npos){
+        cout<<"Pushing struct " << var << " into stack\n";
+        reg=var_to_reg[{scope, var}];
+        cout<<sym->offset<<endl;
+        availableRegs.push_back(reg);
+        return;
+            
+    }
     if(type=="int") reg = var_to_reg[{scope, var}];
     else if(type=="float") reg = floatVarToReg[{scope, var}];
     else if(type=="double"){
         reg = doubleVarToReg[{scope, var}];
     }
-    else{
-        cerr<<"Error: Type not supported for push into stack\n";
-        return;
-    }
+    
+    // else{
+    //     cerr<<"Error: Type not supported for push into stack\n";
+    //     return;
+    // }
     if(scope->symbol_map[var]->offset == -1){
         sym->offset = last_offset.top();
         last_offset.top()+=get_size_from_type(sym->type);
@@ -555,12 +565,12 @@ void generate_return_MIPS(scoped_symtab* scope,string val) {
 void load_if_constant(scoped_symtab* scope, string& var, const string& reg) {
     // Handle integer literal
     if (isIntLiteral(var)) {
-        if (reg_of_const.count(var)) {
-            if(reg==reg_of_const[var]) return;
-            mipsCode.push_back("    move " + reg + ", " + reg_of_const[var]);
-            cout << "Loaded integer constant (cached) " << var << " into " << reg << endl;
-            return;
-        }
+        // if (reg_of_const.count(var)) {
+        //     if(reg==reg_of_const[var]) return;
+        //     mipsCode.push_back("    move " + reg + ", " + reg_of_const[var]);
+        //     cout << "Loaded integer constant (cached) " << var << " into " << reg << endl;
+        //     return;
+        // }
         mipsCode.push_back("    li " + reg + ", " + var);
         loadedConstants[var] = true;
         reg_of_const[var] = reg;
@@ -763,12 +773,12 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
         return;
     }
     if (isIntLiteral(rhs)||isCharLiteral(rhs)) {
-        if(reg_of_const.count(rhs)) {
-            mipsCode.push_back("    move " + dst + ", " + reg_of_const[rhs]);
-            loadedConstants[lhs] = true;
-            cout << "Loaded constant literal " << rhs << " into " << dst << endl;
-            return;
-        }
+        // if(reg_of_const.count(rhs)) {
+        //     mipsCode.push_back("    move " + dst + ", " + reg_of_const[rhs]);
+        //     loadedConstants[lhs] = true;
+        //     cout << "Loaded constant literal " << rhs << " into " << dst << endl;
+        //     return;
+        // }
         mipsCode.push_back("    li " + dst + ", " + rhs);
         loadedConstants[lhs] = true;
         reg_of_const[rhs]=dst;
@@ -776,6 +786,7 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
     else {
         if(rhs.find("alloc")!=string::npos){
             int rest=stoi(rhs.substr(rhs.find("alloc")+6));
+            cout<<"last_offset: " << last_offset.top() << endl;
             lhsInfo->offset=last_offset.top();
             last_offset.top()+=rest;
             cerr<<"Allocating " << rest << " bytes for " << lhs << " at offset " << lhsInfo->offset << endl;
@@ -1154,31 +1165,34 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
     if(isIntLiteral(rhs)){
         cout<<"lhs "<<lhs<<endl;
         dst=getRegister(scope, lhs);
-        if(reg_of_const.count(rhs)) {
-            mipsCode.push_back("    sw " + reg_of_const[rhs] + ", " + to_string(0) + "("+dst + ")");
-        }
-        else{
+        // if(reg_of_const.count(rhs)) {
+        //     mipsCode.push_back("    sw " + reg_of_const[rhs] + ", " + to_string(0) + "("+dst + ")");
+        // }
+        // else{
             mipsCode.push_back("    #Loading constant " + rhs + " into register");
             if(availableRegs.empty()){
                 handleRegisterSpill(scope,rhs);
             }
+            cerr<<"querying available regs\n";
             string reg = availableRegs.back();
+            cerr<<"available regs\n";
+            cerr<<availableRegs.size()<<endl;
             availableRegs.pop_back();
             mipsCode.push_back("    li " + reg + ", " + rhs);
             loadedConstants[rhs] = true;
             reg_of_const[rhs] = reg;
             mipsCode.push_back("    sw " + reg + ", " + to_string(0) + "("+dst + ")");
-            
-        }
+            cerr<<"Loaded constant " << rhs << " into " << reg << endl;
+        //}
     }
     else if(isFloatLiteral(rhs)){
        cout<<"lhs "<<lhs<<endl;
        if(getScope(scope,lhs)->symbol_map[lhs]->type=="float"){
         dst=getFloatRegister(scope, lhs);
-        if(reg_of_const.count(rhs)) {
-            mipsCode.push_back("    s.s " + reg_of_const[rhs] + ", " + to_string(0) + "("+dst + ")");
-        }
-        else{
+        // if(reg_of_const.count(rhs)) {
+        //     mipsCode.push_back("    s.s " + reg_of_const[rhs] + ", " + to_string(0) + "("+dst + ")");
+        // }
+        // else{
             mipsCode.push_back("    #Loading constant " + rhs + " into register");
             if(availableFloatRegs.empty()){
                 handleFloatRegisterSpill(scope,rhs);
@@ -1189,14 +1203,14 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
             reg_of_const[rhs] = reg;
             mipsCode.push_back("    s.s " + reg + ", " + to_string(0) + "("+dst + ")");
             
-        }
+        //}
        }
        else {
         dst=getFloatRegister(scope, lhs,"double");
-        if(reg_of_const.count(rhs)) {
-            mipsCode.push_back("    s.d " + reg_of_const[rhs] + ", " + to_string(0) + "("+dst + ")");
-        }
-        else{
+        // if(reg_of_const.count(rhs)) {
+        //     mipsCode.push_back("    s.d " + reg_of_const[rhs] + ", " + to_string(0) + "("+dst + ")");
+        // }
+        // else{
             mipsCode.push_back("    #Loading constant " + rhs + " into register");
             if(availableFloatRegs.empty()){
                 handleDoubleRegisterSpill(scope,rhs);
@@ -1207,7 +1221,7 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
             reg_of_const[rhs] = reg;
             mipsCode.push_back("    s.d " + reg + ", " + to_string(0) + "("+dst + ")");
             
-        }
+        //}
         
        }
        
@@ -1342,6 +1356,7 @@ void handle_struct(const string& line, scoped_symtab* scope) {
     int symoffset = getScope(scope,structName)->symbol_map[structName]->offset;
     string dst = getRegister(scope, lhs);
     if (var_to_reg.count({scope, structName})) {
+        cout << "Struct " << structName << " found in register" <<var_to_reg[{scope,structName}] <<endl;
         push_into_stack({scope, structName});
     }
       
@@ -1485,6 +1500,10 @@ void compute_use_def(LivenessInfo& inst) {
         size_t eq = line.find(":=");
         string lhs = trim(line.substr(0, eq));
         string rhs = trim(line.substr(eq + 2));
+        cout << "LHS: " << lhs << ", RHS: " << rhs << endl;
+        if(lhs[0] == '*'){
+            lhs = lhs.substr(1);
+        }
         //here
         // inst.def.insert({getScope(inst.scope,lhs), lhs});
         istringstream iss(rhs);
@@ -1492,6 +1511,7 @@ void compute_use_def(LivenessInfo& inst) {
         while (iss >> token)
             if (isalpha(token[0]) && token != lhs){
                 //here
+                cout << "Token rhs: " << token << endl;
                 inst.use.insert({getScope(inst.scope,token), token});
             }
 
@@ -1501,8 +1521,10 @@ void compute_use_def(LivenessInfo& inst) {
         while (iss2 >> token2)
             if (isalpha(token2[0])){
                 //here
+                cout << "Token lhs: " << token2 << endl;
                 if(first){
                     inst.def.insert({getScope(inst.scope,token2), token2});
+                    inst.use.insert({getScope(inst.scope,token2), token2});
                     first=false;
                 }
                 else{

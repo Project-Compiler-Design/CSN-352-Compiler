@@ -1833,8 +1833,8 @@ selection_statement
                 temp.push_back({"goto "+label,curr_scope});
 			}
 			else{
-                str+="if("+$4->place.first+"=="+case_value+") goto "+label+"\n";
-                temp.push_back({"if("+$4->place.first+"=="+case_value+") goto "+label,curr_scope});
+                str+="if ( "+$4->place.first+" == "+case_value+" ) goto "+label+"\n";
+                temp.push_back({"if ( "+$4->place.first+" == "+case_value+" ) goto "+label,curr_scope});
             }
 		}
 		string endlabel=newlabel();
