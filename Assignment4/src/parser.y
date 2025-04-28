@@ -44,7 +44,7 @@
 
 %token <symbol_info> DECIMAL_LITERAL HEXA_LITERAL OCTAL_LITERAL EXP_LITERAL REAL_LITERAL FLOAT_LITERAL STRING_LITERAL CHARACTER_LITERAL 
 %token <str> ID INVALID_ID INCLUDE
-%token AUTO STRUCT BOOL BREAK CASE CONTINUE GOTO DO DEFAULT IF ELSE FOR CONST TRUE FALSE STATIC SWITCH WHILE VOID RETURN SIZEOF FLOAT INT DOUBLE EXTERN SHORT LONG CHAR ENUM REGISTER SIGNED TYPEDEF UNION UNSIGNED VOLATILE 
+%token AUTO STRUCT BOOL BREAK CASE CONTINUE GOTO DO DEFAULT IF ELSE FOR CONST TRUE FALSE STATIC SWITCH WHILE UNTIL VOID RETURN SIZEOF FLOAT INT DOUBLE EXTERN SHORT LONG CHAR ENUM REGISTER SIGNED TYPEDEF UNION UNSIGNED VOLATILE 
 %token CLASS PUBLIC PRIVATE PROTECTED NULLPTR NAMESPACE VIRTUAL CATCH
 %token RBRACE LBRACE LBRACKET RBRACKET LPARENTHESES RPARENTHESES DOT COMMA COLON SEMICOLON PLUS MINUS STAR DIVIDE MODULO AMPERSAND OR XOR EXCLAMATION TILDE EQUALS LESS_THAN GREATER_THAN QUESTION_MARK INCREMENT DECREMENT REL_AND REL_OR REL_EQUALS REL_NOT_EQ LESS_EQUALS GREATER_EQUALS ASSIGN_PLUS ASSIGN_MINUS ASSIGN_STAR ASSIGN_DIV ASSIGN_MOD ASSIGN_AND ASSIGN_OR ASSIGN_XOR LEFT_SHIFT LEFT_SHIFT_EQ RIGHT_SHIFT RIGHT_SHIFT_EQ LAMBDA_ARROW VARIABLE_ARGS
 
@@ -1904,6 +1904,25 @@ iteration_statement
 
 		$$->code=replace_break_continue($$->code,endlabel,startlabel,1);
         $$->final_code=replace_break_continue_final($$->final_code,endlabel,startlabel,1);
+	}
+	| UNTIL LPARENTHESES expression RPARENTHESES statement
+	{
+		string startlabel=newlabel();
+		string endlabel=newlabel();
+		string truelabel=newlabel();
+		symbol_info* new_symbol=new symbol_info();
+		$$=new_symbol;
+		$$->code=$3->code+"\n"+startlabel+":\n"+"if("+$3->place.first+") goto "+endlabel+"\n"+"goto "+truelabel+"\n"+truelabel+":\n"+$5->code+"\n"+"\n"+"goto "+startlabel+"\n"+endlabel+":\n";
+		$$->final_code.push_back({startlabel+":",curr_scope});
+		$$->final_code.insert($$->final_code.end(), $3->final_code.begin(), $3->final_code.end());
+		$$->final_code.push_back({"if("+$3->place.first+") goto "+endlabel,curr_scope});
+		$$->final_code.push_back({"goto "+truelabel,curr_scope});
+		$$->final_code.push_back({truelabel+":",curr_scope});
+		$$->final_code.insert($$->final_code.end(), $5->final_code.begin(), $5->final_code.end());
+		$$->final_code.push_back({"goto "+startlabel,curr_scope});
+		$$->final_code.push_back({endlabel+":",curr_scope});
+		$$->code=replace_break_continue($$->code,endlabel,startlabel,1);
+		$$->final_code=replace_break_continue_final($$->final_code,endlabel,startlabel,1);
 	}
 	| DO statement WHILE LPARENTHESES expression RPARENTHESES SEMICOLON
 	{

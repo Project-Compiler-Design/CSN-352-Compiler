@@ -111,8 +111,8 @@ void push_into_stack(pair<scoped_symtab*, string> varPair){
     symbol_info* sym = scope->symbol_map[var];
     string type=sym->type;
     string reg;
-    if(type.find("struct") != string::npos){
-        cout<<"Pushing struct " << var << " into stack\n";
+    if(type.find("struct") != string::npos || type.find("union") != string::npos){
+        cout<<"Pushing struct/union " << var << " into stack\n";
         reg=var_to_reg[{scope, var}];
         cout<<sym->offset<<endl;
         availableRegs.push_back(reg);
@@ -1464,6 +1464,7 @@ bool check_struct(const string& line, scoped_symtab* scope) {
     string rhs = trim(line.substr(pos + 2));
     auto ppos = rhs.find("+");
     if(ppos == string::npos) return false;
+    if(isIntLiteral(trim(rhs.substr(0,ppos))) || isFloatLiteral(trim(rhs.substr(0,ppos)))) return false;
     string structName = trim(rhs.substr(0, ppos));
     cout << "Struct name: " << structName << endl;
     if(isIntLiteral(structName) || isFloatLiteral(structName) || isStringLiteral(structName)){
@@ -1471,7 +1472,7 @@ bool check_struct(const string& line, scoped_symtab* scope) {
     }
     symbol_info* sym = getScope(scope, structName)->symbol_map[structName];
     cout << sym->type << endl;
-    if(sym->type.substr(0,6) == "struct"){
+    if(sym->type.substr(0,6) == "struct" || sym->type.substr(0,5) == "union") {
         return true;
     }
     return false;
