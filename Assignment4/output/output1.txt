@@ -13,12 +13,9 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| A               | struct               | 0       | N/A        |
 | main            | int                  | 4       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
-| x               | int                  | 4       | N/A        |
-| y               | int                  | 4       | N/A        |
 -----------------------------------------------------------------
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
@@ -31,9 +28,7 @@ Printing scope table
 -----------------------------------------------------------------
 Function main stack size: 20
 Pass 1 done
-LHS: a, RHS: alloc 8
-Token rhs: alloc
-Error!!!! Variable alloc not found in any scope
+LHS: a, RHS: 3
 Token lhs: a
 LHS: t0, RHS: a + 0
 Token rhs: a
@@ -46,9 +41,10 @@ Token lhs: t1
 LHS: *t1, RHS: 10
 Token lhs: t1
 Liveness analysis done
+Inside pass2
 FUNC_BEGIN main
-a:= alloc 8
-Handling assignment: a := alloc 8
+a:=  3
+Handling assignment: a := 3
 Getting register for a
 Assigned register $t9 to a
 last_offset: 0

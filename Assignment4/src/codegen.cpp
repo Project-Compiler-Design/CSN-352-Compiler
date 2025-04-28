@@ -1454,6 +1454,7 @@ void pass1(vector<pair<string, scoped_symtab*>>& codeList) {
 }
 
 void pass2(vector<pair<string, scoped_symtab*>>& codeList){
+    cout<<"Inside pass2"<<endl;
     for(int idx = 0; idx < codeList.size(); ++idx){
         auto& code = codeList[idx];
         currentInstructionIndex = idx;
@@ -1576,6 +1577,7 @@ void compute_use_def(LivenessInfo& inst) {
                     inst.def.insert({getScope(inst.scope,token2), token2});
                     inst.use.insert({getScope(inst.scope,token2), token2});
                     first=false;
+                    
                 }
                 else{
                     inst.use.insert({getScope(inst.scope,token2), token2});
@@ -1626,17 +1628,19 @@ void run_liveness(vector<LivenessInfo>& program) {
     compute_successors(program);
     for (auto& inst : program)
         compute_use_def(inst);
-
+    
     bool changed;
     do {
-        changed = false;
-        for (int i = program.size() - 1; i >= 0; --i) {
+        changed = false; 
+
+        for (int i = (int)program.size() - 1; i >= 0; --i) {
             auto old_in = program[i].live_in;
             auto old_out = program[i].live_out;
-
             program[i].live_out.clear();
-            for (int s : program[i].successors)
-                program[i].live_out.insert(program[s].live_in.begin(), program[s].live_in.end());
+            for (int s : program[i].successors){
+                if(program[s].live_in.empty())
+                    program[i].live_out.insert(program[s].live_in.begin(), program[s].live_in.end());
+            }
 
             program[i].live_in = program[i].use;
             for (auto& v : program[i].live_out)
@@ -1647,6 +1651,7 @@ void run_liveness(vector<LivenessInfo>& program) {
                 changed = true;
         }
     } while (changed);
+    
 }
 
 void printMipsCode(vector<string>& mipsCode, const string& filename) {
