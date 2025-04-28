@@ -1,31 +1,25 @@
+.data
+str0: .asciiz "Hi"
 .text
 .globl main
 main:
     move $fp, $sp
-    addi $sp, $sp, -32
-    sw   $ra, 28($sp)
-    sw   $fp, 24($sp)
-    li $t8, 0
-    li $t7, 4
-    mul $t6, $t8, $t7
-    li $t5, 5
-    addi $t6, $t6, 0
-    add $t6, $t6, $sp
-    sw $t5, 0($t6)
-    move $t4, $t7
-    move $t3, $t8
-    mul $t2, $t4, $t3
-    addi $t2, $t2, 0
-    add $t2, $t2, $sp
-    lw $t2, 0($t2)
-    move $t1, $t2
-    li $t0, 2
-    # Spilling arr from $t9
-    add $t9, $t1, $t0
-    # Spilling t0 from $t6
-    move $t6, $t9
-    lw   $fp, 24($sp)
-    lw   $ra, 28($sp)
-    addi $sp, $sp, 32
+    addi $sp, $sp, -16
+    sw   $ra, 12($sp)
+    sw   $fp, 8($sp)
+    li.s $f31, 5.500000
+    la $a0, str0
+    mov.s $f12, $f31
+ move $a0, $a0
+    li $v0, 4
+syscall
+    mov.s $f12, $f12
+    li $v0, 2
+syscall
+    move $t9, $v0
+    li $v0, 0
+    lw   $fp, 8($sp)
+    lw   $ra, 12($sp)
+    addi $sp, $sp, 16
     li $v0, 10
     syscall

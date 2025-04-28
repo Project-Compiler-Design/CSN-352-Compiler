@@ -1,23 +1,19 @@
-=====================LIST OF ERRORS===================================
-Line 9 : Missing return statement
 ======================================================================
-0x55a76c35c8b0 FUNC_BEGIN main
-0x55a76c363f50 arr := alloc 4
-0x55a76c363f50 t0:= 0 * 4
-0x55a76c363f50 *( arr + t0 ) := 5
-0x55a76c363f50 t1 := 4 * 0
-0x55a76c363f50 t2 := *( arr + t1 )
-0x55a76c363f50 t3 :=  t2 + 2
-0x55a76c363f50 c:= t3
-0x55a76c35c8b0 FUNC_END main
+No Errors in the code
+Intermediate code generated successfully
+======================================================================
+0x5ea8502ea4b0 FUNC_BEGIN main
+0x5ea8502f0fc0 f:= 5.500000
+0x5ea8502f0fc0 PARAM "Hi"
+0x5ea8502f0fc0 PARAM f
+0x5ea8502f0fc0 t0 := CALL printf,2
+0x5ea8502f0fc0 RETURN 0
+0x5ea8502ea4b0 FUNC_END main
 ======================================================================
 Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| A               | struct               | 0       | N/A        |
-| a               | int                  | 4       | N/A        |
-| b               | int                  | 4       | N/A        |
 | main            | int                  | 4       | N/A        |
 | printf          |                      | 0       | N/A        |
 | scanf           |                      | 0       | N/A        |
@@ -25,104 +21,52 @@ Printing scope table
 -----------------------------------------------------------------
 | Identifier      | Type                 | Size    | Value      |
 -----------------------------------------------------------------
-| arr             | int                  | 4       | 5          |
-| c               | int                  | 4       | N/A        |
-| t0              | int                  | 4       | N/A        |
-| t1              | int                  | 4       | N/A        |
-| t2              | int                  | 4       | N/A        |
-| t3              | int                  | 4       | N/A        |
+| f               | float                | 4       | 5.500000   |
+| t0              |                      | 0       | N/A        |
 -----------------------------------------------------------------
-Function main stack size: 32
+Function main stack size: 16
 Pass 1 done
-Error!!!! Variable alloc not found in any scope
+Error!!!! Variable printf,2 not found in any scope
 Liveness analysis done
 FUNC_BEGIN main
-arr := alloc 4
-Handling assignment: arr := alloc 4
-Getting register for arr
-Assigned register $t9 to arr
-Allocating 4 bytes for arr at offset 0
-t0:= 0 * 4
-Handling operation: t0 := 0 * 4
-hi
-Loaded integer constant 0 into $t8
-Loaded integer constant 4 into $t7
+f:= 5.500000
+Handling assignment: f := 5.500000
+Assigning float register $f31 to f
+$f30
+PARAM "Hi"
+PARAM f
+t0 := CALL printf,2
+Handling assignment: t0 := CALL printf,2
 Getting register for t0
-Assigned register $t6 to t0
-Operation: 0 * 4
-Registers: $t8, $t7, $t6
-*( arr + t0 ) := 5
-Handling array: *( arr + t0 ) := 5
-Loaded integer constant 5 into $t5
-Getting register for t0
-Found register for t0 $t6
-t1 := 4 * 0
-Handling operation: t1 := 4 * 0
-hi
-Loaded integer constant (cached) 4 into $t4
-Loaded integer constant (cached) 0 into $t3
-Getting register for t1
-Assigned register $t2 to t1
-Operation: 4 * 0
-Registers: $t4, $t3, $t2
-t2 := *( arr + t1 )
-Handling array: t2 := *( arr + t1 )
-Getting register for t1
-Found register for t1 $t2
-Getting register for t2
-Assigned register $t1 to t2
-t3 :=  t2 + 2
-Struct name: t2
-int
-Handling operation: t3 := t2 + 2
-Getting register for t2
-Found register for t2 $t1
-Loaded integer constant 2 into $t0
-Getting register for t3
-Handling register spill for t3
-Spilling arr from $t9
-Assigned register $t9 to t3
-Operation: t2 + 2
-Registers: $t1, $t0, $t9
-c:= t3
-Handling assignment: c := t3
-Getting register for c
-Handling register spill for c
-Spilling t0 from $t6
-Assigned register $t6 to c
-Getting register for t3
-Found register for t3 $t9
+Assigned register $t9 to t0
+Handling function call: CALL printf,2
+----------------------2
+RETURN 0
 FUNC_END main
 Pass 2 done
 ################ MIPS Assembly Code ################ 
+.data
+str0: .asciiz "Hi"
 .text
 .globl main
 main:
     move $fp, $sp
-    addi $sp, $sp, -32
-    sw   $ra, 28($sp)
-    sw   $fp, 24($sp)
-    li $t8, 0
-    li $t7, 4
-    mul $t6, $t8, $t7
-    li $t5, 5
-    addi $t6, $t6, 0
-    add $t6, $t6, $sp
-    sw $t5, 0($t6)
-    move $t4, $t7
-    move $t3, $t8
-    mul $t2, $t4, $t3
-    addi $t2, $t2, 0
-    add $t2, $t2, $sp
-    lw $t2, 0($t2)
-    move $t1, $t2
-    li $t0, 2
-    # Spilling arr from $t9
-    add $t9, $t1, $t0
-    # Spilling t0 from $t6
-    move $t6, $t9
-    lw   $fp, 24($sp)
-    lw   $ra, 28($sp)
-    addi $sp, $sp, 32
+    addi $sp, $sp, -16
+    sw   $ra, 12($sp)
+    sw   $fp, 8($sp)
+    li.s $f31, 5.500000
+    la $a0, str0
+    mov.s $f12, $f31
+ move $a0, $a0
+    li $v0, 4
+syscall
+    mov.s $f12, $f12
+    li $v0, 2
+syscall
+    move $t9, $v0
+    li $v0, 0
+    lw   $fp, 8($sp)
+    lw   $ra, 12($sp)
+    addi $sp, $sp, 16
     li $v0, 10
     syscall
