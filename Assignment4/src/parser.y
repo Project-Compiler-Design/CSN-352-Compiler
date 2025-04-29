@@ -2063,7 +2063,7 @@ start_symbol: translation_unit
 	static_variables_code.insert(static_variables_code.end(), temp.begin(), temp.end());
     cleaned_TAC=clean_vector_TAC(static_variables_code);
     // print_vector($1->final_code);
-	print_vector(cleaned_TAC);	
+	//print_vector(cleaned_TAC);	
 }
 ;
 translation_unit
@@ -2144,17 +2144,17 @@ void yyerror(const char *s) {
 
 void print_errors() {
     if(error_list.size()==0){
-        cerr<<"======================================================================"<<endl;
-        cerr<<"No Errors in the code"<<endl;
-        cerr<<"Intermediate code generated successfully"<<endl;
-        cerr<<"======================================================================"<<endl;
+        cerr<<"# ======================================================================"<<endl;
+        cerr<<"# No Errors in the code"<<endl;
+        cerr<<"# Intermediate code generated successfully"<<endl;
+        cerr<<"# ======================================================================"<<endl;
     }
     else{
-        cerr<<"=====================LIST OF ERRORS==================================="<<endl;
+        cerr<<"# =====================LIST OF ERRORS==================================="<<endl;
     for(auto it:error_list){
-        cerr<<it<<endl;
+        cerr<<"#"<<it<<endl;
     }
-    cerr<<"======================================================================"<<endl;
+    cerr<<"# ======================================================================"<<endl;
     }
 
 }
@@ -2232,7 +2232,7 @@ int main() {
 	curr_scope->symbol_map["printf"]=new_symbol;
 	curr_scope->symbol_map["scanf"]=new_symbol;
 	yyparse();
-	print_scope_table();
+	/* print_scope_table(); */
 	codegen_main();
 	 
 }

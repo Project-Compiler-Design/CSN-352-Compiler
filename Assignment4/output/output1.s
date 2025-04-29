@@ -1,3 +1,6 @@
+# =====================LIST OF ERRORS===================================
+#Line 3 : Missing return statement
+# ======================================================================
 .data
 newline: .asciiz "\n"
 str0: .asciiz "hello world"

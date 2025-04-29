@@ -164,11 +164,11 @@ void cleanTAC(string input) {
         }
 
         // Check if the line is a label or function
-        cerr<<lineno<<".  ";
+        //cerr<<lineno<<".  ";
         if (!line.empty() && line.back() == ':' || !line.empty() && line.substr(0,4)=="FUNC") {
-            cerr << line << endl;  // Labels should not be indented
+            //cerr << line << endl;  // Labels should not be indented
         } else {
-            cerr << "    " << line << endl;  // Indent normal instructions
+            //cerr << "    " << line << endl;  // Indent normal instructions
         }   
         lineno++;
     }
