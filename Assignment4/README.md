@@ -8,8 +8,13 @@ This project implements a **C to MIPS compiler** using **3-address code (3AC)** 
 ```bash
 Assignment4/
 │── src/                 # Source code directory
-│   ├── scanner.l          # Lex file for lexical analysis
-|   ├── parser.y         # File for syntax analysis
+│   ├── scanner.l        # Lex file for lexical analysis
+|   ├── parser.y         # File for syntax analysis and generation of 3AC
+|   ├── codegen.cpp      # File for generation of MIPS code from 3AC
+│── include/             # Auxillary directory
+│   ├── 3AC.h            # header file for 3AC code generation
+|   ├── functions.h      # Auxillary functions for 3AC code generation
+|   ├── utility.h        # Data Structures definition for nodes
 │── test/                # Test cases for the compiler
 │   ├── input1.c         # Sample test case 1
 │   ├── input2.c         # Sample test case 2

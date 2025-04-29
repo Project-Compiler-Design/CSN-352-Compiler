@@ -248,7 +248,7 @@ postfix_expression
 				else{
 					for(int i=0;i<original_list.size();i++){
 						if(type_priority[original_list[i]]<type_priority[new_list[i]]){
-							cout<<"Error: Type of actual and formal parameter does not match"<<endl;
+							//cout<<"Error: Type of actual and formal parameter does not match"<<endl;
 							break;
 						}
 					}
@@ -1058,7 +1058,7 @@ declaration
 				code=$2->code;
 
 			} else {
-				cout<<"heeeeeee"<<$1<<endl;
+				//cout<<"heeeeeee"<<$1<<endl;
 				curr_scope->symbol_map[top_symbol]->type = $1;
 				if(curr_scope->symbol_map[top_symbol]->type.substr(0,6)=="static"){
 					static_variables.push_back({curr_scope,top_symbol});
@@ -1122,10 +1122,10 @@ declaration
             }
 			int fla=0;
 			for(auto x:static_variables){
-				cout<<temp.substr(0,temp.find(":="))<<endl;
+				//cout<<temp.substr(0,temp.find(":="))<<endl;
 				if(x.first==curr_scope && x.second==trimm(temp.substr(0,temp.find(":=")))){
 					static_variables_code.push_back({temp,curr_scope});
-					cout<<"static variable code: "<<temp<<endl;
+					//cout<<"static variable code: "<<temp<<endl;
 					fla=1;
 					break;
 				}

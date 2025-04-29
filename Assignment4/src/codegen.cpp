@@ -9,6 +9,7 @@ int paramReceiveCounter = 0;
 int param_receive_offset=0;
 int paramFloatReceiveCounter = 0;
 int string_counter = 0;
+scoped_symtab* globalscope;
 map<pair<scoped_symtab*,string>,string> var_to_reg;
 map<string,pair<scoped_symtab*,string>> reg_to_var;
 std::vector<pair<scoped_symtab*, string>> static_var;
@@ -32,6 +33,8 @@ map<string,string> string_to_label;
 map<string, bool> loadedConstants;
 map<string,string> reg_of_const;
 vector<string> reg_for_scanf;
+map<int,pair<scoped_symtab*,string>> offset_to_var;
+map<pair<scoped_symtab*,string>,int> pointer_to_offset;
 int get_size_from_type(string type);
 void handle_function_call(const string& line);
 
@@ -528,13 +531,27 @@ void generate_func_end_MIPS( string &func, int stackSize) {
 
 
 void generate_return_MIPS(string& func, scoped_symtab* scope,string val) {
-    if(isIntLiteral(val) || isFloatLiteral(val)) 
+    if(isIntLiteral(val)) 
     {
       mipsCode.push_back("    li $v0, " + val);
     }
-   else{
-        string reg=getRegister(scope,val);
-        mipsCode.push_back("    move $v0, " + reg);
+    else if(isFloatLiteral(val))
+    {
+        mipsCode.push_back("    li.s $f0, " + val);
+    }
+   else  {
+        string type=globalscope->symbol_map[func]->type;
+        string reg;
+        if(type=="float") 
+        {
+            reg=getFloatRegister(scope,val);
+            mipsCode.push_back("    mov.s $f0, " + reg);
+        }
+        else{
+            reg=getRegister(scope,val);
+            mipsCode.push_back("    move $v0, " + reg);
+        }
+        
     }
     int stackSize = funcStackSize[func];
     if(func!="main")stackSize += 40;
@@ -824,13 +841,35 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
     string dst = getRegister(scope,lhs);
     if(rhs.find("CALL") != string::npos){
         handle_function_call(rhs);
-        mipsCode.push_back("    move " + dst + ", $v0");
+        istringstream iss(rhs);
+        string call, funcWithComma;
+        int argCount;
+        iss >> call >> funcWithComma;
+        iss.ignore();
+        iss >> argCount;
+        int arg_no=0;
+        string funcName = trim(funcWithComma);
+        if (!funcName.empty() && funcName.back() == ',') funcName.pop_back();
+        if(funcName.find(",")!=string::npos){
+            arg_no=stoi(funcName.substr(funcName.find(",")+1));
+            funcName = funcName.substr(0,funcName.find(","));
+        }
+        if(globalscope->symbol_map[funcName]->type=="float"){
+            string dst1 = getFloatRegister(scope, lhs);
+            mipsCode.push_back("    mov.s " + dst1 + ", $f0");
+        }
+        else mipsCode.push_back("    move " + dst + ", $v0");
+        
         return;
     }
     if (isIntLiteral(rhs)||isCharLiteral(rhs)) {
         mipsCode.push_back("    li " + dst + ", " + rhs);
         loadedConstants[lhs] = true;
         reg_of_const[rhs]=dst;
+    }
+    else if(isFloatLiteral(rhs)) {
+        string dst1 = getFloatRegister(scope, lhs);
+        mipsCode.push_back("    li.s " + dst1 + ", " + rhs);
     }
     else {
         string src = getRegister(scope,rhs);
@@ -1295,6 +1334,10 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
         if(rhs_ptr){
             if(var_to_reg.count({getScope(scope, rhs), rhs})){
                 dst=getRegister(scope, lhs);
+                pair<scoped_symtab*,string> var = offset_to_var[pointer_to_offset[{getScope(scope, rhs), rhs}]];
+                if(var_to_reg.count(var) && !var.first->symbol_map[var.second]->is_array){
+                    push_into_stack(var);
+                }
                 mipsCode.push_back("    lw " + dst + ", " + "0(" + var_to_reg[{getScope(scope, rhs), rhs}] + ")");
                 symbol_info* sym = getScope(scope, rhs)->symbol_map[rhs];
                 if(getScope(scope, rhs)->symbol_map[rhs]->offset == -1){
@@ -1340,6 +1383,8 @@ void handle_pointer(const string& line, scoped_symtab* scope) {
                 if(var_to_reg.count({scope, rhs})){
                     push_into_stack({scope, rhs});
                 }
+                offset_to_var[rhsInfo->offset] = {scope, rhs};
+                pointer_to_offset[{getScope(scope, lhs), lhs}] = rhsInfo->offset;
                 mipsCode.push_back("    addi " + dst + ", $sp, " + to_string(rhsInfo->offset));
             }
             else if(rhsInfo->type.substr(0,5)=="float"){
@@ -1481,6 +1526,7 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 iss >> dummy >> funcName;
                 trim(funcName);
                 curr_func = funcName;
+                globalscope=code.second;
                 generate_func_begin_MIPS(funcName, funcStackSize[funcName]);
                 paramReceiveCounter = 0;
                 paramFloatReceiveCounter = 0;
