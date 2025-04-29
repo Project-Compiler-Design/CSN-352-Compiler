@@ -86,6 +86,7 @@ bool isFloatLiteral(const string& s) {
            all_of(fracPart.begin(), fracPart.end(), ::isdigit);
 }
 
+
 scoped_symtab* getScope(scoped_symtab* scope, string& var) {
     if (var=="PARAM"||var=="CALL"||var=="RETURN") return scope;
     while(scope != nullptr) {
@@ -96,6 +97,9 @@ scoped_symtab* getScope(scoped_symtab* scope, string& var) {
     }
     return nullptr;
 }
+
+
+// Pushes a variable from register to stack, handles different data types
 
 void push_into_stack(pair<scoped_symtab*, string> varPair){
     mipsCode.push_back("    #Pushing " + varPair.second + " to stack");
@@ -159,6 +163,8 @@ void push_into_stack(pair<scoped_symtab*, string> varPair){
    
     reg_to_var.erase(reg);
 }
+
+// Handles register spill for double precision values by finding unused registers
 
 void handleDoubleRegisterSpill(scoped_symtab* currentScope, const string& newVar) {
     
@@ -261,6 +267,8 @@ void handleDoubleRegisterSpill(scoped_symtab* currentScope, const string& newVar
     push_into_stack(varPair);
 }
 
+
+// Manages register spilling for floating point values when no free registers are available
 void handleFloatRegisterSpill(scoped_symtab* currentScope, const string& newVar) {
 
     for (auto it = floatVarToReg.begin(); it != floatVarToReg.end(); ++it) {
@@ -356,6 +364,10 @@ void handleFloatRegisterSpill(scoped_symtab* currentScope, const string& newVar)
     push_into_stack(varPair);
 }
 
+
+
+// Manages register spilling for integer values by selecting least-used registers
+
 void handleRegisterSpill(scoped_symtab* currentScope, string& newVar) {
     int maxdist=0;
     string regi="$t0";
@@ -392,6 +404,8 @@ void handleRegisterSpill(scoped_symtab* currentScope, string& newVar) {
     }
     push_into_stack(varPair);
 }
+
+// Returns a float register for a variable, handling register allocation for both float and double types
 
 string getFloatRegister(scoped_symtab* scope, string& var,string type="float") {
     scope = getScope(scope, var);
@@ -431,6 +445,8 @@ string getFloatRegister(scoped_symtab* scope, string& var,string type="float") {
     
 } 
 
+// Returns a register for a variable, handling cases like constants and variables already in registers
+
 string getRegister(scoped_symtab* scope, string& var) {
     if(isIntLiteral(var)){
         if(availableRegs.empty()) handleRegisterSpill(scope,var);
@@ -461,6 +477,8 @@ string getRegister(scoped_symtab* scope, string& var) {
     return reg;
 }
 
+// Returns a register for a variable, handling cases like constants and variables already in registers
+
 pair<size_t, string> find_operator(const string& line) {
     string detectedOp;
     size_t opPos = string::npos;
@@ -473,6 +491,9 @@ pair<size_t, string> find_operator(const string& line) {
     }
     return {opPos, detectedOp};
 }
+
+// Generates MIPS code for function entry, setting up stack frame and saving registers
+
 
 void generate_func_begin_MIPS(const string &func, int stackSize) {
     if (func != "main")
@@ -495,10 +516,16 @@ void generate_func_begin_MIPS(const string &func, int stackSize) {
     last_offset.push(0);
 }
 
+// Cleans up at function end, restoring registers and stack pointer
+
+
 void generate_func_end_MIPS( string &func, int stackSize) {
     if(!last_offset.empty())
     last_offset.pop();
 }
+
+// Generates MIPS code for return statements, restoring registers and frame pointer
+
 
 void generate_return_MIPS(string& func, scoped_symtab* scope,string val) {
     if(isIntLiteral(val) || isFloatLiteral(val)) 
@@ -525,6 +552,8 @@ void generate_return_MIPS(string& func, scoped_symtab* scope,string val) {
     if(func!="main") mipsCode.push_back("    jr   $ra");
     
 }
+
+// Loads constants (integer or float) into registers
 
 void load_if_constant(scoped_symtab* scope, string& var, const string& reg) {
     if (isIntLiteral(var)) {
@@ -570,6 +599,9 @@ void load_if_constant(scoped_symtab* scope, string& var, const string& reg) {
         }
     }
 }
+
+// Handles arithmetic and comparison operations between two operands
+
 
 void handle_operation(string lhs, string rhs, size_t operator_pos, const string& opp, scoped_symtab* scope) {
     bool isFloat;
@@ -743,6 +775,9 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
     }
 }
 
+// Processes assignment statements, handling different data types
+
+
 void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
 
     symbol_info* lhsInfo = getScope(scope,lhs)->symbol_map[lhs];
@@ -780,6 +815,12 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
         }
         return;
     }
+    if(rhs.find("alloc")!=string::npos){
+        int rest=stoi(rhs.substr(rhs.find("alloc")+6));
+        lhsInfo->offset=last_offset.top();
+        last_offset.top()+=rest;
+        return;
+    }
     string dst = getRegister(scope,lhs);
     if(rhs.find("CALL") != string::npos){
         handle_function_call(rhs);
@@ -792,12 +833,6 @@ void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
         reg_of_const[rhs]=dst;
     }
     else {
-        if(rhs.find("alloc")!=string::npos){
-            int rest=stoi(rhs.substr(rhs.find("alloc")+6));
-            lhsInfo->offset=last_offset.top();
-            last_offset.top()+=rest;
-            return;
-        }
         string src = getRegister(scope,rhs);
         mipsCode.push_back("    move " + dst + ", " + src);
     }
@@ -853,6 +888,9 @@ string newstring(){
     string_counter++;
     return label;
 }
+
+// Handles function parameter passing for function calls
+
 void handle_param_pass(const string& line, scoped_symtab* scope) {
     string var = trim(line.substr(5)); // after "PARAM"
     if(var[0] == '&')var = var.substr(1);
@@ -948,6 +986,7 @@ void handle_param_pass(const string& line, scoped_symtab* scope) {
 
     
 }
+// Processes function calls, including system calls like printf and scanf
 
 void handle_function_call(const string& line) {
     istringstream iss(line);
@@ -1036,6 +1075,9 @@ void handle_function_call(const string& line) {
     reg_for_scanf.clear();
 }
 
+// Handles parameter receiving at the beginning of functions
+
+
 void handle_param_receive(const string& line, scoped_symtab* scope) {
     size_t assignPos = line.find(":=");
     string lhs = trim(line.substr(0, assignPos));
@@ -1082,8 +1124,10 @@ void handle_param_receive(const string& line, scoped_symtab* scope) {
         
     }
 
-    
 }
+
+// Processes array accesses and assignments
+
 
 void handle_array(const string& line, scoped_symtab* scope) {
     size_t assignPos = line.find(":=");
@@ -1186,6 +1230,9 @@ void handle_array(const string& line, scoped_symtab* scope) {
         
     }
 }
+
+// Handles pointer operations like dereferencing and address-of
+
 
 void handle_pointer(const string& line, scoped_symtab* scope) {
     size_t assignPos = line.find(":=");
@@ -1379,6 +1426,8 @@ void handle_struct(const string& line, scoped_symtab* scope) {
     mipsCode.push_back("    addi " + dst + ", $sp, " + to_string(totoffset));
 }
 
+// First pass to calculate function stack sizes and parameter sizes
+
 void pass1(vector<pair<string, scoped_symtab*>>& codeList) {
     for (int i = 0; i < codeList.size(); i++) {
         string t = trim(codeList[i].first);
@@ -1412,7 +1461,10 @@ void pass1(vector<pair<string, scoped_symtab*>>& codeList) {
     }
 }
 
+
 string curr_func;
+
+// Second pass that generates MIPS code for each TAC instruction
 
 void pass2(vector<pair<string, scoped_symtab*>>& codeList){
     for(int idx = 0; idx < codeList.size(); ++idx){
@@ -1505,6 +1557,8 @@ bool isAddress(const std::string& token) {
     return token.size() > 2 && token[0] == '0' && token[1] == 'x';
 }
 
+// Computes use-def information for liveness analysis
+
 void compute_use_def(LivenessInfo& inst) {
     const string& line = inst.code;
     if (line.find(":=") != string::npos) {
@@ -1554,6 +1608,8 @@ void compute_use_def(LivenessInfo& inst) {
     }
 }
 
+// Identifies successor instructions for control flow graph construction
+
 void compute_successors(vector<LivenessInfo>& program) {
     for (int i = 0; i < program.size(); ++i) {
         string line = trim(program[i].code);
@@ -1574,6 +1630,8 @@ void compute_successors(vector<LivenessInfo>& program) {
         }
     }
 }
+
+// Performs liveness analysis on the three-address code
 
 void run_liveness(vector<LivenessInfo>& program) {
     compute_successors(program);
@@ -1604,6 +1662,8 @@ void run_liveness(vector<LivenessInfo>& program) {
     } while (changed);
     
 }
+
+// Extracts static variables and adds them to data section
 
 vector<pair<string, scoped_symtab*>> handle_static_code(vector<pair<string, scoped_symtab*>>& codeList) {
     vector<pair<string, scoped_symtab*>> staticCode;
@@ -1641,6 +1701,8 @@ vector<pair<string, scoped_symtab*>> handle_static_code(vector<pair<string, scop
 
 
 }
+
+// Main function for code generation that coordinates the entire process
 
 void codegen_main() {
     mipsCode.push_back(".text");
