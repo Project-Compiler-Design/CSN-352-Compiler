@@ -5,6 +5,7 @@
 .data
 newline: .asciiz "\n"
 str0: .asciiz ""
+str1: .asciiz "Single level pointer value:"
 .text
 .globl main
 main:
@@ -16,20 +17,15 @@ main:
     #Pushing i to stack
     sw $t9, 0($sp)
     addi $t8, $sp, 0
-    #Pushing ptr to stack
-    sw $t8, 4($sp)
-    addi $t9, $sp, 4
-    lw $t8, 0($t9)
-    sw $t8, 8($sp)
-    #Loading constant 10 into register
-    li $t7, 10
-    sw $t7, 0($t8)
+    lw $t9, 0($sp)
+    li $t7, 1
+    add $t9, $t9, $t7
     la $a0, str0
-    lw $t6, 0($t9)
-    sw $t6, 8($sp)
-    lw $t5, 0($t6)
-    sw $t5, 12($sp)
-    move $a1, $t5
+    #Pushing i to stack
+    sw $t9, 0($sp)
+    lw $t6, 0($t8)
+    sw $t6, 4($sp)
+    move $a1, $t6
 #printf
  move $a0, $a0
     li $v0, 4
@@ -43,7 +39,34 @@ syscall
   li $v0, 4 
  la $a0, newline 
  syscall
-    move $t4, $v0
+    move $t9, $v0
+    li $t5, 50
+    #Pushing y to stack
+    sw $t5, 8($sp)
+    addi $t4, $sp, 8
+    lw $t5, 8($sp)
+    li $t3, 1
+    sub $t5, $t5, $t3
+    la $a0, str1
+    #Pushing y to stack
+    sw $t5, 8($sp)
+    lw $t2, 0($t4)
+    sw $t2, 12($sp)
+    move $a1, $t2
+#printf
+ move $a0, $a0
+    li $v0, 4
+syscall
+  li $v0, 4 
+ la $a0, newline 
+ syscall
+ move $a0, $a1
+    li $v0, 1
+syscall
+  li $v0, 4 
+ la $a0, newline 
+ syscall
+    move $t5, $v0
     li $v0, 0
     lw   $fp, 32($sp)
     lw   $ra, 36($sp)

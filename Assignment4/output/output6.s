@@ -5,14 +5,13 @@
 .data
 newline: .asciiz "\n"
 str0: .asciiz ""
-str1: .asciiz "Multi-level pointer value:"
 .text
 .globl main
 main:
     move $fp, $sp
-    addi $sp, $sp, -68
-    sw   $ra, 64($sp)
-    sw   $fp, 60($sp)
+    addi $sp, $sp, -52
+    sw   $ra, 48($sp)
+    sw   $fp, 44($sp)
     addi $t9, $sp, 0
     #Loading constant 7 into register
     li $t8, 7
@@ -84,32 +83,8 @@ syscall
  la $a0, newline 
  syscall
     move $t0, $v0
-    # Spilling t7 from $t0
-    li $t0, 50
-    # Spilling y from $t0
-    addi $t0, $sp, -1
-    la $a0, str1
-    # Spilling p1 from $t0
-    lw $t0, 0()
-    sw $t0, 36($sp)
-    move $a1, $t0
-    # Spilling p1 from 
-#printf
- move $a0, $a0
-    li $v0, 4
-syscall
-  li $v0, 4 
- la $a0, newline 
- syscall
- move $a0, $a1
-    li $v0, 1
-syscall
-  li $v0, 4 
- la $a0, newline 
- syscall
-    move , $v0
     li $v0, 0
-    lw   $fp, 60($sp)
-    lw   $ra, 64($sp)
+    lw   $fp, 44($sp)
+    lw   $ra, 48($sp)
     li $v0, 10
     syscall
