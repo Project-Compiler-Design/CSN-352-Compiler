@@ -3,6 +3,6 @@ int main(){
     int *ptr = &i;
     int **ptr2 = &ptr;
     **ptr2 = 10;
-    printf("%d\n", i);
+    printf("%d\n", **ptr2);
     return 0;
 }

@@ -532,7 +532,11 @@ void generate_func_end_MIPS( string &func, int stackSize) {
 
 
 void generate_return_MIPS(string& func, scoped_symtab* scope,string val) {
-    if(isIntLiteral(val)) 
+    if(val.empty()){
+        // cerr << "HERE" << endl;
+        //void
+    }
+    else if(isIntLiteral(val)) 
     {
       mipsCode.push_back("    li $v0, " + val);
     }
@@ -626,6 +630,7 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
     isFloat = (getScope(scope,lhs)->symbol_map[lhs]->type == "float");
     string op1 = trim(rhs.substr(0, operator_pos));
     string op2 = trim(rhs.substr(operator_pos + opp.size()));
+    vector<pair<string,string>> stat;
     if (isFloat){
         string r1,r2,rd;
         string rx,ry;
@@ -730,9 +735,10 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
         int fl=0;
         
         for(auto x:static_var){
-            if(x.first==scope && x.second==op1){
+            if(getScope(x.first,op1)==scope && x.second==op1){
                 r1 = getRegister(scope,op1);
                 mipsCode.push_back("    lw " + r1 + ", " + "static_" + op1);
+                stat.push_back({r1,"static_" + op1});
                 var_to_reg[{scope,op1}] = r1;
                 reg_to_var[r1] = {scope,op1};
                 fl=1;
@@ -755,7 +761,7 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
         int fl=0;
         
         for(auto x:static_var){
-            if(x.first==scope && x.second==op1){
+            if(getScope(x.first,op2)==scope && x.second==op2){
                 r2 = getRegister(scope,op2);
                 mipsCode.push_back("    lw " + r2 + ", " + "static_" + op2);
                 var_to_reg[{scope,op2}] = r2;
@@ -767,6 +773,15 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
         }
         if(fl==0){
             r2 = getRegister(scope,op2);
+        }
+    }
+    for(auto x:static_var){
+        if(getScope(x.first,lhs)==scope && x.second==lhs){
+            rd=getRegister(scope,lhs);
+            mipsCode.push_back("    lw " + rd + ", " + "static_" + lhs);
+            stat.push_back({rd,"static_" + lhs});
+            var_to_reg[{scope,lhs}] = rd;
+            reg_to_var[rd] = {scope,lhs};
         }
     }
     rd = getRegister(scope,lhs);
@@ -791,6 +806,8 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
         mipsCode.push_back("    slt " + rd + ", " + r1 + ", " + r2);
         mipsCode.push_back("    xori " + rd + ", " + rd + ", 1");
     }
+    for(auto x:stat) mipsCode.push_back("    sw " + x.first + ", " + x.second);
+
 }
 
 // Processes assignment statements, handling different data types
@@ -798,6 +815,21 @@ void handle_operation(string lhs, string rhs, size_t operator_pos, const string&
 
 void handle_assignment(string lhs, string rhs, scoped_symtab* scope) {
 
+    for(auto x:static_var){
+        if(getScope(scope,lhs)==x.first && x.second==lhs){
+            string r1=getRegister(scope,lhs);
+            mipsCode.push_back("    lw " + r1 + ", " + "static_" + lhs);
+            var_to_reg[{scope,lhs}] = r1;
+            reg_to_var[r1] = {scope,lhs};
+            string rr=getRegister(scope,rhs);
+            if(isIntLiteral(rhs)){
+                mipsCode.push_back("   li " + rr + ", " + rhs);
+            }
+            mipsCode.push_back("   move " + r1 + ", " + rr);
+            mipsCode.push_back("   sw " + r1 + ", " + "static_" + lhs);
+            return;
+        }
+    }
     symbol_info* lhsInfo = getScope(scope,lhs)->symbol_map[lhs];
     bool isFloat = (lhsInfo && lhsInfo->type == "float" && rhs.find("CALL") == string::npos && rhs.find("alloc") == string::npos);
     bool isDouble = (lhsInfo && lhsInfo->type == "double" && rhs.find("CALL") == string::npos && rhs.find("alloc") == string::npos);
@@ -1545,6 +1577,7 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
                 istringstream iss(t);
                 string keyword, val;
                 iss >> keyword >> val;
+                if(val.empty())val = "";
                 generate_return_MIPS(curr_func, code.second, val);
             }
             else if (t.rfind("if (", 0) == 0 && t.find("goto") != string::npos) {

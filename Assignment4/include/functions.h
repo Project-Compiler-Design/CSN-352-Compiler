@@ -263,6 +263,7 @@ void print_vector(const vector<pair<string,scoped_symtab*>>& vec) {
 
 string replace_break_continue(string original_code,string end_label,string update_label,int i){
     string new_code = original_code;
+    // cout << "Original code: " << original_code << endl;
     int flag=0;
     size_t pos = 0;
     while ((pos = new_code.find("break")) != std::string::npos) {
@@ -287,28 +288,28 @@ string replace_break_continue(string original_code,string end_label,string updat
 
 vector<pair<string,scoped_symtab*>> replace_break_continue_final(vector<pair<string,scoped_symtab*>> original_code,string end_label,string update_label,int i){
     vector<pair<string,scoped_symtab*>> new_code;
+    int flag=0;
     for(int j=0;j<original_code.size();j++){
         string code=original_code[j].first;
         scoped_symtab* curr_scope2=original_code[j].second;
         string new_code_str = code;
-        int flag=0;
         size_t pos = 0;
         while ((pos = new_code_str.find("break")) != std::string::npos) {
-            new_code_str.replace(pos, 5, "goto " + end_label + "\n");
+            new_code_str = new_code_str.substr(0, pos) + "goto " + end_label + "\n" + new_code_str.substr(pos+5);
         }
 
         pos = 0;
         while ((pos = new_code_str.find("continue")) != std::string::npos) {
-            new_code_str.replace(pos, 8, "goto " + update_label + "\n");
+            new_code_str = new_code_str.substr(0, pos) + "goto " + update_label + "\n" + new_code_str.substr(pos+8);
             flag=1;
         }
         if(flag==0 && i==0)
         {
             pos=0;
             while ((pos = new_code_str.find(update_label)) != std::string::npos) {
-            new_code_str.replace(pos, update_label.length()+1, "\n");
-            flag=1;
-        }
+                new_code_str = new_code_str.substr(0, pos) + "\n" + new_code_str.substr(pos+update_label.length()+1);
+                flag=1;
+            }
         }
         new_code.push_back({new_code_str,curr_scope2});
     }

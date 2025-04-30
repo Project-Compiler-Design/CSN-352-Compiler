@@ -1,17 +1,31 @@
-int main(){
-    int a = 5;
-    switch(a){
+typedef int Integer;
+int main() {
+    Integer a = 3;
+    Integer b = 10;
+    Integer c;
+    switch(a)
+    {
         case 1:
-            printf("1");
+            c = a + b;
+            printf("c is %d\n", c);
             break;
         case 2:
-            printf("2");
+            c = a - b;
+            printf("c is%d\n", c);
             break;
         case 3:
-            printf("3");
+            c = a * b;
+            printf("c is%d\n", c);
             break;
         default:
-            printf("default");
+            c = a / b;
+            printf("c is %d\n", c);
+    }
+    int i=2;
+    until(i<0)
+    {
+        printf("i is %d\n", i);
+        i--;
     }
     return 0;
 }

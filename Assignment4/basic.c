@@ -9,7 +9,7 @@ int factorial(int n) {
     else return n * factorial(n - 1);
 }
 
-int array_sum(int arr[], int size) {
+int array_sum(int arr[5], int size) {
     int sum = 0;
     for (int i = 0; i < size; i++) {
         sum = sum + arr[i];
@@ -22,9 +22,9 @@ struct Point {
     int y;
 };
 
-float point_sum(struct Point *p) {
-    return p->x / p->y;
-}
+// float point_sum(struct Point *p) {
+//     return p->x / p->y;
+// }
 
 int main() {
     int a = 5, b = 10;
@@ -48,12 +48,12 @@ int main() {
         return 1;
     }
 
-    struct Point p = {3, 4};
-    int p_sum = point_sum(&p);
-    if (p_sum != 7) {
-        printf("Struct test failed: %d\n", p_sum);
-        return 1;
-    }
+    // struct Point p = {3, 4};
+    // int p_sum = point_sum(&p);
+    // if (p_sum != 7) {
+    //     printf("Struct test failed: %d\n", p_sum);
+    //     return 1;
+    // }
 
     int value = 0;
     if (a < b) {

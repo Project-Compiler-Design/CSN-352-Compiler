@@ -260,8 +260,28 @@ postfix_expression
             vector<pair<string,scoped_symtab*>> temp_list;
 			for(int i=0;i<$3->param_list.size();i++){
 				middle=middle+"PARAM "+$3->param_list[i]+"\n";
-                temp_list.push_back({"PARAM "+$3->param_list[i],curr_scope});                
-			}
+                int star=0;
+                string temp_str="";
+                if($3->param_list[i][0]=='*')
+                {
+                     while($3->param_list[i][0]=='*')
+                    {
+                        star++;
+                        $3->param_list[i]=$3->param_list[i].substr(1);
+                    }
+                    temp_str=$3->param_list[i];
+                    while(star)
+                    {
+                        qid temp2=newtemp("int",curr_scope);
+                        temp_list.push_back({temp2.first+" := *"+temp_str,curr_scope});
+                        temp_str=temp2.first;
+                        star--;
+                    }
+                    temp_list.push_back({"PARAM "+temp_str,curr_scope});
+                }
+              
+               else temp_list.push_back({"PARAM "+$3->param_list[i],curr_scope});                
+			} 
             if(find_symbol->type!="void"){
                 // debug("idhar",$1->code);  
                 $$->final_code = $1->final_code;
@@ -1058,7 +1078,6 @@ declaration
 				code=$2->code;
 
 			} else {
-				//cout<<"heeeeeee"<<$1<<endl;
 				curr_scope->symbol_map[top_symbol]->type = $1;
 				if(curr_scope->symbol_map[top_symbol]->type.substr(0,6)=="static"){
 					static_variables.push_back({curr_scope,top_symbol});
@@ -2069,7 +2088,7 @@ start_symbol: translation_unit
 	static_variables_code.insert(static_variables_code.end(), temp.begin(), temp.end());
     cleaned_TAC=clean_vector_TAC(static_variables_code);
     // print_vector($1->final_code);
-	//print_vector(cleaned_TAC);	
+	// print_vector(cleaned_TAC);	
 }
 ;
 translation_unit
