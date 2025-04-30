@@ -33,6 +33,7 @@ map<string,string> string_to_label;
 map<string, bool> loadedConstants;
 map<string,string> reg_of_const;
 vector<string> reg_for_scanf;
+vector<string> var_for_printf;
 map<int,pair<scoped_symtab*,string>> offset_to_var;
 map<pair<scoped_symtab*,string>,int> pointer_to_offset;
 int get_size_from_type(string type);
@@ -1549,7 +1550,7 @@ void pass2(vector<pair<string, scoped_symtab*>>& codeList){
             else if (t.rfind("if (", 0) == 0 && t.find("goto") != string::npos) {
                 size_t start = t.find('(') + 1;
                 size_t end = t.find(')');
-                string condition = t.substr(start, end - start);
+                string condition = trim(t.substr(start, end - start));
                 string label = trim(t.substr(t.find("goto") + 4));
                 string reg = getRegister(code.second, condition);
                 load_if_constant(code.second, condition, reg);
@@ -1607,6 +1608,10 @@ bool isAddress(const std::string& token) {
 
 void compute_use_def(LivenessInfo& inst) {
     const string& line = inst.code;
+    if(line.find("printf")!=string::npos){
+        for(auto var: var_for_printf) inst.use.insert({getScope(inst.scope,var), var});
+        var_for_printf.clear();
+    }
     if (line.find(":=") != string::npos) {
         size_t eq = line.find(":=");
         string lhs = trim(line.substr(0, eq));
@@ -1651,6 +1656,11 @@ void compute_use_def(LivenessInfo& inst) {
         istringstream iss(line);
         iss >> word >> val;
         if(isalpha(val[0])) inst.use.insert({getScope(inst.scope,val), val});
+    }else if(line.find("PARAM")!=string::npos){
+        string word, val;
+        istringstream iss(line);
+        iss >> word >> val;
+        if(isalpha(val[0])) var_for_printf.push_back(val);
     }
 }
 

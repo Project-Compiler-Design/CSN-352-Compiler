@@ -15,7 +15,7 @@ main:
     #Loading constant 1 into register
     li $t8, 1
     sw $t8, 0($t9)
-    addi $t7, $sp, 4
+    addi $t7, $sp, 0
     #Loading constant 2 into register
     li $t6, 2
     sw $t6, 0($t7)

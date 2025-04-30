@@ -1,9 +1,17 @@
 int main(){
-    int i=0;
-    int sum=0;
-    for(i=0;i<10;i++){
-        sum+=i;
+    int a = 5;
+    switch(a){
+        case 1:
+            printf("1");
+            break;
+        case 2:
+            printf("2");
+            break;
+        case 3:
+            printf("3");
+            break;
+        default:
+            printf("default");
     }
-    printf("Sum of 10 numbers is: %d", sum);
     return 0;
 }

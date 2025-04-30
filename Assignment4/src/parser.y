@@ -1868,8 +1868,14 @@ selection_statement
                 temp.push_back({"goto "+label,curr_scope});
 			}
 			else{
-                str+="if ( "+$4->place.first+" == "+case_value+") goto "+label+"\n";
-                temp.push_back({"if ( "+$4->place.first+" == "+case_value+") goto "+label,curr_scope});
+				qid var=newtemp("int",curr_scope);
+				str+=var.first+" := "+$4->place.first+" == "+case_value;
+                //str+="if ( "+$4->place.first+" == "+case_value+") goto "+label+"\n";
+				str+="if ( "+var.first+" ) goto "+label+"\n";
+                //temp.push_back({"if ( "+$4->place.first+" == "+case_value+") goto "+label,curr_scope});
+				temp.push_back({var.first+" := "+$4->place.first+" == "+case_value,curr_scope});
+				temp.push_back({"if ( "+var.first+" ) goto "+label,curr_scope});
+
             }
 		}
 		string endlabel=newlabel();
