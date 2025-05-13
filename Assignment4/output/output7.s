@@ -41,18 +41,15 @@ syscall
  syscall
     move $t9, $v0
     li $t5, 50
+    li $t4, 1
+    sub $t5, $t5, $t4
     #Pushing y to stack
     sw $t5, 8($sp)
-    addi $t4, $sp, 8
-    lw $t5, 8($sp)
-    li $t3, 1
-    sub $t5, $t5, $t3
+    addi $t3, $sp, 8
     la $a0, str1
-    #Pushing y to stack
-    sw $t5, 8($sp)
-    lw $t2, 0($t4)
-    sw $t2, 12($sp)
-    move $a1, $t2
+    lw $t5, 0($t3)
+    sw $t5, 12($sp)
+    move $a1, $t5
 #printf
  move $a0, $a0
     li $v0, 4
@@ -66,7 +63,7 @@ syscall
   li $v0, 4 
  la $a0, newline 
  syscall
-    move $t5, $v0
+    move $t2, $v0
     li $v0, 0
     lw   $fp, 32($sp)
     lw   $ra, 36($sp)

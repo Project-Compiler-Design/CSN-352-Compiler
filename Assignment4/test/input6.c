@@ -2,7 +2,6 @@ struct A{
     int a;
     int b;
 };
-
 int main() {
     struct A str;
     str.a = 7;

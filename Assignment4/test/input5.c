@@ -1,8 +1,9 @@
 //static.c
-void count_with_static() {
-    static int counter = 0;
+int count_with_static() {
+    int counter = 0;
     counter++;
     printf("Static counter = %d\n", counter);
+    return 1;
 }
 
 int main() {
@@ -17,7 +18,7 @@ start_loop:
         }
 
         printf("i = %d\n", i);
-        // count_with_static();
+       int r=count_with_static();
     }
 
     static int repeat = 0;
