@@ -26,7 +26,7 @@ Assignment2/
 
 ```
 ## ⚙️ How to Compile and Run  
-Follow these steps to build and execute the lexical analyzer:
+Follow these steps to build and execute the lexical analyzer: 
 
 ### 1️⃣ Compile the files 
 ```bash
